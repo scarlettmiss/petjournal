@@ -1,4 +1,4 @@
-package pet
+package treatment
 
 type Service interface {
 	/**service methods declaration:

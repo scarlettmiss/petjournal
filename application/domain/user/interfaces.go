@@ -1,4 +1,4 @@
-package pet
+package user
 
 type Service interface {
 	/**service methods declaration:
