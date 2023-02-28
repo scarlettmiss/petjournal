@@ -1,4 +1,4 @@
-package baseStruct
+package base
 
 type Service interface {
 	/**service methods declaration:

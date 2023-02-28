@@ -1,22 +1,29 @@
 package application
 
-import service "github.com/scarlettmiss/bestPal/application/services/baseService"
+import (
+	petService "github.com/scarlettmiss/bestPal/application/services/petService"
+	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
+	userService "github.com/scarlettmiss/bestPal/application/services/userService"
+)
 
 /*
-*
-what the user can do.
+what the actor can do.
 application talks with all the services
 */
 type Application struct {
-	service *service.Service
+	petService       petService.Service
+	userService      userService.Service
+	treatmentService treatmentService.Service
 }
 
 type Options struct {
-	Service *service.Service
+	PetService       petService.Service
+	UserService      userService.Service
+	TreatmentService treatmentService.Service
 }
 
 func New(opts Options) (*Application, error) {
-	app := Application{service: opts.Service}
+	app := Application{petService: opts.PetService, userService: opts.UserService, treatmentService: opts.TreatmentService}
 
 	return &app, nil
 }

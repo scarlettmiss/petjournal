@@ -1,32 +1,37 @@
 package treatment
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/baseStruct"
+	"github.com/scarlettmiss/bestPal/application/domain/base"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	"time"
 )
 
-type Type string
+type TreatmentType string
 
 const (
-	Vaccine      Type = "VACCINE"
-	Surgery      Type = "SURGERY"
-	Medicine     Type = "MEDICINE"
-	Endoparasite Type = "ENDOPARASITE"
-	Ectoparasite Type = "ECTOPARASITE"
-	examination  Type = "EXAMINATION"
-	microchip    Type = "MICROCHIP"
-	Diagnostic   Type = "DIAGNOSTIC"
-	Other        Type = "OTHER"
+	Vaccine      TreatmentType = "vaccine"
+	Surgery      TreatmentType = "surgery"
+	Medicine     TreatmentType = "medicine"
+	Endoparasite TreatmentType = "endoparasite"
+	Ectoparasite TreatmentType = "ectoparasite"
+	Examination  TreatmentType = "examination"
+	Microchip    TreatmentType = "microchip"
+	Diagnostic   TreatmentType = "diagnostic"
+	Dental       TreatmentType = "dental"
+	Other        TreatmentType = "other"
 )
 
 type Treatment struct {
-	baseStruct.BaseStruct
-	treatmentType Type
-	name          string
-	date          time.Time
-	lot           *string
-	result        *string
-	description   string
-	administer    user.User
+	base.Base
+	PetId         string
+	TreatmentType TreatmentType
+	Name          string
+	Date          time.Time
+	Lot           string
+	Result        string
+	Description   string
+	Notes         string
+	Administer    user.User
 }
+
+var Nil = Treatment{}

@@ -1,22 +1,26 @@
 package user
 
-import "github.com/scarlettmiss/bestPal/application/domain/baseStruct"
+import (
+	"github.com/scarlettmiss/bestPal/application/domain/base"
+)
 
 type Type string
 
 const (
-	Vet   Type = Type("VET")
-	Owner Type = Type("OWNER")
+	Vet   Type = "vet"
+	Owner Type = "owner"
 )
 
 type User struct {
-	baseStruct.BaseStruct
-	userType Type
-	email    string
-	password string
-	name     string
-	surname  string
-	phone    string
-	address  string
-	country  string
+	base.Base
+	UserType Type
+	Email    string
+	Password string
+	Name     string
+	Surname  string
+	Phone    string
+	Address  string
+	Country  string
 }
+
+var Nil = User{}

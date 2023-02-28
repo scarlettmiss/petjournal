@@ -1,22 +1,30 @@
 package pet
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/baseStruct"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"github.com/scarlettmiss/bestPal/application/domain/base"
+	"time"
+)
+
+type BehaviorType string
+
+const (
+	Aggressive BehaviorType = "aggressive"
+	Friendly   BehaviorType = "friendly"
 )
 
 type Pet struct {
-	baseStruct.BaseStruct
-	name        string
-	dateOfBirth string
-	sex         string
-	breed       string
-	color       *string
-	description *string
-	pedigree    *string
-	microchip   *string
-	treatments  *[]string
-	weight      *[]float64
-	owner       user.User
-	vet         *[]user.User
+	base.Base
+	Name          string
+	DateOfBirth   string
+	Sex           string
+	BreedName     string
+	Color         string
+	Description   string
+	Pedigree      string
+	Microchip     string
+	Behavior      BehaviorType
+	WeightHistory map[time.Time]float64
+	OwnerId       string
 }
+
+var Nil = Pet{}
