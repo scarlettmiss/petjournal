@@ -20,7 +20,10 @@ type User struct {
 	Surname  string
 	Phone    string
 	Address  string
+	City     string
+	State    string
 	Country  string
+	Zip      string
 }
 
 var Nil = User{}

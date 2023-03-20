@@ -1,6 +1,9 @@
 package treatment
 
-import "errors"
+import (
+	"errors"
+	"github.com/google/uuid"
+)
 
 var (
 	// ErrNotFound is returned when a treatment is not found
@@ -8,19 +11,19 @@ var (
 )
 
 type Service interface {
-	Treatment(id string) (*Treatment, error)
-	PetTreatments(petId string) map[string]*Treatment
-	Treatments() map[string]*Treatment
+	Treatment(id uuid.UUID) (*Treatment, error)
+	PetTreatments(petId uuid.UUID) map[uuid.UUID]Treatment
+	Treatments() map[uuid.UUID]*Treatment
 	CreateTreatment(treatment Treatment) error
 	UpdateTreatment(treatment Treatment) error
-	DeleteTreatment(id string) error
+	DeleteTreatment(id uuid.UUID) error
 }
 
 type Repository interface {
 	CreateTreatment(treatment Treatment) error
-	Treatment(id string) (Treatment, error)
-	Treatments() map[string]Treatment
-	TreatmentsByPet(petId string) map[string]Treatment
+	Treatment(id uuid.UUID) (Treatment, error)
+	Treatments() map[uuid.UUID]Treatment
+	TreatmentsByPet(petId uuid.UUID) map[uuid.UUID]Treatment
 	UpdateTreatment(treatment Treatment) error
-	DeleteTreatment(id string) error
+	DeleteTreatment(id uuid.UUID) error
 }

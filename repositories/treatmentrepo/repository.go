@@ -1,6 +1,7 @@
 package treatmentrepo
 
 import (
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 	"sync"
@@ -8,12 +9,12 @@ import (
 
 type Repository struct {
 	mux        sync.Mutex
-	treatments map[string]treatment.Treatment
+	treatments map[uuid.UUID]treatment.Treatment
 }
 
 func New() *Repository {
 	return &Repository{
-		treatments: map[string]treatment.Treatment{},
+		treatments: map[uuid.UUID]treatment.Treatment{},
 	}
 }
 
@@ -26,7 +27,7 @@ func (r *Repository) CreateTreatment(t treatment.Treatment) error {
 	return nil
 }
 
-func (r *Repository) Treatment(id string) (treatment.Treatment, error) {
+func (r *Repository) Treatment(id uuid.UUID) (treatment.Treatment, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -38,17 +39,17 @@ func (r *Repository) Treatment(id string) (treatment.Treatment, error) {
 	return t, nil
 }
 
-func (r *Repository) Treatments() map[string]treatment.Treatment {
+func (r *Repository) Treatments() map[uuid.UUID]treatment.Treatment {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	return r.treatments
 }
 
-func (r *Repository) TreatmentsByPet(pId string) map[string]treatment.Treatment {
+func (r *Repository) TreatmentsByPet(pId uuid.UUID) map[uuid.UUID]treatment.Treatment {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-	treatments := lo.PickBy[string, treatment.Treatment](r.treatments, func(key string, value treatment.Treatment) bool {
+	treatments := lo.PickBy[uuid.UUID, treatment.Treatment](r.treatments, func(key uuid.UUID, value treatment.Treatment) bool {
 		return value.Id == pId
 	})
 
@@ -69,7 +70,7 @@ func (r *Repository) UpdateTreatment(t treatment.Treatment) error {
 	return nil
 }
 
-func (r *Repository) DeleteTreatment(id string) error {
+func (r *Repository) DeleteTreatment(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

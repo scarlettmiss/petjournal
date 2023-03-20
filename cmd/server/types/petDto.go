@@ -9,12 +9,12 @@ type PetDto struct {
 	DateOfBirth   string           `json:"dateOfBirth"`
 	Sex           string           `json:"sex"`
 	BreedName     string           `json:"breedName"`
-	Color         string           `json:"color"`
+	Colors        string           `json:"colors"`
 	Description   string           `json:"description"`
 	Pedigree      string           `json:"pedigree"`
 	Microchip     string           `json:"microchip"`
 	Behavior      pet.BehaviorType `json:"behavior"`
-	WeightHistory []WeightEntry    `json:"weightHistory"`
+	WeightHistory []WeightEntry    `json:"weightHistory,omitempty"`
 	OwnerId       string           `json:"ownerId"`
 }
 

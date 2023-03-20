@@ -1,6 +1,9 @@
 package user
 
-import "errors"
+import (
+	"errors"
+	"github.com/google/uuid"
+)
 
 var (
 	// ErrNotFound is returned when a user is not found
@@ -10,18 +13,18 @@ var (
 )
 
 type Service interface {
-	User(id string) (User, error)
-	Users() map[string]User
+	User(id uuid.UUID) (User, error)
+	Users() map[uuid.UUID]User
 	CreateUser(user User) error
 	Authenticate(email string, password string) (User, error)
 	UpdateUser(u User) error
-	DeleteUser(id string) error
+	DeleteUser(id uuid.UUID) error
 }
 
 type Repository interface {
 	CreateUser(user User) error
-	User(id string) (User, error)
-	Users() map[string]User
+	User(id uuid.UUID) (User, error)
+	Users() map[uuid.UUID]User
 	UpdateUser(u User) error
-	DeleteUser(id string) error
+	DeleteUser(id uuid.UUID) error
 }

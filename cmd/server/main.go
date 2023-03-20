@@ -1,16 +1,15 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/scarlettmiss/bestPal/api"
+	"github.com/scarlettmiss/bestPal/api/config"
 	"github.com/scarlettmiss/bestPal/application"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
 	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
 	userService "github.com/scarlettmiss/bestPal/application/services/userService"
-	"github.com/scarlettmiss/bestPal/cmd/server/types"
 	"github.com/scarlettmiss/bestPal/repositories/petrepo"
 	"github.com/scarlettmiss/bestPal/repositories/treatmentrepo"
 	"github.com/scarlettmiss/bestPal/repositories/userrepo"
-	"net/http"
 	"os"
 	"os/signal"
 )
@@ -34,8 +33,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// Creates default gin router with Logger and Recovery middleware already attached
-	router := gin.Default()
 
 	//pass services to application
 	opts := application.Options{PetService: ps, UserService: us, TreatmentService: ts}

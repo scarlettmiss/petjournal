@@ -2,6 +2,7 @@ package pet
 
 import (
 	"errors"
+	"github.com/google/uuid"
 )
 
 var (
@@ -10,18 +11,18 @@ var (
 )
 
 type Service interface {
-	Pet(id string) (Pet, error)
-	Pets(userId string) map[string]Pet
+	Pet(id uuid.UUID) (Pet, error)
+	Pets(userId uuid.UUID) map[uuid.UUID]Pet
 	CreatePet(pet Pet) error
 	UpdatePetInformation() error
-	DeletePet(id string) error
+	DeletePet(id uuid.UUID) error
 }
 
 type Repository interface {
 	CreatePet(pet Pet) error
-	Pet(id string) (Pet, error)
-	Pets() map[string]Pet
-	PetsByUser(userId string) map[string]Pet
+	Pet(id uuid.UUID) (Pet, error)
+	Pets() map[uuid.UUID]Pet
+	PetsByUser(userId uuid.UUID) map[uuid.UUID]Pet
 	UpdatePet(pet Pet) error
-	DeletePet(id string) error
+	DeletePet(id uuid.UUID) error
 }

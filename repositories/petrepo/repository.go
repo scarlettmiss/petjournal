@@ -1,6 +1,7 @@
 package petrepo
 
 import (
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"sync"
@@ -8,12 +9,12 @@ import (
 
 type Repository struct {
 	mux  sync.Mutex
-	pets map[string]pet.Pet
+	pets map[uuid.UUID]pet.Pet
 }
 
 func New() *Repository {
 	return &Repository{
-		pets: map[string]pet.Pet{},
+		pets: map[uuid.UUID]pet.Pet{},
 	}
 }
 
@@ -26,7 +27,7 @@ func (r *Repository) CreatePet(p pet.Pet) error {
 	return nil
 }
 
-func (r *Repository) Pet(id string) (pet.Pet, error) {
+func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -38,17 +39,17 @@ func (r *Repository) Pet(id string) (pet.Pet, error) {
 	return u, nil
 }
 
-func (r *Repository) Pets() map[string]pet.Pet {
+func (r *Repository) Pets() map[uuid.UUID]pet.Pet {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	return r.pets
 }
 
-func (r *Repository) PetsByUser(uId string) map[string]pet.Pet {
+func (r *Repository) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-	pets := lo.PickBy[string, pet.Pet](r.pets, func(key string, value pet.Pet) bool {
+	pets := lo.PickBy[uuid.UUID, pet.Pet](r.pets, func(key uuid.UUID, value pet.Pet) bool {
 		return value.Id == uId
 	})
 
@@ -69,7 +70,7 @@ func (r *Repository) UpdatePet(p pet.Pet) error {
 	return nil
 }
 
-func (r *Repository) DeletePet(id string) error {
+func (r *Repository) DeletePet(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
