@@ -1,19 +1,15 @@
 package pet
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/base"
+	"github.com/google/uuid"
 	"time"
 )
 
-type BehaviorType string
-
-const (
-	Aggressive BehaviorType = "aggressive"
-	Friendly   BehaviorType = "friendly"
-)
-
 type Pet struct {
-	base.Base
+	Id            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Deleted       bool
 	Name          string
 	DateOfBirth   string
 	Sex           string
@@ -22,7 +18,7 @@ type Pet struct {
 	Description   string
 	Pedigree      string
 	Microchip     string
-	Behavior      BehaviorType
+	Friendly      bool
 	WeightHistory map[time.Time]float64
 	OwnerId       string
 }

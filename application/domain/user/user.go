@@ -1,7 +1,10 @@
 package user
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/base"
+	"errors"
+	"github.com/google/uuid"
+	"strings"
+	"time"
 )
 
 type Type string
@@ -11,19 +14,36 @@ const (
 	Owner Type = "owner"
 )
 
+var types = map[Type]Type{
+	Vet:   Vet,
+	Owner: Owner,
+}
+
+func ParseType(value string) (Type, error) {
+	value = strings.TrimSpace(strings.ToLower(value))
+	typ, ok := types[Type(value)]
+	if !ok {
+		return Owner, errors.New("type not found, fallback to owner")
+	}
+	return typ, nil
+}
+
 type User struct {
-	base.Base
-	UserType Type
-	Email    string
-	Password string
-	Name     string
-	Surname  string
-	Phone    string
-	Address  string
-	City     string
-	State    string
-	Country  string
-	Zip      string
+	Id           uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Deleted      bool
+	UserType     Type
+	Email        string
+	PasswordHash string
+	Name         string
+	Surname      string
+	Phone        string
+	Address      string
+	City         string
+	State        string
+	Country      string
+	Zip          string
 }
 
 var Nil = User{}

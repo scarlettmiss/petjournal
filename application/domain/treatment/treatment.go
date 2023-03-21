@@ -1,30 +1,57 @@
 package treatment
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/base"
+	"errors"
+	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"strings"
 	"time"
 )
 
-type TreatmentType string
+type Type string
 
 const (
-	Vaccine      TreatmentType = "vaccine"
-	Surgery      TreatmentType = "surgery"
-	Medicine     TreatmentType = "medicine"
-	Endoparasite TreatmentType = "endoparasite"
-	Ectoparasite TreatmentType = "ectoparasite"
-	Examination  TreatmentType = "examination"
-	Microchip    TreatmentType = "microchip"
-	Diagnostic   TreatmentType = "diagnostic"
-	Dental       TreatmentType = "dental"
-	Other        TreatmentType = "other"
+	Vaccine      Type = "vaccine"
+	Surgery      Type = "surgery"
+	Medicine     Type = "medicine"
+	Endoparasite Type = "endoparasite"
+	Ectoparasite Type = "ectoparasite"
+	Examination  Type = "examination"
+	Microchip    Type = "microchip"
+	Diagnostic   Type = "diagnostic"
+	Dental       Type = "dental"
+	Other        Type = "other"
 )
 
+var treatmentTypes = map[Type]Type{
+	Vaccine:      Vaccine,
+	Surgery:      Surgery,
+	Medicine:     Medicine,
+	Endoparasite: Endoparasite,
+	Ectoparasite: Ectoparasite,
+	Examination:  Examination,
+	Microchip:    Microchip,
+	Diagnostic:   Diagnostic,
+	Dental:       Dental,
+	Other:        Other,
+}
+
+func ParseType(value string) (Type, error) {
+	value = strings.TrimSpace(strings.ToLower(value))
+	typ, ok := treatmentTypes[Type(value)]
+	if !ok {
+		return Other, errors.New("type not found, fallback to Other")
+	}
+	return typ, nil
+}
+
 type Treatment struct {
-	base.Base
+	Id            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Deleted       bool
 	PetId         string
-	TreatmentType TreatmentType
+	TreatmentType Type
 	Name          string
 	Date          time.Time
 	Lot           string

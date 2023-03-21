@@ -15,14 +15,15 @@ var (
 type Service interface {
 	User(id uuid.UUID) (User, error)
 	Users() map[uuid.UUID]User
-	CreateUser(user User) error
+	CreateUser(user User) (User, error)
 	Authenticate(email string, password string) (User, error)
 	UpdateUser(u User) error
 	DeleteUser(id uuid.UUID) error
+	UserByEmail(email string) (User, bool)
 }
 
 type Repository interface {
-	CreateUser(user User) error
+	CreateUser(user User) (User, error)
 	User(id uuid.UUID) (User, error)
 	Users() map[uuid.UUID]User
 	UpdateUser(u User) error
