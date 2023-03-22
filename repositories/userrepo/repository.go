@@ -54,18 +54,20 @@ func (r *Repository) Users() map[uuid.UUID]user.User {
 	return r.users
 }
 
-func (r *Repository) UpdateUser(u user.User) error {
+func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	_, ok := r.users[u.Id]
 	if !ok {
-		return user.ErrNotFound
+		return user.Nil, user.ErrNotFound
 	}
+	now := time.Now()
+	u.UpdatedAt = now
 
 	r.users[u.Id] = u
 
-	return nil
+	return u, nil
 }
 
 func (r *Repository) DeleteUser(id uuid.UUID) error {

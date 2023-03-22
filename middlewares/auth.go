@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/scarlettmiss/bestPal/utils"
@@ -30,7 +29,6 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		fmt.Println(claims)
 		c.Set("UserId", claims["UserId"])
 		c.Set("UserType", claims["UserType"])
 		c.Next()

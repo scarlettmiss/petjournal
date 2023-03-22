@@ -42,14 +42,10 @@ func (s *Service) UserByEmail(email string) (user.User, bool) {
 }
 
 func (s *Service) CreateUser(u user.User) (user.User, error) {
-	var _, ok = s.UserByEmail(u.Email)
-	if ok {
-		return user.Nil, user.ErrUserExists
-	}
 	return s.repo.CreateUser(u)
 }
 
-func (s *Service) UpdateUser(u user.User) error {
+func (s *Service) UpdateUser(u user.User) (user.User, error) {
 	return s.repo.UpdateUser(u)
 }
 

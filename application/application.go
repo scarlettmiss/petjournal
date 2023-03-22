@@ -31,12 +31,38 @@ func New(opts Options) *Application {
 	return &app
 }
 
-func (a *Application) CreateUser(u user.User) (user.User, error) {
-	return a.userService.CreateUser(u)
+func (a *Application) CreateUser(u user.User) (string, error) {
+	u, err := a.userService.CreateUser(u)
+	if err != nil {
+		return "", err
+	}
+
+	token, err := utils.GenerateJWT(u.Id, u.UserType)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (a *Application) CheckEmail(email string) error {
+	_, ok := a.userService.UserByEmail(email)
+	if !ok {
+		return nil
+	}
+	return user.ErrMailExists
+}
+
+func (a *Application) UpdateUser(u user.User) (user.User, error) {
+	return a.userService.UpdateUser(u)
 }
 
 func (a *Application) Users() map[uuid.UUID]user.User {
 	return a.userService.Users()
+}
+
+func (a *Application) User(id uuid.UUID) (user.User, error) {
+	return a.userService.User(id)
 }
 
 func (a *Application) Authenticate(email string, password string) (string, error) {
