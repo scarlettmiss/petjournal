@@ -1,6 +1,6 @@
 package types
 
-type Account struct {
+type UserCreateRequest struct {
 	UserType string `json:"userType"`
 	Email    string `json:"email"`
 	Password string `json:"password"`

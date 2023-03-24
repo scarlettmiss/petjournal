@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
-	"github.com/scarlettmiss/bestPal/utils"
+	authService "github.com/scarlettmiss/bestPal/application/services/authService"
 )
 
 type Service struct {
@@ -57,7 +57,7 @@ func (s *Service) Authenticate(email string, password string) (user.User, error)
 	}
 
 	fmt.Println(password)
-	if !utils.CheckPasswordHash(password, u.PasswordHash) {
+	if !authService.CheckPasswordHash(password, u.PasswordHash) {
 		return user.User{}, user.ErrAuthentication
 	}
 

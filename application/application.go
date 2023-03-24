@@ -3,10 +3,10 @@ package application
 import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
+	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
 	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
 	userService "github.com/scarlettmiss/bestPal/application/services/userService"
-	"github.com/scarlettmiss/bestPal/utils"
 )
 
 /*
@@ -31,29 +31,38 @@ func New(opts Options) *Application {
 	return &app
 }
 
-func (a *Application) CreateUser(u user.User) (string, error) {
-	u, err := a.userService.CreateUser(u)
+func (a *Application) CreateUser(u user.User) (user.User, error) {
+	err := a.CheckEmail(u.Email, u.Id)
 	if err != nil {
-		return "", err
+		return user.Nil, err
 	}
 
-	token, err := utils.GenerateJWT(u.Id, u.UserType)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return a.userService.CreateUser(u)
 }
 
-func (a *Application) CheckEmail(email string) error {
-	_, ok := a.userService.UserByEmail(email)
+func (a *Application) UserToken(u user.User) (string, error) {
+	return jwtService.GenerateJWT(u.Id, u.UserType)
+}
+
+func (a *Application) CheckEmail(email string, id uuid.UUID) error {
+	u, ok := a.userService.UserByEmail(email)
+
 	if !ok {
 		return nil
 	}
+
+	if u.Id == id {
+		return nil
+	}
+
 	return user.ErrMailExists
 }
 
 func (a *Application) UpdateUser(u user.User) (user.User, error) {
+	err := a.CheckEmail(u.Email, u.Id)
+	if err != nil {
+		return user.Nil, err
+	}
 	return a.userService.UpdateUser(u)
 }
 
@@ -65,16 +74,15 @@ func (a *Application) User(id uuid.UUID) (user.User, error) {
 	return a.userService.User(id)
 }
 
-func (a *Application) Authenticate(email string, password string) (string, error) {
+func (a *Application) DeleteUser(id uuid.UUID) error {
+	return a.userService.DeleteUser(id)
+}
+
+func (a *Application) Authenticate(email string, password string) (user.User, error) {
 	u, err := a.userService.Authenticate(email, password)
 	if err != nil {
-		return "", err
+		return user.Nil, err
 	}
 
-	token, err := utils.GenerateJWT(u.Id, u.UserType)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return u, nil
 }

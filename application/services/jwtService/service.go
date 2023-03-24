@@ -1,26 +1,12 @@
-package utils
+package service
 
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
-
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
 
 var jwtKey = []byte("supersecretkey")
 

@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/scarlettmiss/bestPal/utils"
+	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
 	"net/http"
 )
 
@@ -17,7 +17,7 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		token, err := utils.ValidateToken(tokenString)
+		token, err := jwtService.ValidateToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			c.Abort()

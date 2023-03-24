@@ -74,13 +74,12 @@ func (r *Repository) DeleteUser(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	u, ok := r.users[id]
+	_, ok := r.users[id]
 	if !ok {
 		return user.ErrNotFound
 	}
 
-	u.Deleted = true
-	r.users[u.Id] = u
+	delete(r.users, id)
 
 	return nil
 }
