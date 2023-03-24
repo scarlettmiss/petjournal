@@ -36,30 +36,21 @@ func main() {
 
 	//pass services to application
 	opts := application.Options{PetService: ps, UserService: us, TreatmentService: ts}
-	_, err = application.New(opts)
+	app := application.New(opts)
 
 	if err != nil {
 		panic(err)
 	}
 
-	router.POST("/createPet", func(c *gin.Context) {
-		var requestBody types.PetDto
+	restServer := api.New(app)
 
-		err := c.ShouldBindJSON(&requestBody)
+	go func() { // Start listening and serving requests
+		err = restServer.Run(config.Host + ":" + config.Port)
+
 		if err != nil {
-			c.Status(http.StatusBadRequest)
-			return
+			panic(err)
 		}
-	})
-	router.NoRoute(func(ctx *gin.Context) { ctx.JSON(http.StatusNotFound, gin.H{}) })
-
-	// Start listening and serving requests
-	err = router.Run(":8080")
-
-	if err != nil {
-		panic(err)
-	}
-
+	}()
 	//ctrl + c to stop server
 	waitForInterrupt := make(chan os.Signal, 1)
 	signal.Notify(waitForInterrupt, os.Interrupt, os.Kill)

@@ -1,11 +1,10 @@
 package service
 
 import (
+	"fmt"
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/base"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
-	"github.com/scarlettmiss/bestPal/cmd/server/types"
-	"time"
+	authService "github.com/scarlettmiss/bestPal/application/services/authService"
 )
 
 type Service struct {
@@ -28,62 +27,41 @@ func (s *Service) Users() map[uuid.UUID]user.User {
 	return s.repo.Users()
 }
 
-func (s *Service) CreateUser(a types.Account) error {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
-	t := time.Time{}
-	base := base.Base{
-		Id:        id,
-		CreatedAt: t,
-		UpdatedAt: t,
-		Deleted:   false,
-	}
-	u := user.User{
-		Base:     base,
-		UserType: a.UserType,
-		Email:    a.Email,
-		Password: a.Password,
-		Name:     a.Name,
-		Surname:  a.Surname,
-		Phone:    a.Phone,
-		Address:  a.Address,
-		City:     a.City,
-		State:    a.State,
-		Country:  a.Country,
-		Zip:      a.Zip,
-	}
-
-	return s.repo.CreateUser(u)
-}
-
-func (s *Service) UpdateUser(u user.User) error {
-	return s.repo.UpdateUser(u)
-}
-
-func (s *Service) Authenticate(email string, password string) (user.User, error) {
-	users := s.Users()
-
-	var userByEmail user.User
+func (s *Service) UserByEmail(email string) (user.User, bool) {
+	var u user.User
 	var found bool
-	for _, v := range users {
+
+	for _, v := range s.Users() {
 		if v.Email == email {
-			userByEmail = v
+			u = v
 			found = true
 			break
 		}
 	}
+	return u, found
+}
 
-	if !found {
+func (s *Service) CreateUser(u user.User) (user.User, error) {
+	return s.repo.CreateUser(u)
+}
+
+func (s *Service) UpdateUser(u user.User) (user.User, error) {
+	return s.repo.UpdateUser(u)
+}
+
+func (s *Service) Authenticate(email string, password string) (user.User, error) {
+
+	var u, ok = s.UserByEmail(email)
+	if !ok {
+		return user.User{}, user.ErrNotFound
+	}
+
+	fmt.Println(password)
+	if !authService.CheckPasswordHash(password, u.PasswordHash) {
 		return user.User{}, user.ErrAuthentication
 	}
 
-	if userByEmail.Password != password {
-		return user.User{}, user.ErrAuthentication
-	}
-
-	return userByEmail, nil
+	return u, nil
 }
 
 func (s *Service) DeleteUser(id uuid.UUID) error {

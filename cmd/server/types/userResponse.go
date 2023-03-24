@@ -1,13 +1,10 @@
 package types
 
-import (
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-)
+import "github.com/scarlettmiss/bestPal/application/domain/user"
 
-type Account struct {
+type UserResponse struct {
 	UserType user.Type `json:"userType"`
 	Email    string    `json:"email"`
-	Password string    `json:"password"`
 	Name     string    `json:"name"`
 	Surname  string    `json:"surname"`
 	Phone    string    `json:"phone"`
@@ -16,4 +13,5 @@ type Account struct {
 	State    string    `json:"state,omitempty"`
 	Country  string    `json:"country,omitempty"`
 	Zip      string    `json:"zip,omitempty"`
+	Deleted  bool      `json:"deleted,omitempty"`
 }

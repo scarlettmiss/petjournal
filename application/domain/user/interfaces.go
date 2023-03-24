@@ -8,23 +8,24 @@ import (
 var (
 	// ErrNotFound is returned when a user is not found
 	ErrNotFound       = errors.New("user not found")
-	ErrUserExists     = errors.New("user already exists")
+	ErrMailExists     = errors.New("mail in use")
 	ErrAuthentication = errors.New("wrong credentials")
 )
 
 type Service interface {
 	User(id uuid.UUID) (User, error)
 	Users() map[uuid.UUID]User
-	CreateUser(user User) error
+	CreateUser(user User) (User, error)
 	Authenticate(email string, password string) (User, error)
-	UpdateUser(u User) error
+	UpdateUser(u User) (User, error)
 	DeleteUser(id uuid.UUID) error
+	UserByEmail(email string) (User, bool)
 }
 
 type Repository interface {
-	CreateUser(user User) error
+	CreateUser(user User) (User, error)
 	User(id uuid.UUID) (User, error)
 	Users() map[uuid.UUID]User
-	UpdateUser(u User) error
+	UpdateUser(u User) (User, error)
 	DeleteUser(id uuid.UUID) error
 }
