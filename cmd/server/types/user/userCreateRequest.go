@@ -1,4 +1,4 @@
-package types
+package user
 
 type UserCreateRequest struct {
 	UserType string `json:"userType"`

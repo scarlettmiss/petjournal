@@ -2,7 +2,6 @@ package petrepo
 
 import (
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"sync"
 )
@@ -18,13 +17,13 @@ func New() *Repository {
 	}
 }
 
-func (r *Repository) CreatePet(p pet.Pet) error {
+func (r *Repository) CreatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	r.pets[p.Id] = p
 
-	return nil
+	return p, nil
 }
 
 func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
@@ -46,28 +45,18 @@ func (r *Repository) Pets() map[uuid.UUID]pet.Pet {
 	return r.pets
 }
 
-func (r *Repository) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-	pets := lo.PickBy[uuid.UUID, pet.Pet](r.pets, func(key uuid.UUID, value pet.Pet) bool {
-		return value.Id == uId
-	})
-
-	return pets
-}
-
-func (r *Repository) UpdatePet(p pet.Pet) error {
+func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.pets[p.Id]
+	p, ok := r.pets[p.Id]
 	if !ok {
-		return pet.ErrNotFound
+		return pet.Pet{}, pet.ErrNotFound
 	}
 
 	r.pets[p.Id] = p
 
-	return nil
+	return p, nil
 }
 
 func (r *Repository) DeletePet(id uuid.UUID) error {

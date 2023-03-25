@@ -7,7 +7,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
-	"github.com/scarlettmiss/bestPal/cmd/server/types"
+	user2 "github.com/scarlettmiss/bestPal/cmd/server/types/user"
 	"github.com/scarlettmiss/bestPal/converters"
 	"github.com/scarlettmiss/bestPal/middlewares"
 	"github.com/scarlettmiss/bestPal/utils"
@@ -41,7 +41,7 @@ func New(application *application.Application) *API {
 }
 
 func (api *API) register(c *gin.Context) {
-	var requestBody types.UserCreateRequest
+	var requestBody user2.UserCreateRequest
 
 	err := c.ShouldBindJSON(&requestBody)
 	if err != nil {
@@ -77,7 +77,7 @@ func (api *API) register(c *gin.Context) {
 }
 
 func (api *API) login(c *gin.Context) {
-	var requestBody types.LoginRequest
+	var requestBody user2.LoginRequest
 
 	err := c.ShouldBindJSON(&requestBody)
 	if err != nil {
@@ -103,7 +103,7 @@ func (api *API) login(c *gin.Context) {
 func (api *API) users(c *gin.Context) {
 	users := api.app.Users()
 
-	usersResp := lo.MapValues(users, func(u user.User, _ uuid.UUID) types.UserResponse {
+	usersResp := lo.MapValues(users, func(u user.User, _ uuid.UUID) user2.UserResponse {
 		return converters.UserToResponse(u)
 	})
 
@@ -180,7 +180,7 @@ func (api *API) updateUser(c *gin.Context) {
 		return
 	}
 
-	var requestBody types.UserUpdateRequest
+	var requestBody user2.UserUpdateRequest
 	err = c.ShouldBindJSON(&requestBody)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))

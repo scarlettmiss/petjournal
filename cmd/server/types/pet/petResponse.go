@@ -1,6 +1,6 @@
-package types
+package pet
 
-type Pet struct {
+type PetResponse struct {
 	Name          string        `json:"name"`
 	DateOfBirth   string        `json:"dateOfBirth"`
 	Sex           string        `json:"sex"`
@@ -11,10 +11,6 @@ type Pet struct {
 	Microchip     string        `json:"microchip"`
 	Friendly      bool          `json:"friendly"`
 	WeightHistory []WeightEntry `json:"weightHistory,omitempty"`
-	OwnerId       string        `json:"ownerId"`
-}
-
-type WeightEntry struct {
-	Date   uint64  `json:"date,omitempty"` //nano
-	Weight float64 `json:"weight,omitempty"`
+	OwnerIds      []string      `json:"OwnerIds"`
+	VetIds        []string      `json:"vetIds"`
 }
