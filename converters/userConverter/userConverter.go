@@ -1,4 +1,4 @@
-package converters
+package userConverter
 
 import (
 	"github.com/scarlettmiss/bestPal/application/domain/user"
