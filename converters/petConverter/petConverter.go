@@ -1,12 +1,13 @@
 package petConverter
 
 import (
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	pet2 "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
 )
 
-func PetRequestToPet(requestBody pet2.PetRequest) (pet.Pet, error) {
+func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID) (pet.Pet, error) {
 	p := pet.Pet{}
 	p.Name = requestBody.Name
 	p.DateOfBirth = requestBody.DateOfBirth
@@ -16,10 +17,26 @@ func PetRequestToPet(requestBody pet2.PetRequest) (pet.Pet, error) {
 	p.Description = requestBody.Description
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
-	p.Friendly = requestBody.Friendly
 	p.WeightHistory = weightEntryToPet(requestBody.WeightHistory)
-	p.OwnerIds = requestBody.OwnerIds
-	p.VetIds = requestBody.VetIds
+	p.OwnerId = ownerId
+	p.VetId = requestBody.VetId
+	p.Metas = requestBody.Metas
+
+	return p, nil
+}
+
+func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet) (pet.Pet, error) {
+	p.Name = requestBody.Name
+	p.DateOfBirth = requestBody.DateOfBirth
+	p.Sex = requestBody.Sex
+	p.BreedName = requestBody.BreedName
+	p.Colors = requestBody.Colors
+	p.Description = requestBody.Description
+	p.Pedigree = requestBody.Pedigree
+	p.Microchip = requestBody.Microchip
+	p.WeightHistory = weightEntryToPet(requestBody.WeightHistory)
+	p.VetId = requestBody.VetId
+	p.Metas = requestBody.Metas
 
 	return p, nil
 }
@@ -52,10 +69,10 @@ func PetToResponse(pet pet.Pet) pet2.PetResponse {
 	p.Description = pet.Description
 	p.Pedigree = pet.Pedigree
 	p.Microchip = pet.Microchip
-	p.Friendly = pet.Friendly
 	p.WeightHistory = weightEntryToResponse(pet.WeightHistory)
-	p.OwnerIds = pet.OwnerIds
-	p.VetIds = pet.VetIds
+	p.OwnerId = pet.OwnerId
+	p.VetIds = pet.VetId
+	p.Metas = pet.Metas
 
 	return p
 }

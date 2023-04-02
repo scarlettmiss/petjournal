@@ -21,15 +21,19 @@ func New() *Repository {
 func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return user.Nil, err
 	}
-	now := time.Now()
 	u.Id = id
+
+	now := time.Now()
 	u.CreatedAt = now
 	u.UpdatedAt = now
+
 	u.Deleted = false
+
 	r.users[u.Id] = u
 
 	return u, nil
@@ -62,6 +66,7 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 	if !ok {
 		return user.Nil, user.ErrNotFound
 	}
+
 	now := time.Now()
 	u.UpdatedAt = now
 

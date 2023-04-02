@@ -18,10 +18,10 @@ type Pet struct {
 	Description   string
 	Pedigree      string
 	Microchip     string
-	Friendly      bool
 	WeightHistory []WeightEntry
-	OwnerIds      []string
-	VetIds        []string
+	OwnerId       uuid.UUID
+	VetId         uuid.UUID
+	Metas         map[string]string
 }
 
 type WeightEntry struct {

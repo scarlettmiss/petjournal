@@ -99,3 +99,11 @@ func (a *Application) Pet(id uuid.UUID) (pet.Pet, error) {
 func (a *Application) DeletePet(id uuid.UUID) error {
 	return a.petService.DeletePet(id)
 }
+
+func (a *Application) CreatePet(p pet.Pet) (pet.Pet, error) {
+	return a.petService.CreatePet(p)
+}
+
+func (a *Application) UpdatePet(p pet.Pet) (pet.Pet, error) {
+	return a.petService.UpdatePet(p)
+}

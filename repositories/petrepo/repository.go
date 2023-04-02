@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"sync"
+	"time"
 )
 
 type Repository struct {
@@ -20,6 +21,18 @@ func New() *Repository {
 func (r *Repository) CreatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return pet.Nil, err
+	}
+	p.Id = id
+
+	now := time.Now()
+	p.CreatedAt = now
+	p.UpdatedAt = now
+
+	p.Deleted = false
 
 	r.pets[p.Id] = p
 
@@ -53,6 +66,9 @@ func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	if !ok {
 		return pet.Pet{}, pet.ErrNotFound
 	}
+
+	now := time.Now()
+	p.UpdatedAt = now
 
 	r.pets[p.Id] = p
 
