@@ -43,12 +43,12 @@ func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	u, ok := r.pets[id]
+	p, ok := r.pets[id]
 	if !ok {
 		return pet.Nil, pet.ErrNotFound
 	}
 
-	return u, nil
+	return p, nil
 }
 
 func (r *Repository) Pets() map[uuid.UUID]pet.Pet {

@@ -83,30 +83,6 @@ func (api *API) register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"user": userConverter.UserToResponse(u), "token": token})
 }
 
-func (api *API) login(c *gin.Context) {
-	var requestBody typesUser.LoginRequest
-
-	err := c.ShouldBindJSON(&requestBody)
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	u, err := api.app.Authenticate(requestBody.Email, requestBody.Password)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	token, err := api.app.UserToken(u)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"user": userConverter.UserToResponse(u), "token": token})
-
-}
-
 func (api *API) users(c *gin.Context) {
 	users := api.app.Users()
 
@@ -138,22 +114,6 @@ func (api *API) user(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, userConverter.UserToResponse(u))
-}
-
-func (api *API) deleteUser(c *gin.Context) {
-	uId, err := uuid.Parse(c.GetString("UserId"))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
-	}
-
-	err = api.app.DeleteUser(uId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 }
 
 func (api *API) updateUser(c *gin.Context) {
@@ -191,62 +151,44 @@ func (api *API) updateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, userConverter.UserToResponse(u))
 }
 
-func (api *API) pets(c *gin.Context) {
-	pets := api.app.Pets()
+func (api *API) deleteUser(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
 
-	petsResp := lo.MapValues(pets, func(p pet.Pet, _ uuid.UUID) typesPet.PetResponse {
-		return petConverter.PetToResponse(p)
-	})
+	err = api.app.DeleteUser(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
 
-	c.JSON(http.StatusOK, petsResp)
+	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 }
 
-func (api *API) pet(c *gin.Context) {
-	id := c.Param("id")
+func (api *API) login(c *gin.Context) {
+	var requestBody typesUser.LoginRequest
 
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-		return
-	}
-
-	//parse
-	pId, err := uuid.Parse(id)
+	err := c.ShouldBindJSON(&requestBody)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		c.Status(http.StatusBadRequest)
 		return
 	}
-	//TODO check if pet belongs to user
-	p, err := api.app.Pet(pId)
+	u, err := api.app.Authenticate(requestBody.Email, requestBody.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	c.JSON(http.StatusOK, petConverter.PetToResponse(p))
-}
-
-func (api *API) deletePet(c *gin.Context) {
-	id := c.Param("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-		return
-	}
-
-	//parse
-	pId, err := uuid.Parse(id)
+	token, err := api.app.UserToken(u)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
-	}
-	//TODO check if pet belongs to user
-	err = api.app.DeletePet(pId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "pet deleted"})
+	c.JSON(http.StatusCreated, gin.H{"user": userConverter.UserToResponse(u), "token": token})
+
 }
 
 func (api *API) createPet(c *gin.Context) {
@@ -279,7 +221,58 @@ func (api *API) createPet(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p)})
 }
 
+func (api *API) pets(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	pets := api.app.PetsByUser(uId)
+
+	petsResp := lo.MapValues(pets, func(p pet.Pet, _ uuid.UUID) typesPet.PetResponse {
+		return petConverter.PetToResponse(p)
+	})
+
+	c.JSON(http.StatusOK, petsResp)
+}
+
+func (api *API) pet(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
+	//parse
+	pId, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+	p, err := api.app.PetByUser(uId, pId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, petConverter.PetToResponse(p))
+}
+
 func (api *API) updatePet(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
 	id := c.Param("id")
 
 	if id == "" {
@@ -289,7 +282,7 @@ func (api *API) updatePet(c *gin.Context) {
 
 	var requestBody typesPet.PetRequest
 
-	err := c.ShouldBindJSON(&requestBody)
+	err = c.ShouldBindJSON(&requestBody)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -301,7 +294,7 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.Pet(pId)
+	p, err := api.app.PetByUser(uId, pId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
@@ -321,4 +314,39 @@ func (api *API) updatePet(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p)})
+}
+
+func (api *API) deletePet(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
+	//parse
+	pId, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+	_, err = api.app.PetByUser(uId, pId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		return
+	}
+
+	err = api.app.DeletePet(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pet deleted"})
 }

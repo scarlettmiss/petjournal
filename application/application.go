@@ -92,8 +92,16 @@ func (a *Application) Pets() map[uuid.UUID]pet.Pet {
 	return a.petService.Pets()
 }
 
+func (a *Application) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
+	return a.petService.PetsByUser(uId)
+}
+
 func (a *Application) Pet(id uuid.UUID) (pet.Pet, error) {
 	return a.petService.Pet(id)
+}
+
+func (a *Application) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
+	return a.petService.PetByUser(uId, id)
 }
 
 func (a *Application) DeletePet(id uuid.UUID) error {

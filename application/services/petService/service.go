@@ -15,11 +15,11 @@ func New(repo pet.Repository) (Service, error) {
 }
 
 func (s *Service) Pet(id uuid.UUID) (pet.Pet, error) {
-	u, err := s.repo.Pet(id)
+	p, err := s.repo.Pet(id)
 	if err != nil {
-		return u, err
+		return p, err
 	}
-	return u, nil
+	return p, nil
 }
 
 func (s *Service) Pets() map[uuid.UUID]pet.Pet {
@@ -33,6 +33,16 @@ func (s *Service) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
 	})
 
 	return uPets
+}
+
+func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
+	pets := s.PetsByUser(uId)
+	p, ok := pets[id]
+	if !ok {
+		return pet.Nil, pet.ErrNotFound
+	}
+
+	return p, nil
 }
 
 func (s *Service) CreatePet(p pet.Pet) (pet.Pet, error) {
