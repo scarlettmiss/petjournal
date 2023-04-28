@@ -2,6 +2,7 @@ package application
 
 import (
 	"github.com/google/uuid"
+	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
@@ -85,4 +86,32 @@ func (a *Application) Authenticate(email string, password string) (user.User, er
 	}
 
 	return u, nil
+}
+
+func (a *Application) Pets() map[uuid.UUID]pet.Pet {
+	return a.petService.Pets()
+}
+
+func (a *Application) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
+	return a.petService.PetsByUser(uId)
+}
+
+func (a *Application) Pet(id uuid.UUID) (pet.Pet, error) {
+	return a.petService.Pet(id)
+}
+
+func (a *Application) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
+	return a.petService.PetByUser(uId, id)
+}
+
+func (a *Application) DeletePet(id uuid.UUID) error {
+	return a.petService.DeletePet(id)
+}
+
+func (a *Application) CreatePet(p pet.Pet) (pet.Pet, error) {
+	return a.petService.CreatePet(p)
+}
+
+func (a *Application) UpdatePet(p pet.Pet) (pet.Pet, error) {
+	return a.petService.UpdatePet(p)
 }

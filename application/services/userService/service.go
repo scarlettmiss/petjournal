@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	authService "github.com/scarlettmiss/bestPal/application/services/authService"
@@ -56,7 +55,6 @@ func (s *Service) Authenticate(email string, password string) (user.User, error)
 		return user.User{}, user.ErrNotFound
 	}
 
-	fmt.Println(password)
 	if !authService.CheckPasswordHash(password, u.PasswordHash) {
 		return user.User{}, user.ErrAuthentication
 	}

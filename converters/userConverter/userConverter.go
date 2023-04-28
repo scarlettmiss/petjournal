@@ -1,12 +1,12 @@
-package converters
+package userConverter
 
 import (
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	authService "github.com/scarlettmiss/bestPal/application/services/authService"
-	"github.com/scarlettmiss/bestPal/cmd/server/types"
+	user2 "github.com/scarlettmiss/bestPal/cmd/server/types/user"
 )
 
-func UserCreateRequestToUser(requestBody types.UserCreateRequest) (user.User, error) {
+func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, error) {
 	u := user.User{}
 	typ, err := user.ParseType(requestBody.UserType)
 	if err != nil {
@@ -30,7 +30,7 @@ func UserCreateRequestToUser(requestBody types.UserCreateRequest) (user.User, er
 	return u, nil
 }
 
-func UserUpdateRequestToUser(requestBody types.UserUpdateRequest, u user.User) user.User {
+func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) user.User {
 	u.Email = requestBody.Email
 	u.Name = requestBody.Name
 	u.Surname = requestBody.Surname
@@ -43,8 +43,8 @@ func UserUpdateRequestToUser(requestBody types.UserUpdateRequest, u user.User) u
 	return u
 }
 
-func UserToResponse(u user.User) types.UserResponse {
-	resp := types.UserResponse{}
+func UserToResponse(u user.User) user2.UserResponse {
+	resp := user2.UserResponse{}
 	resp.UserType = u.UserType
 	resp.Email = u.Email
 	resp.Name = u.Name

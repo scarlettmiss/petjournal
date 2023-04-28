@@ -14,13 +14,19 @@ type Pet struct {
 	DateOfBirth   string
 	Sex           string
 	BreedName     string
-	Color         string
+	Colors        []string
 	Description   string
 	Pedigree      string
 	Microchip     string
-	Friendly      bool
-	WeightHistory map[time.Time]float64
-	OwnerId       string
+	WeightHistory []WeightEntry
+	OwnerId       uuid.UUID
+	VetId         uuid.UUID
+	Metas         map[string]string
+}
+
+type WeightEntry struct {
+	Date   uint64
+	Weight float64
 }
 
 var Nil = Pet{}
