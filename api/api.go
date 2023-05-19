@@ -6,10 +6,13 @@ import (
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
+	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	typesPet "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
+	typesTreatment "github.com/scarlettmiss/bestPal/cmd/server/types/treatment"
 	typesUser "github.com/scarlettmiss/bestPal/cmd/server/types/user"
 	"github.com/scarlettmiss/bestPal/converters/petConverter"
+	"github.com/scarlettmiss/bestPal/converters/treatmentConverter"
 	"github.com/scarlettmiss/bestPal/converters/userConverter"
 	"github.com/scarlettmiss/bestPal/middlewares"
 	"github.com/scarlettmiss/bestPal/utils"
@@ -45,6 +48,13 @@ func New(application *application.Application) *API {
 	petApi.GET("/api/pet/:id", api.pet)
 	petApi.PATCH("/api/pet/:id", api.updatePet)
 	petApi.DELETE("/api/pet/:id", api.deleteUser)
+
+	treatmentApi := api.Group("/").Use(middlewares.Auth())
+	treatmentApi.POST("/api/pet/:petId/treatment", api.createTreatment)
+	petApi.GET("/api/pet/:petId/treatments", api.treatmentsByPet)
+	petApi.GET("/api/pet/:petId/treatment/:treatmentId", api.treatmentByPet)
+	petApi.PATCH("/api/pet/:petId/treatment/:treatmentId", api.updateTreatment)
+	petApi.DELETE("/api/pet/:petId/treatment/:treatmentId", api.deleteTreatment)
 
 	return api
 }
@@ -324,12 +334,6 @@ func (api *API) deletePet(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-		return
-	}
-
 	//parse
 	pId, err := uuid.Parse(id)
 	if err != nil {
@@ -349,4 +353,284 @@ func (api *API) deletePet(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "pet deleted"})
+}
+
+func (api *API) createTreatment(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	u, err := api.app.User(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	pId := c.Param("petId")
+
+	petId, err := uuid.Parse(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.PetByUser(uId, petId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+	var requestBody typesTreatment.TreatmentCreateRequest
+
+	err = c.ShouldBindJSON(&requestBody)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	t, err := treatmentConverter.TreatmentCreateRequestToTreatment(requestBody, petId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	var verifier = user.Nil
+	if u.UserType == user.Vet {
+		t.VerifiedBy = u.Id
+		verifier = u
+	}
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	t, err = api.app.CreateTreatment(t)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"treatment": treatmentConverter.TreatmentToResponse(t, u, verifier)})
+}
+
+func (api *API) treatmentsByPet(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	pId := c.Param("petId")
+
+	petId, err := uuid.Parse(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.PetByUser(uId, petId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	treatments := api.app.TreatmentsByPet(petId)
+
+	var hasError bool
+	treatmentsResp := lo.MapValues(treatments, func(t treatment.Treatment, _ uuid.UUID) typesTreatment.TreatmentResponse {
+		administer, err := api.app.User(t.AdministeredBy)
+		if err != nil {
+			hasError = true
+			return typesTreatment.TreatmentResponse{}
+		}
+
+		verifier, err := api.app.User(t.VerifiedBy)
+		if err != nil {
+			hasError = true
+			return typesTreatment.TreatmentResponse{}
+		}
+
+		return treatmentConverter.TreatmentToResponse(t, administer, verifier)
+	})
+
+	if hasError {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, treatmentsResp)
+}
+
+func (api *API) treatmentByPet(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	pId := c.Param("petId")
+
+	petId, err := uuid.Parse(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	tId := c.Param("treatmentId")
+
+	treatmentId, err := uuid.Parse(tId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.PetByUser(uId, petId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	t, err := api.app.TreatmentByPet(petId, treatmentId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		return
+	}
+
+	administer, err := api.app.User(t.AdministeredBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	verifier, err := api.app.User(t.VerifiedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, administer, verifier))
+}
+
+func (api *API) updateTreatment(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	tId := c.Param("treatmentId")
+	treatmentId, err := uuid.Parse(tId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	u, err := api.app.User(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	pId := c.Param("petId")
+
+	petId, err := uuid.Parse(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.PetByUser(uId, petId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	t, err := api.app.TreatmentByPet(petId, treatmentId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	var requestBody typesTreatment.TreatmentUpdateRequest
+
+	err = c.ShouldBindJSON(&requestBody)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	t, err = treatmentConverter.TreatmentUpdateRequestToTreatment(requestBody, t)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		return
+	}
+
+	var verifier = user.Nil
+	if u.UserType == user.Vet {
+		t.VerifiedBy = u.Id
+		verifier = u
+	}
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	t, err = api.app.UpdateTreatment(t)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"treatment": treatmentConverter.TreatmentToResponse(t, u, verifier)})
+}
+
+func (api *API) deleteTreatment(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	tId := c.Param("treatmentId")
+	treatmentId, err := uuid.Parse(tId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.User(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	pId := c.Param("petId")
+	petId, err := uuid.Parse(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.PetByUser(uId, petId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	_, err = api.app.TreatmentByPet(petId, treatmentId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	err = api.app.DeleteTreatment(treatmentId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "treatment deleted"})
 }

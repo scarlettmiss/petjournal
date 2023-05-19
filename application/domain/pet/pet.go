@@ -11,7 +11,7 @@ type Pet struct {
 	UpdatedAt     time.Time
 	Deleted       bool
 	Name          string
-	DateOfBirth   string
+	DateOfBirth   time.Time
 	Sex           string
 	BreedName     string
 	Colors        []string

@@ -22,14 +22,10 @@ func (s *Service) Pet(id uuid.UUID) (pet.Pet, error) {
 	return p, nil
 }
 
-func (s *Service) Pets() map[uuid.UUID]pet.Pet {
-	return s.repo.Pets()
-}
-
 func (s *Service) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
 	pets := s.repo.Pets()
 	uPets := lo.PickBy[uuid.UUID, pet.Pet](pets, func(key uuid.UUID, value pet.Pet) bool {
-		return value.Id == uId
+		return value.Id == uId || value.VetId == uId
 	})
 
 	return uPets

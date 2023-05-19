@@ -3,6 +3,7 @@ package application
 import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
+	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
@@ -88,16 +89,8 @@ func (a *Application) Authenticate(email string, password string) (user.User, er
 	return u, nil
 }
 
-func (a *Application) Pets() map[uuid.UUID]pet.Pet {
-	return a.petService.Pets()
-}
-
 func (a *Application) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
 	return a.petService.PetsByUser(uId)
-}
-
-func (a *Application) Pet(id uuid.UUID) (pet.Pet, error) {
-	return a.petService.Pet(id)
 }
 
 func (a *Application) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
@@ -114,4 +107,24 @@ func (a *Application) CreatePet(p pet.Pet) (pet.Pet, error) {
 
 func (a *Application) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	return a.petService.UpdatePet(p)
+}
+
+func (a *Application) CreateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
+	return a.treatmentService.CreateTreatment(t)
+}
+
+func (a *Application) TreatmentsByPet(pId uuid.UUID) map[uuid.UUID]treatment.Treatment {
+	return a.treatmentService.PetTreatments(pId)
+}
+
+func (a *Application) TreatmentByPet(pId uuid.UUID, tId uuid.UUID) (treatment.Treatment, error) {
+	return a.treatmentService.PetTreatment(pId, tId)
+}
+
+func (a *Application) UpdateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
+	return a.treatmentService.UpdateTreatment(t)
+}
+
+func (a *Application) DeleteTreatment(id uuid.UUID) error {
+	return a.treatmentService.DeleteTreatment(id)
 }
