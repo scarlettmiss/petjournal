@@ -45,6 +45,7 @@ func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) u
 
 func UserToResponse(u user.User) user2.UserResponse {
 	resp := user2.UserResponse{}
+	resp.Id = u.Id.String()
 	resp.UserType = u.UserType
 	resp.Email = u.Email
 	resp.Name = u.Name

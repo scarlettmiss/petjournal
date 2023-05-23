@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	typesPet "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
@@ -95,9 +94,11 @@ func (api *API) register(c *gin.Context) {
 func (api *API) users(c *gin.Context) {
 	users := api.app.Users()
 
-	usersResp := lo.MapValues(users, func(u user.User, _ uuid.UUID) typesUser.UserResponse {
-		return userConverter.UserToResponse(u)
-	})
+	usersResp := make([]typesUser.UserResponse, 0, len(users))
+	for _, u := range users {
+		userResponse := userConverter.UserToResponse(u)
+		usersResp = append(usersResp, userResponse)
+	}
 
 	c.JSON(http.StatusOK, usersResp)
 }
