@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 )
 
@@ -24,9 +23,13 @@ func (s *Service) Pet(id uuid.UUID) (pet.Pet, error) {
 
 func (s *Service) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
 	pets := s.repo.Pets()
-	uPets := lo.PickBy[uuid.UUID, pet.Pet](pets, func(key uuid.UUID, value pet.Pet) bool {
-		return value.Id == uId || value.VetId == uId
-	})
+	uPets := make(map[uuid.UUID]pet.Pet)
+
+	for petId, p := range pets {
+		if p.OwnerId == uId || p.VetId == uId {
+			uPets[petId] = p
+		}
+	}
 
 	return uPets
 }

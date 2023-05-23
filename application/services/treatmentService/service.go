@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 )
 
@@ -29,18 +28,19 @@ func (s Service) Treatment(tId uuid.UUID) (treatment.Treatment, error) {
 
 func (s Service) PetTreatments(pId uuid.UUID) map[uuid.UUID]treatment.Treatment {
 	treatments := s.repo.Treatments()
-	petTreatments := lo.PickBy[uuid.UUID, treatment.Treatment](treatments, func(key uuid.UUID, value treatment.Treatment) bool {
-		return value.Id == pId
-	})
+
+	petTreatments := make(map[uuid.UUID]treatment.Treatment)
+	for _, t := range treatments {
+		if t.PetId == pId {
+			petTreatments[t.Id] = t
+		}
+	}
 
 	return petTreatments
 }
 
 func (s Service) PetTreatment(pId uuid.UUID, tId uuid.UUID) (treatment.Treatment, error) {
-	treatments := s.repo.Treatments()
-	petTreatments := lo.PickBy[uuid.UUID, treatment.Treatment](treatments, func(key uuid.UUID, value treatment.Treatment) bool {
-		return value.Id == pId
-	})
+	petTreatments := s.PetTreatments(pId)
 
 	petTreatment, ok := petTreatments[tId]
 	if !ok {

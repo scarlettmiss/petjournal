@@ -3,11 +3,11 @@ package user
 import "github.com/scarlettmiss/bestPal/application/domain/user"
 
 type UserResponse struct {
-	UserType user.Type `json:"userType"`
-	Email    string    `json:"email"`
-	Name     string    `json:"name"`
-	Surname  string    `json:"surname"`
-	Phone    string    `json:"phone"`
+	UserType user.Type `json:"userType,omitempty"`
+	Email    string    `json:"email,omitempty"`
+	Name     string    `json:"name,omitempty"`
+	Surname  string    `json:"surname,omitempty"`
+	Phone    string    `json:"phone,omitempty"`
 	Address  string    `json:"address,omitempty"`
 	City     string    `json:"city,omitempty"`
 	State    string    `json:"state,omitempty"`

@@ -9,20 +9,7 @@ import (
 	"time"
 )
 
-func getId(id string) (uuid.UUID, error) {
-	if id == "" {
-		return uuid.Nil, nil
-	}
-
-	vetId, err := uuid.Parse(id)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return vetId, nil
-}
-
-func TreatmentCreateRequestToTreatment(requestBody treatmentType.TreatmentCreateRequest, petId uuid.UUID) (treatment.Treatment, error) {
+func TreatmentCreateRequestToTreatment(requestBody treatmentType.TreatmentCreateRequest, petId uuid.UUID, administeredBy uuid.UUID) (treatment.Treatment, error) {
 	t := treatment.Treatment{}
 	t.PetId = petId
 	typ, err := treatment.ParseType(requestBody.TreatmentType)
@@ -36,7 +23,7 @@ func TreatmentCreateRequestToTreatment(requestBody treatmentType.TreatmentCreate
 	t.Result = requestBody.Result
 	t.Description = requestBody.Description
 	t.Notes = requestBody.Notes
-	t.AdministeredBy, err = getId(requestBody.AdministeredBy)
+	t.AdministeredBy = administeredBy
 	if err != nil {
 		return treatment.Nil, err
 	}
@@ -48,7 +35,7 @@ func TreatmentCreateRequestToTreatment(requestBody treatmentType.TreatmentCreate
 func TreatmentUpdateRequestToTreatment(requestBody treatmentType.TreatmentUpdateRequest, t treatment.Treatment) (treatment.Treatment, error) {
 	typ, err := treatment.ParseType(requestBody.TreatmentType)
 	if err != nil {
-		return t, err
+		return treatment.Nil, err
 	}
 	t.TreatmentType = typ
 	t.Name = requestBody.Name
@@ -67,7 +54,9 @@ func TreatmentUpdateRequestToTreatment(requestBody treatmentType.TreatmentUpdate
 
 func TreatmentToResponse(t treatment.Treatment, administeredBy user.User, verifiedBy user.User) treatmentType.TreatmentResponse {
 	resp := treatmentType.TreatmentResponse{}
-	resp.TreatmentType = t.TreatmentType
+	resp.Id = t.Id.String()
+	resp.PetId = t.PetId.String()
+	resp.TreatmentType = string(t.TreatmentType)
 	resp.Name = t.Name
 	resp.Date = t.Date.Unix()
 	resp.Lot = t.Lot
@@ -75,7 +64,9 @@ func TreatmentToResponse(t treatment.Treatment, administeredBy user.User, verifi
 	resp.Description = t.Description
 	resp.Notes = t.Notes
 	resp.AdministeredBy = userConverter.UserToResponse(administeredBy)
-	resp.VerifiedBy = userConverter.UserToResponse(verifiedBy)
+	if verifiedBy != user.Nil {
+		resp.VerifiedBy = userConverter.UserToResponse(verifiedBy)
+	}
 	resp.RecurringRule = t.RecurringRule
 
 	return resp

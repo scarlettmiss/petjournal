@@ -5,6 +5,8 @@ import (
 )
 
 type TreatmentResponse struct {
+	Id             string            `json:"id"`
+	PetId          string            `json:"petId"`
 	TreatmentType  string            `json:"treatmentType"`
 	Name           string            `json:"name"`
 	Date           int64             `json:"date"`

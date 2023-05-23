@@ -2,7 +2,6 @@ package petConverter
 
 import (
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	pet2 "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
 	"time"
@@ -31,14 +30,14 @@ func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID) (pet.
 	p.Description = requestBody.Description
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
-	p.WeightHistory = weightEntryToPet(requestBody.WeightHistory)
+	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	p.OwnerId = ownerId
 	vetId, err := getVetId(requestBody.VetId)
 	if err != nil {
 		return pet.Nil, err
 	}
 	p.VetId = vetId
-	p.Metas = requestBody.Metas
+	p.Metas = metaToMap(requestBody.Metas)
 
 	return p, nil
 }
@@ -52,37 +51,52 @@ func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet) (pet.Pet, err
 	p.Description = requestBody.Description
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
-	p.WeightHistory = weightEntryToPet(requestBody.WeightHistory)
+	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	vetId, err := getVetId(requestBody.VetId)
 	if err != nil {
 		return pet.Nil, err
 	}
 	p.VetId = vetId
-	p.Metas = requestBody.Metas
+	p.Metas = metaToMap(requestBody.Metas)
 
 	return p, nil
 }
 
-func weightEntryToPet(weightEntries []pet2.WeightEntry) []pet.WeightEntry {
-	return lo.Map(weightEntries, func(entry pet2.WeightEntry, _ int) pet.WeightEntry {
-		weightEntry := pet.WeightEntry{}
-		weightEntry.Weight = entry.Weight
-		weightEntry.Date = entry.Date
-		return weightEntry
-	})
+func metaToMap(metas []pet2.Meta) map[string]string {
+	metaMap := make(map[string]string)
+
+	for _, meta := range metas {
+		metaMap[meta.Key] = meta.Value
+	}
+	return metaMap
 }
 
-func weightEntryToResponse(weightEntries []pet.WeightEntry) []pet2.WeightEntry {
-	return lo.Map(weightEntries, func(entry pet.WeightEntry, _ int) pet2.WeightEntry {
-		weightEntry := pet2.WeightEntry{}
-		weightEntry.Weight = entry.Weight
-		weightEntry.Date = entry.Date
-		return weightEntry
-	})
+func weightEntriesToMap(weightEntries []pet2.WeightEntry) map[int64]float64 {
+	weightMap := make(map[int64]float64)
+
+	for _, entry := range weightEntries {
+		weightMap[entry.Date] = entry.Weight
+	}
+	return weightMap
+}
+
+func weightMapToEntries(weightEntries map[int64]float64) []pet2.WeightEntry {
+	weights := make([]pet2.WeightEntry, 0, len(weightEntries))
+
+	for key, value := range weightEntries {
+		meta := pet2.WeightEntry{
+			Date:   key,
+			Weight: value,
+		}
+		weights = append(weights, meta)
+	}
+
+	return weights
 }
 
 func PetToResponse(pet pet.Pet) pet2.PetResponse {
 	p := pet2.PetResponse{}
+	p.Id = pet.Id.String()
 	p.Name = pet.Name
 	p.DateOfBirth = pet.DateOfBirth.Unix()
 	p.Sex = pet.Sex
@@ -91,12 +105,13 @@ func PetToResponse(pet pet.Pet) pet2.PetResponse {
 	p.Description = pet.Description
 	p.Pedigree = pet.Pedigree
 	p.Microchip = pet.Microchip
-	p.WeightHistory = weightEntryToResponse(pet.WeightHistory)
+	p.WeightHistory = weightMapToEntries(pet.WeightHistory)
 	p.OwnerId = pet.OwnerId.String()
 	if pet.VetId == uuid.Nil {
 		p.VetId = ""
+	} else {
+		p.VetId = pet.VetId.String()
 	}
-	p.VetId = pet.VetId.String()
 	p.Metas = pet.Metas
 
 	return p

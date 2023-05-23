@@ -39,7 +39,7 @@ func ParseType(value string) (Type, error) {
 	value = strings.TrimSpace(strings.ToLower(value))
 	typ, ok := treatmentTypes[Type(value)]
 	if !ok {
-		return Other, errors.New("type not found, fallback to Other")
+		return Other, errors.New("type not found")
 	}
 	return typ, nil
 }

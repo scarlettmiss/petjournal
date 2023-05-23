@@ -1,12 +1,11 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	typesPet "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
 	typesTreatment "github.com/scarlettmiss/bestPal/cmd/server/types/treatment"
@@ -45,16 +44,16 @@ func New(application *application.Application) *API {
 	petApi := api.Group("/").Use(middlewares.Auth())
 	petApi.POST("/api/pet", api.createPet)
 	petApi.GET("/api/pets", api.pets)
-	petApi.GET("/api/pet/:id", api.pet)
-	petApi.PATCH("/api/pet/:id", api.updatePet)
-	petApi.DELETE("/api/pet/:id", api.deleteUser)
+	petApi.GET("/api/pet/:petId", api.pet)
+	petApi.PATCH("/api/pet/:petId", api.updatePet)
+	petApi.DELETE("/api/pet/:petId", api.deletePet)
 
 	treatmentApi := api.Group("/").Use(middlewares.Auth())
 	treatmentApi.POST("/api/pet/:petId/treatment", api.createTreatment)
-	petApi.GET("/api/pet/:petId/treatments", api.treatmentsByPet)
-	petApi.GET("/api/pet/:petId/treatment/:treatmentId", api.treatmentByPet)
-	petApi.PATCH("/api/pet/:petId/treatment/:treatmentId", api.updateTreatment)
-	petApi.DELETE("/api/pet/:petId/treatment/:treatmentId", api.deleteTreatment)
+	treatmentApi.GET("/api/pet/:petId/treatments", api.treatmentsByPet)
+	treatmentApi.GET("/api/pet/:petId/treatment/:treatmentId", api.treatmentByPet)
+	treatmentApi.PATCH("/api/pet/:petId/treatment/:treatmentId", api.updateTreatment)
+	treatmentApi.DELETE("/api/pet/:petId/treatment/:treatmentId", api.deleteTreatment)
 
 	return api
 }
@@ -240,9 +239,11 @@ func (api *API) pets(c *gin.Context) {
 
 	pets := api.app.PetsByUser(uId)
 
-	petsResp := lo.MapValues(pets, func(p pet.Pet, _ uuid.UUID) typesPet.PetResponse {
-		return petConverter.PetToResponse(p)
-	})
+	petsResp := make([]typesPet.PetResponse, 0, len(pets))
+	for _, p := range pets {
+		petResponse := petConverter.PetToResponse(p)
+		petsResp = append(petsResp, petResponse)
+	}
 
 	c.JSON(http.StatusOK, petsResp)
 }
@@ -254,7 +255,7 @@ func (api *API) pet(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	id := c.Param("petId")
 
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
@@ -283,7 +284,7 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	id := c.Param("petId")
 
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
@@ -311,6 +312,7 @@ func (api *API) updatePet(c *gin.Context) {
 	}
 
 	p, err = petConverter.PetUpdateRequestToPet(requestBody, p)
+	fmt.Println(p)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
@@ -333,7 +335,7 @@ func (api *API) deletePet(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	id := c.Param("petId")
 	//parse
 	pId, err := uuid.Parse(id)
 	if err != nil {
@@ -389,7 +391,7 @@ func (api *API) createTreatment(c *gin.Context) {
 		return
 	}
 
-	t, err := treatmentConverter.TreatmentCreateRequestToTreatment(requestBody, petId)
+	t, err := treatmentConverter.TreatmentCreateRequestToTreatment(requestBody, petId, uId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -439,21 +441,24 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 	treatments := api.app.TreatmentsByPet(petId)
 
 	var hasError bool
-	treatmentsResp := lo.MapValues(treatments, func(t treatment.Treatment, _ uuid.UUID) typesTreatment.TreatmentResponse {
+	treatmentsResp := make([]typesTreatment.TreatmentResponse, 0, len(treatments))
+	for _, t := range treatments {
 		administer, err := api.app.User(t.AdministeredBy)
 		if err != nil {
 			hasError = true
-			return typesTreatment.TreatmentResponse{}
 		}
 
-		verifier, err := api.app.User(t.VerifiedBy)
-		if err != nil {
-			hasError = true
-			return typesTreatment.TreatmentResponse{}
+		verifier := user.Nil
+		if t.VerifiedBy != uuid.Nil {
+			verifier, err = api.app.User(t.VerifiedBy)
+			if err != nil {
+				hasError = true
+			}
 		}
 
-		return treatmentConverter.TreatmentToResponse(t, administer, verifier)
-	})
+		treatmentResponse := treatmentConverter.TreatmentToResponse(t, administer, verifier)
+		treatmentsResp = append(treatmentsResp, treatmentResponse)
+	}
 
 	if hasError {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -503,11 +508,13 @@ func (api *API) treatmentByPet(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
-
-	verifier, err := api.app.User(t.VerifiedBy)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
+	verifier := user.Nil
+	if t.VerifiedBy != uuid.Nil {
+		verifier, err = api.app.User(t.VerifiedBy)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, administer, verifier))

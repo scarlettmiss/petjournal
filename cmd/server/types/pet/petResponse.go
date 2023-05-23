@@ -1,6 +1,7 @@
 package pet
 
 type PetResponse struct {
+	Id            string            `json:"id"`
 	Name          string            `json:"name"`
 	DateOfBirth   int64             `json:"dateOfBirth"`
 	Sex           string            `json:"sex"`

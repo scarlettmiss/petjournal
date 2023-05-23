@@ -8,6 +8,5 @@ type TreatmentUpdateRequest struct {
 	Result        string `json:"result,omitempty"`
 	Description   string `json:"description,omitempty"`
 	Notes         string `json:"notes,omitempty"`
-	VerifiedBy    string `json:"verifiedBy,omitempty"`
 	RecurringRule string `json:"recurringRule,omitempty"`
 }
