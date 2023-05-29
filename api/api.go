@@ -242,7 +242,11 @@ func (api *API) pets(c *gin.Context) {
 		return
 	}
 
-	pets := api.app.PetsByUser(uId)
+	pets, err := api.app.PetsByUser(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
 
 	petsResp := make([]typesPet.PetResponse, 0, len(pets))
 	for _, p := range pets {

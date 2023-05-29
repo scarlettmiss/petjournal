@@ -1,20 +1,85 @@
 package petrepo
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
+	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"sync"
 	"time"
 )
 
-type Repository struct {
-	mux  sync.Mutex
-	pets map[uuid.UUID]pet.Pet
+type PetDBModel struct {
+	Id            uuid.UUID         `bson:"_id"`
+	CreatedAt     time.Time         `bson:"created_at"`
+	UpdatedAt     time.Time         `bson:"updated_at"`
+	Deleted       bool              `bson:"deleted"`
+	Name          string            `bson:"name"`
+	DateOfBirth   time.Time         `bson:"date_of_birth"`
+	Sex           string            `bson:"sex"`
+	BreedName     string            `bson:"breed_name"`
+	Colors        []string          `bson:"colors"`
+	Description   string            `bson:"description"`
+	Pedigree      string            `bson:"pedigree"`
+	Microchip     string            `bson:"microchip"`
+	WeightHistory map[int64]float64 `bson:"weight_history"`
+	OwnerID       uuid.UUID         `bson:"owner_id"`
+	VetID         uuid.UUID         `bson:"vet_id"`
+	Metas         map[string]string `bson:"metas"`
 }
 
-func New() *Repository {
+func ConvertToPetDBModel(pet pet.Pet) PetDBModel {
+	return PetDBModel{
+		Id:            pet.Id,
+		CreatedAt:     pet.CreatedAt,
+		UpdatedAt:     pet.UpdatedAt,
+		Deleted:       pet.Deleted,
+		Name:          pet.Name,
+		DateOfBirth:   pet.DateOfBirth,
+		Sex:           pet.Sex,
+		BreedName:     pet.BreedName,
+		Colors:        pet.Colors,
+		Description:   pet.Description,
+		Pedigree:      pet.Pedigree,
+		Microchip:     pet.Microchip,
+		WeightHistory: pet.WeightHistory,
+		OwnerID:       pet.OwnerId,
+		VetID:         pet.VetId,
+		Metas:         pet.Metas,
+	}
+}
+
+func ConvertToPetDomainModel(dbPet PetDBModel) pet.Pet {
+	return pet.Pet{
+		Id:            dbPet.Id,
+		CreatedAt:     dbPet.CreatedAt,
+		UpdatedAt:     dbPet.UpdatedAt,
+		Deleted:       dbPet.Deleted,
+		Name:          dbPet.Name,
+		DateOfBirth:   dbPet.DateOfBirth,
+		Sex:           dbPet.Sex,
+		BreedName:     dbPet.BreedName,
+		Colors:        dbPet.Colors,
+		Description:   dbPet.Description,
+		Pedigree:      dbPet.Pedigree,
+		Microchip:     dbPet.Microchip,
+		WeightHistory: dbPet.WeightHistory,
+		OwnerId:       dbPet.OwnerID,
+		VetId:         dbPet.VetID,
+		Metas:         dbPet.Metas,
+	}
+}
+
+type Repository struct {
+	mux  sync.Mutex
+	pets *mongo.Collection
+}
+
+func New(collection *mongo.Collection) *Repository {
 	return &Repository{
-		pets: map[uuid.UUID]pet.Pet{},
+		pets: collection,
 	}
 }
 
@@ -34,7 +99,15 @@ func (r *Repository) CreatePet(p pet.Pet) (pet.Pet, error) {
 
 	p.Deleted = false
 
-	r.pets[p.Id] = p
+	dbPet, err := bson.Marshal(ConvertToPetDBModel(p))
+	if err != nil {
+		return pet.Nil, err
+	}
+
+	_, err = r.pets.InsertOne(context.Background(), dbPet)
+	if err != nil {
+		return pet.Nil, err
+	}
 
 	return p, nil
 }
@@ -43,34 +116,73 @@ func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	p, ok := r.pets[id]
-	if !ok {
-		return pet.Nil, pet.ErrNotFound
-	}
+	var retrievedPet PetDBModel
 
-	return p, nil
+	filter := bson.M{"_id": id}
+
+	err := r.pets.FindOne(context.Background(), filter).Decode(&retrievedPet)
+	if err != nil {
+		return pet.Nil, user.ErrNotFound
+	}
+	return ConvertToPetDomainModel(retrievedPet), nil
 }
 
-func (r *Repository) Pets() map[uuid.UUID]pet.Pet {
+func (r *Repository) Pets() ([]pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	return r.pets
+	var pets []pet.Pet
+
+	// Define an empty filter to retrieve all pets
+	filter := bson.M{}
+
+	ctx := context.Background()
+	// Perform the find operation
+	cursor, err := r.pets.Find(ctx, filter)
+	if err != nil {
+		return pets, err
+	}
+	defer cursor.Close(ctx)
+
+	// Iterate over the cursor and decode the users
+	for cursor.Next(ctx) {
+		var p PetDBModel
+		err = cursor.Decode(&p)
+
+		if err != nil {
+			return pets, err
+		}
+
+		pets = append(pets, ConvertToPetDomainModel(p))
+	}
+
+	// Check for any errors during cursor iteration
+	err = cursor.Err()
+	if err != nil {
+		return pets, err
+	}
+
+	return pets, nil
 }
 
 func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.pets[p.Id]
-	if !ok {
-		return pet.Pet{}, pet.ErrNotFound
+	// Define the filter to identify the document to update
+	filter := bson.M{"_id": p.Id}
+
+	// Define the update document using the '$set' operator
+	replacement, err := bson.Marshal(ConvertToPetDBModel(p))
+	if err != nil {
+		return pet.Nil, err
 	}
 
-	now := time.Now()
-	p.UpdatedAt = now
-
-	r.pets[p.Id] = p
+	// Perform the update operation
+	_, err = r.pets.ReplaceOne(context.Background(), filter, replacement)
+	if err != nil {
+		return pet.Nil, err
+	}
 
 	return p, nil
 }
@@ -79,11 +191,11 @@ func (r *Repository) DeletePet(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	_, ok := r.pets[id]
-	if !ok {
-		return pet.ErrNotFound
-	}
-	delete(r.pets, id)
+	filter := bson.M{"_id": id}
 
+	result := r.pets.FindOneAndDelete(context.Background(), filter)
+	if result.Err() != nil {
+		return result.Err()
+	}
 	return nil
 }

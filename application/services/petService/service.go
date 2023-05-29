@@ -21,21 +21,33 @@ func (s *Service) Pet(id uuid.UUID) (pet.Pet, error) {
 	return p, nil
 }
 
-func (s *Service) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
-	pets := s.repo.Pets()
+func (s *Service) Pets() ([]pet.Pet, error) {
+	return s.repo.Pets()
+}
+
+func (s *Service) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	uPets := make(map[uuid.UUID]pet.Pet)
 
-	for petId, p := range pets {
+	pets, err := s.Pets()
+	if err != nil {
+		return uPets, err
+	}
+
+	for _, p := range pets {
 		if p.OwnerId == uId || p.VetId == uId {
-			uPets[petId] = p
+			uPets[p.Id] = p
 		}
 	}
 
-	return uPets
+	return uPets, nil
 }
 
 func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
-	pets := s.PetsByUser(uId)
+	pets, err := s.PetsByUser(uId)
+	if err != nil {
+		return pet.Nil, err
+	}
+
 	p, ok := pets[id]
 	if !ok {
 		return pet.Nil, pet.ErrNotFound

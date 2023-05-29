@@ -89,7 +89,7 @@ func (a *Application) Authenticate(email string, password string) (user.User, er
 	return u, nil
 }
 
-func (a *Application) PetsByUser(uId uuid.UUID) map[uuid.UUID]pet.Pet {
+func (a *Application) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	return a.petService.PetsByUser(uId)
 }
 

@@ -6,11 +6,67 @@ import (
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"sync"
 	"time"
 )
+
+type UserDBModel struct {
+	Id           uuid.UUID `bson:"_id,omitempty"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+	Deleted      bool      `bson:"deleted"`
+	UserType     user.Type `bson:"user_type"`
+	Email        string    `bson:"email"`
+	PasswordHash string    `bson:"password_hash"`
+	Name         string    `bson:"name"`
+	Surname      string    `bson:"surname"`
+	Phone        string    `bson:"phone"`
+	Address      string    `bson:"address"`
+	City         string    `bson:"city"`
+	State        string    `bson:"state"`
+	Country      string    `bson:"country"`
+	Zip          string    `bson:"zip"`
+}
+
+func ConvertToUserDBModel(user user.User) UserDBModel {
+	return UserDBModel{
+		Id:           user.Id,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
+		Deleted:      user.Deleted,
+		UserType:     user.UserType,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		Name:         user.Name,
+		Surname:      user.Surname,
+		Phone:        user.Phone,
+		Address:      user.Address,
+		City:         user.City,
+		State:        user.State,
+		Country:      user.Country,
+		Zip:          user.Zip,
+	}
+}
+
+func ConvertToUserDomainModel(dbUser UserDBModel) user.User {
+	return user.User{
+		Id:           dbUser.Id,
+		CreatedAt:    dbUser.CreatedAt,
+		UpdatedAt:    dbUser.UpdatedAt,
+		Deleted:      dbUser.Deleted,
+		UserType:     dbUser.UserType,
+		Email:        dbUser.Email,
+		PasswordHash: dbUser.PasswordHash,
+		Name:         dbUser.Name,
+		Surname:      dbUser.Surname,
+		Phone:        dbUser.Phone,
+		Address:      dbUser.Address,
+		City:         dbUser.City,
+		State:        dbUser.State,
+		Country:      dbUser.Country,
+		Zip:          dbUser.Zip,
+	}
+}
 
 type Repository struct {
 	mux   sync.Mutex
@@ -39,10 +95,11 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 
 	u.Deleted = false
 
-	dbUser, err := bson.Marshal(u)
+	dbUser, err := bson.Marshal(ConvertToUserDBModel(u))
 	if err != nil {
 		return user.Nil, err
 	}
+
 	_, err = r.users.InsertOne(context.Background(), dbUser)
 	if err != nil {
 		return user.Nil, err
@@ -54,42 +111,50 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 func (r *Repository) User(id uuid.UUID) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-	var retrievedUser user.User
-	err := r.users.FindOne(context.Background(), bson.M{"id": id}).Decode(&retrievedUser)
+	var retrievedUser UserDBModel
+
+	filter := bson.M{"_id": id}
+
+	err := r.users.FindOne(context.Background(), filter).Decode(&retrievedUser)
 	if err != nil {
-		log.Fatal(err)
 		return user.Nil, user.ErrNotFound
 	}
-	return retrievedUser, nil
+
+	return ConvertToUserDomainModel(retrievedUser), nil
 }
 
 func (r *Repository) Users() ([]user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	var users []user.User
+
 	// Define an empty filter to retrieve all users
 	filter := bson.M{}
 
+	ctx := context.Background()
 	// Perform the find operation
-	cursor, err := r.users.Find(context.Background(), filter)
+	cursor, err := r.users.Find(ctx, filter)
 	if err != nil {
-		log.Fatal(err)
+		return users, err
 	}
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
 	// Iterate over the cursor and decode the users
-	var users []user.User
-	for cursor.Next(context.Background()) {
-		var u user.User
-		if err := cursor.Decode(&u); err != nil {
-			log.Fatal(err)
+	for cursor.Next(ctx) {
+		var u UserDBModel
+		err = cursor.Decode(&u)
+
+		if err != nil {
+			return users, err
 		}
-		users = append(users, u)
+
+		users = append(users, ConvertToUserDomainModel(u))
 	}
 
 	// Check for any errors during cursor iteration
-	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
+	err = cursor.Err()
+	if err != nil {
 		return users, err
 	}
 
@@ -101,29 +166,17 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 	defer r.mux.Unlock()
 
 	// Define the filter to identify the document to update
-	filter := bson.M{"id": u.Id}
+	filter := bson.M{"_id": u.Id}
 
 	// Define the update document using the '$set' operator
-	dbUser, err := bson.Marshal(u)
+	replacement, err := bson.Marshal(ConvertToUserDBModel(u))
 	if err != nil {
 		return user.Nil, err
 	}
 
-	var updateDoc bson.M
-	err = bson.Unmarshal(dbUser, &updateDoc)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	update := bson.M{"$set": updateDoc}
-
-	// Specify options for the update operation (optional)
-	opts := options.Update().SetUpsert(false)
-
 	// Perform the update operation
-	_, err = r.users.UpdateOne(context.Background(), filter, update, opts)
+	_, err = r.users.ReplaceOne(context.Background(), filter, replacement)
 	if err != nil {
-		log.Fatal(err)
 		return user.Nil, err
 	}
 
@@ -134,9 +187,10 @@ func (r *Repository) DeleteUser(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	result := r.users.FindOneAndDelete(context.Background(), bson.M{"id": id})
+	filter := bson.M{"_id": id}
+
+	result := r.users.FindOneAndDelete(context.Background(), filter)
 	if result.Err() != nil {
-		log.Fatal(result.Err())
 		return result.Err()
 	}
 	return nil

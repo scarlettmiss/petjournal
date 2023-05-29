@@ -49,9 +49,12 @@ func main() {
 	db := client.Database(os.Getenv("DB_NAME"))
 
 	//init repos
-	petRepo := petrepo.New()
-	userCollection := db.Collection("users")
-	userRepo := userrepo.New(userCollection)
+	petsCollection := db.Collection("pets")
+	petRepo := petrepo.New(petsCollection)
+
+	usersCollection := db.Collection("users")
+	userRepo := userrepo.New(usersCollection)
+
 	treatmentRepo := treatmentrepo.New()
 	//init services
 	ps, err := petService.New(petRepo)
