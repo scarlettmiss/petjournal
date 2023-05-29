@@ -14,7 +14,7 @@ var (
 
 type Service interface {
 	User(id uuid.UUID) (User, error)
-	Users() map[uuid.UUID]User
+	Users() ([]User, error)
 	CreateUser(user User) (User, error)
 	Authenticate(email string, password string) (User, error)
 	UpdateUser(u User) (User, error)
@@ -25,7 +25,7 @@ type Service interface {
 type Repository interface {
 	CreateUser(user User) (User, error)
 	User(id uuid.UUID) (User, error)
-	Users() map[uuid.UUID]User
+	Users() ([]User, error)
 	UpdateUser(u User) (User, error)
 	DeleteUser(id uuid.UUID) error
 }

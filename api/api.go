@@ -92,7 +92,11 @@ func (api *API) register(c *gin.Context) {
 }
 
 func (api *API) users(c *gin.Context) {
-	users := api.app.Users()
+	users, err := api.app.Users()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
 
 	usersResp := make([]typesUser.UserResponse, 0, len(users))
 	for _, u := range users {

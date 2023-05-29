@@ -68,7 +68,7 @@ func (a *Application) UpdateUser(u user.User) (user.User, error) {
 	return a.userService.UpdateUser(u)
 }
 
-func (a *Application) Users() map[uuid.UUID]user.User {
+func (a *Application) Users() ([]user.User, error) {
 	return a.userService.Users()
 }
 

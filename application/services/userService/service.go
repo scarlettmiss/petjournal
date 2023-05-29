@@ -22,7 +22,7 @@ func (s *Service) User(id uuid.UUID) (user.User, error) {
 	return u, nil
 }
 
-func (s *Service) Users() map[uuid.UUID]user.User {
+func (s *Service) Users() ([]user.User, error) {
 	return s.repo.Users()
 }
 
@@ -30,7 +30,11 @@ func (s *Service) UserByEmail(email string) (user.User, bool) {
 	var u user.User
 	var found bool
 
-	for _, v := range s.Users() {
+	users, err := s.Users()
+	if err != nil {
+		return user.Nil, false
+	}
+	for _, v := range users {
 		if v.Email == email {
 			u = v
 			found = true
