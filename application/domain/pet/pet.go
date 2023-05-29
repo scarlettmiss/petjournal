@@ -11,22 +11,17 @@ type Pet struct {
 	UpdatedAt     time.Time
 	Deleted       bool
 	Name          string
-	DateOfBirth   string
+	DateOfBirth   time.Time
 	Sex           string
 	BreedName     string
 	Colors        []string
 	Description   string
 	Pedigree      string
 	Microchip     string
-	WeightHistory []WeightEntry
+	WeightHistory map[int64]float64
 	OwnerId       uuid.UUID
 	VetId         uuid.UUID
 	Metas         map[string]string
-}
-
-type WeightEntry struct {
-	Date   uint64
-	Weight float64
 }
 
 var Nil = Pet{}

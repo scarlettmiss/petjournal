@@ -1,10 +1,9 @@
 package pet
 
-import "github.com/google/uuid"
-
 type PetResponse struct {
+	Id            string            `json:"id"`
 	Name          string            `json:"name"`
-	DateOfBirth   string            `json:"dateOfBirth"`
+	DateOfBirth   int64             `json:"dateOfBirth"`
 	Sex           string            `json:"sex"`
 	BreedName     string            `json:"breedName"`
 	Colors        []string          `json:"colors"`
@@ -12,7 +11,7 @@ type PetResponse struct {
 	Pedigree      string            `json:"pedigree,omitempty"`
 	Microchip     string            `json:"microchip,omitempty"`
 	WeightHistory []WeightEntry     `json:"weightHistory,omitempty"`
-	OwnerId       uuid.UUID         `json:"ownerId"`
-	VetIds        uuid.UUID         `json:"vetId,omitempty"`
+	OwnerId       string            `json:"ownerId"`
+	VetId         string            `json:"vetId,omitempty"`
 	Metas         map[string]string `json:"metas"`
 }

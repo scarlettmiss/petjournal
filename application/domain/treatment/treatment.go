@@ -3,7 +3,6 @@ package treatment
 import (
 	"errors"
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
 	"strings"
 	"time"
 )
@@ -40,25 +39,27 @@ func ParseType(value string) (Type, error) {
 	value = strings.TrimSpace(strings.ToLower(value))
 	typ, ok := treatmentTypes[Type(value)]
 	if !ok {
-		return Other, errors.New("type not found, fallback to Other")
+		return Other, errors.New("type not found")
 	}
 	return typ, nil
 }
 
 type Treatment struct {
-	Id            uuid.UUID
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	Deleted       bool
-	PetId         string
-	TreatmentType Type
-	Name          string
-	Date          time.Time
-	Lot           string
-	Result        string
-	Description   string
-	Notes         string
-	Administer    user.User
+	Id             uuid.UUID
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	Deleted        bool
+	PetId          uuid.UUID
+	TreatmentType  Type
+	Name           string
+	Date           time.Time
+	Lot            string
+	Result         string
+	Description    string
+	Notes          string
+	AdministeredBy uuid.UUID
+	VerifiedBy     uuid.UUID
+	RecurringRule  string
 }
 
 var Nil = Treatment{}

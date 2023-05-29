@@ -62,7 +62,7 @@ func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	p, ok := r.pets[p.Id]
+	_, ok := r.pets[p.Id]
 	if !ok {
 		return pet.Pet{}, pet.ErrNotFound
 	}

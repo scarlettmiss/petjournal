@@ -2,9 +2,9 @@ package treatmentrepo
 
 import (
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 	"sync"
+	"time"
 )
 
 type Repository struct {
@@ -18,13 +18,24 @@ func New() *Repository {
 	}
 }
 
-func (r *Repository) CreateTreatment(t treatment.Treatment) error {
+func (r *Repository) CreateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return treatment.Nil, err
+	}
+	t.Id = id
+
+	now := time.Now()
+	t.CreatedAt = now
+	t.UpdatedAt = now
+
+	t.Deleted = false
 
 	r.treatments[t.Id] = t
 
-	return nil
+	return t, nil
 }
 
 func (r *Repository) Treatment(id uuid.UUID) (treatment.Treatment, error) {
@@ -46,28 +57,21 @@ func (r *Repository) Treatments() map[uuid.UUID]treatment.Treatment {
 	return r.treatments
 }
 
-func (r *Repository) TreatmentsByPet(pId uuid.UUID) map[uuid.UUID]treatment.Treatment {
-	r.mux.Lock()
-	defer r.mux.Unlock()
-	treatments := lo.PickBy[uuid.UUID, treatment.Treatment](r.treatments, func(key uuid.UUID, value treatment.Treatment) bool {
-		return value.Id == pId
-	})
-
-	return treatments
-}
-
-func (r *Repository) UpdateTreatment(t treatment.Treatment) error {
+func (r *Repository) UpdateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	_, ok := r.treatments[t.Id]
 	if !ok {
-		return treatment.ErrNotFound
+		return treatment.Nil, treatment.ErrNotFound
 	}
+
+	now := time.Now()
+	t.UpdatedAt = now
 
 	r.treatments[t.Id] = t
 
-	return nil
+	return t, nil
 }
 
 func (r *Repository) DeleteTreatment(id uuid.UUID) error {
