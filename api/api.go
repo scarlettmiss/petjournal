@@ -447,7 +447,11 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 		return
 	}
 
-	treatments := api.app.TreatmentsByPet(petId)
+	treatments, err := api.app.TreatmentsByPet(petId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
 
 	var hasError bool
 	treatmentsResp := make([]typesTreatment.TreatmentResponse, 0, len(treatments))

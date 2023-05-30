@@ -11,7 +11,7 @@ import (
 )
 
 type UserDBModel struct {
-	Id           uuid.UUID `bson:"_id,omitempty"`
+	Id           uuid.UUID `bson:"_id"`
 	CreatedAt    time.Time `bson:"created_at"`
 	UpdatedAt    time.Time `bson:"updated_at"`
 	Deleted      bool      `bson:"deleted"`
@@ -20,12 +20,12 @@ type UserDBModel struct {
 	PasswordHash string    `bson:"password_hash"`
 	Name         string    `bson:"name"`
 	Surname      string    `bson:"surname"`
-	Phone        string    `bson:"phone"`
-	Address      string    `bson:"address"`
-	City         string    `bson:"city"`
-	State        string    `bson:"state"`
-	Country      string    `bson:"country"`
-	Zip          string    `bson:"zip"`
+	Phone        string    `bson:"phone,omitempty"`
+	Address      string    `bson:"address,omitempty"`
+	City         string    `bson:"city,omitempty"`
+	State        string    `bson:"state,omitempty"`
+	Country      string    `bson:"country,omitempty"`
+	Zip          string    `bson:"zip,omitempty"`
 }
 
 func ConvertToUserDBModel(user user.User) UserDBModel {
@@ -111,6 +111,7 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 func (r *Repository) User(id uuid.UUID) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
 	var retrievedUser UserDBModel
 
 	filter := bson.M{"_id": id}

@@ -18,7 +18,7 @@ type Pet struct {
 	Description   string
 	Pedigree      string
 	Microchip     string
-	WeightHistory map[int64]float64
+	WeightHistory map[time.Time]float64
 	OwnerId       uuid.UUID
 	VetId         uuid.UUID
 	Metas         map[string]string

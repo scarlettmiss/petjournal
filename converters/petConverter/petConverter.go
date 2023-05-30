@@ -43,21 +43,43 @@ func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID) (pet.
 }
 
 func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet) (pet.Pet, error) {
-	p.Name = requestBody.Name
-	p.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
-	p.Sex = requestBody.Sex
-	p.BreedName = requestBody.BreedName
-	p.Colors = requestBody.Colors
-	p.Description = requestBody.Description
-	p.Pedigree = requestBody.Pedigree
-	p.Microchip = requestBody.Microchip
-	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
-	vetId, err := getVetId(requestBody.VetId)
-	if err != nil {
-		return pet.Nil, err
+	if requestBody.Name != "" {
+		p.Name = requestBody.Name
 	}
-	p.VetId = vetId
-	p.Metas = metaToMap(requestBody.Metas)
+	if requestBody.DateOfBirth != 0 {
+		p.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
+	}
+	if requestBody.Sex != "" {
+		p.Sex = requestBody.Sex
+	}
+	if requestBody.BreedName != "" {
+		p.BreedName = requestBody.BreedName
+	}
+	if len(requestBody.Colors) > 0 {
+		p.Colors = requestBody.Colors
+	}
+	if requestBody.Description != "" {
+		p.Description = requestBody.Description
+	}
+	if requestBody.Pedigree != "" {
+		p.Pedigree = requestBody.Pedigree
+	}
+	if requestBody.Microchip != "" {
+		p.Microchip = requestBody.Microchip
+	}
+	if len(requestBody.WeightHistory) > 0 {
+		p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
+	}
+	if requestBody.VetId != "" {
+		vetId, err := getVetId(requestBody.VetId)
+		if err != nil {
+			return pet.Nil, err
+		}
+		p.VetId = vetId
+	}
+	if len(requestBody.Metas) > 0 {
+		p.Metas = metaToMap(requestBody.Metas)
+	}
 
 	return p, nil
 }
@@ -71,16 +93,17 @@ func metaToMap(metas []pet2.Meta) map[string]string {
 	return metaMap
 }
 
-func weightEntriesToMap(weightEntries []pet2.WeightEntry) map[int64]float64 {
-	weightMap := make(map[int64]float64)
+func weightEntriesToMap(weightEntries []pet2.WeightEntryRequest) map[time.Time]float64 {
+	weightMap := make(map[time.Time]float64)
 
 	for _, entry := range weightEntries {
-		weightMap[entry.Date] = entry.Weight
+		date := time.Unix(entry.Date/1000, (entry.Date%1000)*1000000)
+		weightMap[date] = entry.Weight
 	}
 	return weightMap
 }
 
-func weightMapToEntries(weightEntries map[int64]float64) []pet2.WeightEntry {
+func weightMapToEntries(weightEntries map[time.Time]float64) []pet2.WeightEntry {
 	weights := make([]pet2.WeightEntry, 0, len(weightEntries))
 
 	for key, value := range weightEntries {
@@ -98,7 +121,7 @@ func PetToResponse(pet pet.Pet) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
 	p.Name = pet.Name
-	p.DateOfBirth = pet.DateOfBirth.Unix()
+	p.DateOfBirth = pet.DateOfBirth
 	p.Sex = pet.Sex
 	p.BreedName = pet.BreedName
 	p.Colors = pet.Colors
@@ -107,9 +130,7 @@ func PetToResponse(pet pet.Pet) pet2.PetResponse {
 	p.Microchip = pet.Microchip
 	p.WeightHistory = weightMapToEntries(pet.WeightHistory)
 	p.OwnerId = pet.OwnerId.String()
-	if pet.VetId == uuid.Nil {
-		p.VetId = ""
-	} else {
+	if pet.VetId != uuid.Nil {
 		p.VetId = pet.VetId.String()
 	}
 	p.Metas = pet.Metas

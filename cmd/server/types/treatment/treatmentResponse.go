@@ -2,6 +2,7 @@ package treatment
 
 import (
 	"github.com/scarlettmiss/bestPal/cmd/server/types/user"
+	"time"
 )
 
 type TreatmentResponse struct {
@@ -9,7 +10,7 @@ type TreatmentResponse struct {
 	PetId          string            `json:"petId"`
 	TreatmentType  string            `json:"treatmentType"`
 	Name           string            `json:"name"`
-	Date           int64             `json:"date"`
+	Date           time.Time         `json:"date"`
 	Lot            string            `json:"lot,omitempty"`
 	Result         string            `json:"result,omitempty"`
 	Description    string            `json:"description,omitempty"`

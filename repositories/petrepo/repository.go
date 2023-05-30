@@ -12,22 +12,22 @@ import (
 )
 
 type PetDBModel struct {
-	Id            uuid.UUID         `bson:"_id"`
-	CreatedAt     time.Time         `bson:"created_at"`
-	UpdatedAt     time.Time         `bson:"updated_at"`
-	Deleted       bool              `bson:"deleted"`
-	Name          string            `bson:"name"`
-	DateOfBirth   time.Time         `bson:"date_of_birth"`
-	Sex           string            `bson:"sex"`
-	BreedName     string            `bson:"breed_name"`
-	Colors        []string          `bson:"colors"`
-	Description   string            `bson:"description"`
-	Pedigree      string            `bson:"pedigree"`
-	Microchip     string            `bson:"microchip"`
-	WeightHistory map[int64]float64 `bson:"weight_history"`
-	OwnerID       uuid.UUID         `bson:"owner_id"`
-	VetID         uuid.UUID         `bson:"vet_id"`
-	Metas         map[string]string `bson:"metas"`
+	Id            uuid.UUID             `bson:"_id"`
+	CreatedAt     time.Time             `bson:"created_at"`
+	UpdatedAt     time.Time             `bson:"updated_at"`
+	Deleted       bool                  `bson:"deleted"`
+	Name          string                `bson:"name"`
+	DateOfBirth   time.Time             `bson:"date_of_birth,omitempty"`
+	Sex           string                `bson:"sex,omitempty"`
+	BreedName     string                `bson:"breed_name,omitempty"`
+	Colors        []string              `bson:"colors,omitempty"`
+	Description   string                `bson:"description,omitempty"`
+	Pedigree      string                `bson:"pedigree,omitempty"`
+	Microchip     string                `bson:"microchip,omitempty"`
+	WeightHistory map[time.Time]float64 `bson:"weight_history,omitempty"`
+	OwnerID       uuid.UUID             `bson:"owner_id,omitempty"`
+	VetID         uuid.UUID             `bson:"vet_id,omitempty"`
+	Metas         map[string]string     `bson:"metas,omitempty"`
 }
 
 func ConvertToPetDBModel(pet pet.Pet) PetDBModel {

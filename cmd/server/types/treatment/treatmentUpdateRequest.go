@@ -1,9 +1,9 @@
 package treatment
 
 type TreatmentUpdateRequest struct {
-	TreatmentType string `json:"treatmentType"`
-	Name          string `json:"name"`
-	Date          int64  `json:"date"`
+	TreatmentType string `json:"treatmentType,omitempty"`
+	Name          string `json:"name,omitempty"`
+	Date          int64  `json:"date,omitempty"`
 	Lot           string `json:"lot,omitempty"`
 	Result        string `json:"result,omitempty"`
 	Description   string `json:"description,omitempty"`

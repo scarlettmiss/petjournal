@@ -14,7 +14,7 @@ type Service interface {
 	Treatment(id uuid.UUID) (Treatment, error)
 	Treatments() map[uuid.UUID]Treatment
 	PetTreatment(petId uuid.UUID, id uuid.UUID) (Treatment, error)
-	PetTreatments(petId uuid.UUID) map[uuid.UUID]Treatment
+	PetTreatments(petId uuid.UUID) (map[uuid.UUID]Treatment, error)
 	CreateTreatment(treatment Treatment) (Treatment, error)
 	UpdateTreatment(treatment Treatment) (Treatment, error)
 	DeleteTreatment(id uuid.UUID) error
@@ -23,7 +23,7 @@ type Service interface {
 type Repository interface {
 	CreateTreatment(treatment Treatment) (Treatment, error)
 	Treatment(id uuid.UUID) (Treatment, error)
-	Treatments() map[uuid.UUID]Treatment
+	Treatments() ([]Treatment, error)
 	UpdateTreatment(treatment Treatment) (Treatment, error)
 	DeleteTreatment(id uuid.UUID) error
 }

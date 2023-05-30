@@ -31,15 +31,34 @@ func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, er
 }
 
 func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) user.User {
-	u.Email = requestBody.Email
-	u.Name = requestBody.Name
-	u.Surname = requestBody.Surname
-	u.Phone = requestBody.Phone
-	u.Address = requestBody.Address
-	u.City = requestBody.City
-	u.State = requestBody.State
-	u.Country = requestBody.Country
-	u.Zip = requestBody.Zip
+	if requestBody.Email != "" {
+		u.Email = requestBody.Email
+	}
+	if requestBody.Name != "" {
+		u.Name = requestBody.Name
+	}
+	if requestBody.Surname != "" {
+		u.Surname = requestBody.Surname
+	}
+	if requestBody.Phone != "" {
+		u.Phone = requestBody.Phone
+	}
+	if requestBody.Address != "" {
+		u.Address = requestBody.Address
+	}
+	if requestBody.City != "" {
+		u.City = requestBody.City
+	}
+	if requestBody.State != "" {
+		u.State = requestBody.State
+	}
+	if requestBody.Country != "" {
+		u.Country = requestBody.Country
+	}
+	if requestBody.Zip != "" {
+		u.Zip = requestBody.Zip
+	}
+
 	return u
 }
 

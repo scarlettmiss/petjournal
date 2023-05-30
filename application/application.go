@@ -113,7 +113,7 @@ func (a *Application) CreateTreatment(t treatment.Treatment) (treatment.Treatmen
 	return a.treatmentService.CreateTreatment(t)
 }
 
-func (a *Application) TreatmentsByPet(pId uuid.UUID) map[uuid.UUID]treatment.Treatment {
+func (a *Application) TreatmentsByPet(pId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
 	return a.treatmentService.PetTreatments(pId)
 }
 

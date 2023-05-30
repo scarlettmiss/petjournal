@@ -55,7 +55,8 @@ func main() {
 	usersCollection := db.Collection("users")
 	userRepo := userrepo.New(usersCollection)
 
-	treatmentRepo := treatmentrepo.New()
+	treatmentsCollection := db.Collection("treatments")
+	treatmentRepo := treatmentrepo.New(treatmentsCollection)
 	//init services
 	ps, err := petService.New(petRepo)
 	if err != nil {

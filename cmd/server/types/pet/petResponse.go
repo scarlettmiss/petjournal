@@ -1,9 +1,11 @@
 package pet
 
+import "time"
+
 type PetResponse struct {
 	Id            string            `json:"id"`
 	Name          string            `json:"name"`
-	DateOfBirth   int64             `json:"dateOfBirth"`
+	DateOfBirth   time.Time         `json:"dateOfBirth"`
 	Sex           string            `json:"sex"`
 	BreedName     string            `json:"breedName"`
 	Colors        []string          `json:"colors"`
