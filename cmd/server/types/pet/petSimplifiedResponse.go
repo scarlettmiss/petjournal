@@ -18,5 +18,4 @@ type PetSimplifiedResponse struct {
 	WeightHistory []WeightEntry               `json:"weightHistory,omitempty"`
 	Owner         user.UserResponseSimplified `json:"owner"`
 	Vet           user.UserResponse           `json:"vet,omitempty"`
-	Metas         map[string]string           `json:"metas"`
 }

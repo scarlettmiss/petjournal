@@ -471,7 +471,7 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p, owner, vet)})
+	c.JSON(http.StatusOK, gin.H{"pet": petConverter.PetToResponse(p, owner, vet)})
 }
 
 func (api *API) deletePet(c *gin.Context) {
@@ -741,7 +741,7 @@ func (api *API) updateTreatment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"treatment": treatmentConverter.TreatmentToResponse(t, u, verifier)})
+	c.JSON(http.StatusOK, gin.H{"treatment": treatmentConverter.TreatmentToResponse(t, u, verifier)})
 }
 
 func (api *API) deleteTreatment(c *gin.Context) {

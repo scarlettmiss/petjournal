@@ -19,6 +19,8 @@ func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID, vetId
 	p.Description = requestBody.Description
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
+	p.WeightMin = requestBody.WeightMin
+	p.WeightMax = requestBody.WeightMax
 	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	p.OwnerId = ownerId
 	p.VetId = vetId
@@ -51,6 +53,12 @@ func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet, vetId uuid.UU
 	}
 	if requestBody.Microchip != "" {
 		p.Microchip = requestBody.Microchip
+	}
+	if requestBody.WeightMin != 0 {
+		p.WeightMin = requestBody.WeightMin
+	}
+	if requestBody.WeightMax != 0 {
+		p.WeightMax = requestBody.WeightMax
 	}
 	if len(requestBody.WeightHistory) > 0 {
 		p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
@@ -109,7 +117,8 @@ func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse
 	p.Description = pet.Description
 	p.Pedigree = pet.Pedigree
 	p.Microchip = pet.Microchip
-	p.WeightHistory = weightMapToEntries(pet.WeightHistory)
+	p.WeightMin = pet.WeightMin
+	p.WeightMax = pet.WeightMax
 	p.Owner = userConverter.UserToResponse(owner)
 	if vet != user.Nil {
 		p.Vet = userConverter.UserToResponse(vet)
@@ -133,7 +142,6 @@ func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.P
 	if vet != user.Nil {
 		p.Vet = userConverter.UserToResponse(vet)
 	}
-	p.Metas = pet.Metas
 
 	return p
 }

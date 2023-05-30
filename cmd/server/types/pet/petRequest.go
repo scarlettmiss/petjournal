@@ -9,6 +9,8 @@ type PetRequest struct {
 	Description   string               `json:"description,omitempty"`
 	Pedigree      string               `json:"pedigree,omitempty"`
 	Microchip     string               `json:"microchip,omitempty"`
+	WeightMin     float64              `json:"weightMin,omitempty"`
+	WeightMax     float64              `json:"weightMax,omitempty"`
 	WeightHistory []WeightEntryRequest `json:"weightHistory,omitempty"`
 	VetId         string               `json:"vetId,omitempty"`
 	Metas         []Meta               `json:"metas"`
