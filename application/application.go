@@ -72,8 +72,20 @@ func (a *Application) Users() ([]user.User, error) {
 	return a.userService.Users()
 }
 
+func (a *Application) UsersByType(t user.Type) ([]user.User, error) {
+	return a.userService.UsersByType(t)
+}
+
 func (a *Application) User(id uuid.UUID) (user.User, error) {
 	return a.userService.User(id)
+}
+
+func (a *Application) UserByType(id uuid.UUID, t user.Type) (user.User, error) {
+	u, err := a.userService.UserByType(id, t)
+	if err != nil {
+		return user.Nil, err
+	}
+	return u, nil
 }
 
 func (a *Application) DeleteUser(id uuid.UUID) error {

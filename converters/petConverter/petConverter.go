@@ -9,20 +9,7 @@ import (
 	"time"
 )
 
-func getVetId(id string) (uuid.UUID, error) {
-	if id == "" {
-		return uuid.Nil, nil
-	}
-
-	vetId, err := uuid.Parse(id)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return vetId, nil
-}
-
-func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID) (pet.Pet, error) {
+func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID, vetId uuid.UUID) (pet.Pet, error) {
 	p := pet.Pet{}
 	p.Name = requestBody.Name
 	p.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
@@ -34,17 +21,13 @@ func PetCreateRequestToPet(requestBody pet2.PetRequest, ownerId uuid.UUID) (pet.
 	p.Microchip = requestBody.Microchip
 	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	p.OwnerId = ownerId
-	vetId, err := getVetId(requestBody.VetId)
-	if err != nil {
-		return pet.Nil, err
-	}
 	p.VetId = vetId
 	p.Metas = metaToMap(requestBody.Metas)
 
 	return p, nil
 }
 
-func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet) (pet.Pet, error) {
+func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet, vetId uuid.UUID) (pet.Pet, error) {
 	if requestBody.Name != "" {
 		p.Name = requestBody.Name
 	}
@@ -72,11 +55,7 @@ func PetUpdateRequestToPet(requestBody pet2.PetRequest, p pet.Pet) (pet.Pet, err
 	if len(requestBody.WeightHistory) > 0 {
 		p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	}
-	if requestBody.VetId != "" {
-		vetId, err := getVetId(requestBody.VetId)
-		if err != nil {
-			return pet.Nil, err
-		}
+	if vetId != uuid.Nil {
 		p.VetId = vetId
 	}
 	if len(requestBody.Metas) > 0 {

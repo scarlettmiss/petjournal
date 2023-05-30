@@ -44,6 +44,41 @@ func (s *Service) UserByEmail(email string) (user.User, bool) {
 	return u, found
 }
 
+func (s *Service) UsersByType(t user.Type) ([]user.User, error) {
+	var users []user.User
+
+	allUsers, err := s.Users()
+	if err != nil {
+		return users, err
+	}
+
+	for _, u := range allUsers {
+		if u.UserType == t {
+			users = append(users, u)
+		}
+	}
+
+	return users, nil
+}
+
+func (s *Service) UserByType(id uuid.UUID, t user.Type) (user.User, error) {
+	var u user.User
+
+	users, err := s.UsersByType(t)
+	if err != nil {
+		return user.Nil, err
+	}
+	err = user.ErrNotFound
+	for _, v := range users {
+		if v.Id == id {
+			u = v
+			err = nil
+			break
+		}
+	}
+	return u, err
+}
+
 func (s *Service) CreateUser(u user.User) (user.User, error) {
 	return s.repo.CreateUser(u)
 }

@@ -15,6 +15,8 @@ var (
 type Service interface {
 	User(id uuid.UUID) (User, error)
 	Users() ([]User, error)
+	UsersByType(t Type) ([]User, error)
+	UserByType(id uuid.UUID, t Type) (User, error)
 	CreateUser(user User) (User, error)
 	Authenticate(email string, password string) (User, error)
 	UpdateUser(u User) (User, error)
