@@ -3,7 +3,9 @@ package petConverter
 import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
+	"github.com/scarlettmiss/bestPal/application/domain/user"
 	pet2 "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
+	"github.com/scarlettmiss/bestPal/converters/userConverter"
 	"time"
 )
 
@@ -117,7 +119,7 @@ func weightMapToEntries(weightEntries map[time.Time]float64) []pet2.WeightEntry 
 	return weights
 }
 
-func PetToResponse(pet pet.Pet) pet2.PetResponse {
+func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
 	p.Name = pet.Name
@@ -129,9 +131,28 @@ func PetToResponse(pet pet.Pet) pet2.PetResponse {
 	p.Pedigree = pet.Pedigree
 	p.Microchip = pet.Microchip
 	p.WeightHistory = weightMapToEntries(pet.WeightHistory)
-	p.OwnerId = pet.OwnerId.String()
-	if pet.VetId != uuid.Nil {
-		p.VetId = pet.VetId.String()
+	p.Owner = userConverter.UserToResponse(owner)
+	if vet != user.Nil {
+		p.Vet = userConverter.UserToResponse(vet)
+	}
+	p.Metas = pet.Metas
+
+	return p
+}
+
+func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetSimplifiedResponse {
+	p := pet2.PetSimplifiedResponse{}
+	p.Id = pet.Id.String()
+	p.Name = pet.Name
+	p.DateOfBirth = pet.DateOfBirth
+	p.Sex = pet.Sex
+	p.BreedName = pet.BreedName
+	p.Colors = pet.Colors
+	p.Description = pet.Description
+	p.Microchip = pet.Microchip
+	p.Owner = userConverter.UserToSimplifiedResponse(owner)
+	if vet != user.Nil {
+		p.Vet = userConverter.UserToResponse(vet)
 	}
 	p.Metas = pet.Metas
 

@@ -32,6 +32,7 @@ func New(application *application.Application) *API {
 
 	api.POST("/api/auth/register", api.register)
 	api.POST("/api/auth/login", api.login)
+	api.GET("/api/petPage/:petId", api.petSimplified)
 
 	userApi := api.Group("/").Use(middlewares.Auth())
 	userApi.GET("/api/users", api.users)
@@ -220,7 +221,13 @@ func (api *API) createPet(c *gin.Context) {
 		return
 	}
 
-	p, err := petConverter.PetCreateRequestToPet(requestBody, uId)
+	owner, err := api.app.User(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	p, err := petConverter.PetCreateRequestToPet(requestBody, owner.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -231,8 +238,16 @@ func (api *API) createPet(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
+	vet := user.Nil
+	if p.VetId != uuid.Nil {
+		vet, err = api.app.User(p.VetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
 
-	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p)})
+	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p, owner, vet)})
 }
 
 func (api *API) pets(c *gin.Context) {
@@ -249,12 +264,68 @@ func (api *API) pets(c *gin.Context) {
 	}
 
 	petsResp := make([]typesPet.PetResponse, 0, len(pets))
+	var hasError bool
 	for _, p := range pets {
-		petResponse := petConverter.PetToResponse(p)
+		owner, err := api.app.User(p.OwnerId)
+		if err != nil {
+			hasError = true
+		}
+		vet := user.Nil
+		if p.VetId != uuid.Nil {
+			vet, err = api.app.User(p.VetId)
+			if err != nil {
+				hasError = true
+			}
+		}
+
+		petResponse := petConverter.PetToResponse(p, owner, vet)
 		petsResp = append(petsResp, petResponse)
 	}
 
+	if hasError {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
 	c.JSON(http.StatusOK, petsResp)
+}
+
+func (api *API) petSimplified(c *gin.Context) {
+	id := c.Param("petId")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+
+	//parse
+	pId, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	p, err := api.app.Pet(pId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		return
+	}
+
+	owner, err := api.app.User(p.OwnerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+	vet := user.Nil
+	if p.VetId != uuid.Nil {
+		vet, err = api.app.User(p.VetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, petConverter.PetToSimplifiedResponse(p, owner, vet))
 }
 
 func (api *API) pet(c *gin.Context) {
@@ -283,7 +354,21 @@ func (api *API) pet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, petConverter.PetToResponse(p))
+	owner, err := api.app.User(p.OwnerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+	vet := user.Nil
+	if p.VetId != uuid.Nil {
+		vet, err = api.app.User(p.VetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, petConverter.PetToResponse(p, owner, vet))
 }
 
 func (api *API) updatePet(c *gin.Context) {
@@ -334,7 +419,21 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p)})
+	owner, err := api.app.User(p.OwnerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+	vet := user.Nil
+	if p.VetId != uuid.Nil {
+		vet, err = api.app.User(p.VetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p, owner, vet)})
 }
 
 func (api *API) deletePet(c *gin.Context) {

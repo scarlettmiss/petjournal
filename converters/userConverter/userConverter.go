@@ -78,3 +78,14 @@ func UserToResponse(u user.User) user2.UserResponse {
 	resp.Deleted = u.Deleted
 	return resp
 }
+
+func UserToSimplifiedResponse(u user.User) user2.UserResponseSimplified {
+	resp := user2.UserResponseSimplified{}
+	resp.Id = u.Id.String()
+	resp.UserType = u.UserType
+	resp.Email = u.Email
+	resp.Name = u.Name
+	resp.Surname = u.Surname
+	resp.Phone = u.Phone
+	return resp
+}

@@ -1,6 +1,9 @@
 package pet
 
-import "time"
+import (
+	"github.com/scarlettmiss/bestPal/cmd/server/types/user"
+	"time"
+)
 
 type PetResponse struct {
 	Id            string            `json:"id"`
@@ -13,7 +16,7 @@ type PetResponse struct {
 	Pedigree      string            `json:"pedigree,omitempty"`
 	Microchip     string            `json:"microchip,omitempty"`
 	WeightHistory []WeightEntry     `json:"weightHistory,omitempty"`
-	OwnerId       string            `json:"ownerId"`
-	VetId         string            `json:"vetId,omitempty"`
+	Owner         user.UserResponse `json:"ownerId"`
+	Vet           user.UserResponse `json:"vetId,omitempty"`
 	Metas         map[string]string `json:"metas"`
 }
