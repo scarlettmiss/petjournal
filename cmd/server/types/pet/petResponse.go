@@ -18,7 +18,7 @@ type PetResponse struct {
 	WeightMin     float64           `json:"weightMin,omitempty"`
 	WeightMax     float64           `json:"weightMax,omitempty"`
 	WeightHistory []WeightEntry     `json:"weightHistory,omitempty"`
-	Owner         user.UserResponse `json:"ownerId"`
-	Vet           user.UserResponse `json:"vetId,omitempty"`
+	Owner         user.UserResponse `json:"owner"`
+	Vet           user.UserResponse `json:"vet,omitempty"`
 	Metas         map[string]string `json:"metas"`
 }

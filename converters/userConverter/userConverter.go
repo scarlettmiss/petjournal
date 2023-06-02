@@ -79,8 +79,8 @@ func UserToResponse(u user.User) user2.UserResponse {
 	return resp
 }
 
-func UserToSimplifiedResponse(u user.User) user2.UserResponseSimplified {
-	resp := user2.UserResponseSimplified{}
+func UserToSimplifiedResponse(u user.User) user2.UserResponse {
+	resp := user2.UserResponse{}
 	resp.Id = u.Id.String()
 	resp.UserType = u.UserType
 	resp.Email = u.Email
