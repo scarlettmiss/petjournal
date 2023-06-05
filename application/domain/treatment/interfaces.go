@@ -7,7 +7,9 @@ import (
 
 var (
 	// ErrNotFound is returned when a treatment is not found
-	ErrNotFound = errors.New("treatment not found")
+	ErrNotFound     = errors.New("treatment not found")
+	ErrNotValidName = errors.New("treatment name not valid")
+	ErrNotValidDate = errors.New("treatment date not valid")
 )
 
 type Service interface {

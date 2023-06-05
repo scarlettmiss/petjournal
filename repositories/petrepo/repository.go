@@ -18,7 +18,7 @@ type PetDBModel struct {
 	Deleted       bool                  `bson:"deleted"`
 	Name          string                `bson:"name"`
 	DateOfBirth   time.Time             `bson:"date_of_birth,omitempty"`
-	Sex           string                `bson:"sex,omitempty"`
+	Gender        string                `bson:"gender,omitempty"`
 	BreedName     string                `bson:"breed_name,omitempty"`
 	Colors        []string              `bson:"colors,omitempty"`
 	Description   string                `bson:"description,omitempty"`
@@ -40,7 +40,7 @@ func ConvertToPetDBModel(pet pet.Pet) PetDBModel {
 		Deleted:       pet.Deleted,
 		Name:          pet.Name,
 		DateOfBirth:   pet.DateOfBirth,
-		Sex:           pet.Sex,
+		Gender:        string(pet.Gender),
 		BreedName:     pet.BreedName,
 		Colors:        pet.Colors,
 		Description:   pet.Description,
@@ -63,7 +63,7 @@ func ConvertToPetDomainModel(dbPet PetDBModel) pet.Pet {
 		Deleted:       dbPet.Deleted,
 		Name:          dbPet.Name,
 		DateOfBirth:   dbPet.DateOfBirth,
-		Sex:           dbPet.Sex,
+		Gender:        pet.Gender(dbPet.Gender),
 		BreedName:     dbPet.BreedName,
 		Colors:        dbPet.Colors,
 		Description:   dbPet.Description,

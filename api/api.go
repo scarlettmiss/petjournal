@@ -218,12 +218,12 @@ func (api *API) login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"user": userConverter.UserToResponse(u), "token": token})
+	c.JSON(http.StatusOK, gin.H{"user": userConverter.UserToResponse(u), "token": token})
 
 }
 
 func (api *API) createPet(c *gin.Context) {
-	var requestBody typesPet.PetRequest
+	var requestBody typesPet.PetCreateRequest
 
 	err := c.ShouldBindJSON(&requestBody)
 	if err != nil {
@@ -416,7 +416,7 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	var requestBody typesPet.PetRequest
+	var requestBody typesPet.PetUpdateRequest
 
 	err = c.ShouldBindJSON(&requestBody)
 	if err != nil {

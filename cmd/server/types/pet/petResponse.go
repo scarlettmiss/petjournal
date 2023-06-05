@@ -9,7 +9,7 @@ type PetResponse struct {
 	Id            string            `json:"id"`
 	Name          string            `json:"name"`
 	DateOfBirth   time.Time         `json:"dateOfBirth"`
-	Sex           string            `json:"sex"`
+	Gender        string            `json:"gender"`
 	BreedName     string            `json:"breedName"`
 	Colors        []string          `json:"colors"`
 	Description   string            `json:"description,omitempty"`
