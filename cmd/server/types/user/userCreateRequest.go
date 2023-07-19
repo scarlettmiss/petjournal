@@ -6,7 +6,7 @@ type UserCreateRequest struct {
 	Password string `json:"password"`
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
-	Phone    string `json:"phone"`
+	Phone    string `json:"phone,omitempty"`
 	Address  string `json:"address,omitempty"`
 	City     string `json:"city,omitempty"`
 	State    string `json:"state,omitempty"`

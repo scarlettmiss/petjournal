@@ -5,10 +5,11 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"os"
 	"time"
 )
 
-var jwtKey = []byte("supersecretkey")
+var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
 type JWTClaim struct {
 	UserId   uuid.UUID

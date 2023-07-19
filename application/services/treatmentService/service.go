@@ -13,35 +13,36 @@ func New(repo treatment.Repository) (Service, error) {
 	return Service{repo: repo}, nil
 }
 
-func (s Service) Treatments() map[uuid.UUID]treatment.Treatment {
+func (s Service) Treatments() ([]treatment.Treatment, error) {
 	return s.repo.Treatments()
 }
 
 func (s Service) Treatment(tId uuid.UUID) (treatment.Treatment, error) {
-	treatments := s.repo.Treatments()
-	t, ok := treatments[tId]
-	if !ok {
-		return treatment.Nil, treatment.ErrNotFound
-	}
-	return t, nil
+	return s.repo.Treatment(tId)
 }
 
-func (s Service) PetTreatments(pId uuid.UUID) map[uuid.UUID]treatment.Treatment {
-	treatments := s.repo.Treatments()
-
+func (s Service) PetTreatments(pId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
 	petTreatments := make(map[uuid.UUID]treatment.Treatment)
+
+	treatments, err := s.repo.Treatments()
+	if err != nil {
+		return petTreatments, err
+	}
+
 	for _, t := range treatments {
 		if t.PetId == pId {
 			petTreatments[t.Id] = t
 		}
 	}
 
-	return petTreatments
+	return petTreatments, nil
 }
 
 func (s Service) PetTreatment(pId uuid.UUID, tId uuid.UUID) (treatment.Treatment, error) {
-	petTreatments := s.PetTreatments(pId)
-
+	petTreatments, err := s.PetTreatments(pId)
+	if err != nil {
+		return treatment.Nil, err
+	}
 	petTreatment, ok := petTreatments[tId]
 	if !ok {
 		return treatment.Nil, treatment.ErrNotFound
