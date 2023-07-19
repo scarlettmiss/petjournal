@@ -4,6 +4,7 @@ import (
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	authService "github.com/scarlettmiss/bestPal/application/services/authService"
 	user2 "github.com/scarlettmiss/bestPal/cmd/server/types/user"
+	"github.com/scarlettmiss/bestPal/utils"
 )
 
 func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, error) {
@@ -13,13 +14,26 @@ func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, er
 		return user.Nil, err
 	}
 	u.UserType = typ
+	if !utils.IsEmailValid(requestBody.Email) {
+		return user.Nil, user.ErrNoValidMail
+	}
 	u.Email = requestBody.Email
+	err = utils.IsPasswordValid(requestBody.Password)
+	if err != nil {
+		return user.Nil, err
+	}
 	hashed, err := authService.HashPassword(requestBody.Password)
 	if err != nil {
 		return user.Nil, err
 	}
 	u.PasswordHash = hashed
+	if utils.TextIsEmpty(requestBody.Name) {
+		return user.Nil, user.ErrNoValidName
+	}
 	u.Name = requestBody.Name
+	if utils.TextIsEmpty(requestBody.Surname) {
+		return user.Nil, user.ErrNoValidSurname
+	}
 	u.Surname = requestBody.Surname
 	u.Phone = requestBody.Phone
 	u.Address = requestBody.Address
@@ -76,5 +90,16 @@ func UserToResponse(u user.User) user2.UserResponse {
 	resp.Country = u.Country
 	resp.Zip = u.Zip
 	resp.Deleted = u.Deleted
+	return resp
+}
+
+func UserToSimplifiedResponse(u user.User) user2.UserResponse {
+	resp := user2.UserResponse{}
+	resp.Id = u.Id.String()
+	resp.UserType = u.UserType
+	resp.Email = u.Email
+	resp.Name = u.Name
+	resp.Surname = u.Surname
+	resp.Phone = u.Phone
 	return resp
 }
