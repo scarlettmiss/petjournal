@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application"
@@ -26,6 +27,11 @@ func New(application *application.Application) *API {
 		Engine: gin.Default(),
 		app:    application,
 	}
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+
+	api.Use(cors.New(config))
 
 	api.NoRoute(func(ctx *gin.Context) { ctx.Status(http.StatusNotFound) })
 
