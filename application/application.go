@@ -2,6 +2,7 @@ package application
 
 import (
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"github.com/scarlettmiss/bestPal/application/domain/treatment"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
@@ -127,6 +128,14 @@ func (a *Application) UpdatePet(p pet.Pet) (pet.Pet, error) {
 
 func (a *Application) CreateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
 	return a.treatmentService.CreateTreatment(t)
+}
+
+func (a *Application) TreatmentsByUser(uId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
+	pets, err := a.PetsByUser(uId)
+	if err != nil {
+		return nil, err
+	}
+	return a.treatmentService.PetsTreatments(lo.Keys[uuid.UUID, pet.Pet](pets))
 }
 
 func (a *Application) TreatmentsByPet(pId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {

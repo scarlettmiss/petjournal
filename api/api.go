@@ -57,6 +57,7 @@ func New(application *application.Application) *API {
 	treatmentApi := api.Group("/").Use(middlewares.Auth())
 	treatmentApi.POST("/api/pet/:petId/treatment", api.createTreatment)
 	treatmentApi.GET("/api/pet/:petId/treatments", api.treatmentsByPet)
+	treatmentApi.GET("/api/treatments", api.treatmentsByPet)
 	treatmentApi.GET("/api/pet/:petId/treatment/:treatmentId", api.treatmentByPet)
 	treatmentApi.PATCH("/api/pet/:petId/treatment/:treatmentId", api.updateTreatment)
 	treatmentApi.DELETE("/api/pet/:petId/treatment/:treatmentId", api.deleteTreatment)
@@ -566,7 +567,7 @@ func (api *API) createTreatment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"treatment": treatmentConverter.TreatmentToResponse(t, u, verifier)})
+	c.JSON(http.StatusCreated, treatmentConverter.TreatmentToResponse(t, u, verifier))
 }
 
 func (api *API) treatmentsByPet(c *gin.Context) {
@@ -591,6 +592,47 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 	}
 
 	treatments, err := api.app.TreatmentsByPet(petId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	var hasError bool
+	treatmentsResp := make([]typesTreatment.TreatmentResponse, 0, len(treatments))
+	for _, t := range treatments {
+		administer, err := api.app.User(t.AdministeredBy)
+		if err != nil {
+			hasError = true
+		}
+
+		verifier := user.Nil
+		if t.VerifiedBy != uuid.Nil {
+			verifier, err = api.app.User(t.VerifiedBy)
+			if err != nil {
+				hasError = true
+			}
+		}
+
+		treatmentResponse := treatmentConverter.TreatmentToResponse(t, administer, verifier)
+		treatmentsResp = append(treatmentsResp, treatmentResponse)
+	}
+
+	if hasError {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, treatmentsResp)
+}
+
+func (api *API) treatments(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	treatments, err := api.app.TreatmentsByUser(uId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -747,7 +789,7 @@ func (api *API) updateTreatment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"treatment": treatmentConverter.TreatmentToResponse(t, u, verifier)})
+	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, u, verifier))
 }
 
 func (api *API) deleteTreatment(c *gin.Context) {
