@@ -130,6 +130,8 @@ func weightMapToEntries(weightEntries map[time.Time]float64) []pet2.WeightEntry 
 func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
+	p.CreatedAt = pet.CreatedAt
+	p.UpdatedAt = pet.UpdatedAt
 	p.Name = pet.Name
 	p.DateOfBirth = pet.DateOfBirth
 	p.Gender = string(pet.Gender)
@@ -153,6 +155,8 @@ func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse
 func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
+	p.CreatedAt = pet.CreatedAt
+	p.UpdatedAt = pet.UpdatedAt
 	p.Name = pet.Name
 	p.DateOfBirth = pet.DateOfBirth
 	p.Gender = string(pet.Gender)

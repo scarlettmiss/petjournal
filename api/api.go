@@ -280,7 +280,7 @@ func (api *API) createPet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"pet": petConverter.PetToResponse(p, owner, vet)})
+	c.JSON(http.StatusCreated, petConverter.PetToResponse(p, owner, vet))
 }
 
 func (api *API) pets(c *gin.Context) {
