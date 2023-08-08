@@ -1,6 +1,7 @@
 package pet
 
 type PetUpdateRequest struct {
+	Avatar        string               `json:"avatar,omitempty"`
 	Name          string               `json:"name,omitempty"`
 	DateOfBirth   int64                `json:"dateOfBirth,omitempty"`
 	Gender        string               `json:"gender,omitempty"`

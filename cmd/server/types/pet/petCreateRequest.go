@@ -14,4 +14,5 @@ type PetCreateRequest struct {
 	WeightHistory []WeightEntryRequest `json:"weightHistory,omitempty"`
 	VetId         string               `json:"vetId,omitempty"`
 	Metas         []Meta               `json:"metas,omitempty"`
+	Avatar        string               `json:"avatar,omitempty"`
 }

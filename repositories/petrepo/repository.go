@@ -30,6 +30,7 @@ type PetDBModel struct {
 	OwnerID       uuid.UUID             `bson:"owner_id,omitempty"`
 	VetID         uuid.UUID             `bson:"vet_id,omitempty"`
 	Metas         map[string]string     `bson:"metas,omitempty"`
+	Avatar        string                `bson:"avatar,omitempty"`
 }
 
 func ConvertToPetDBModel(pet pet.Pet) PetDBModel {
@@ -52,6 +53,7 @@ func ConvertToPetDBModel(pet pet.Pet) PetDBModel {
 		OwnerID:       pet.OwnerId,
 		VetID:         pet.VetId,
 		Metas:         pet.Metas,
+		Avatar:        pet.Avatar,
 	}
 }
 
@@ -75,6 +77,7 @@ func ConvertToPetDomainModel(dbPet PetDBModel) pet.Pet {
 		OwnerId:       dbPet.OwnerID,
 		VetId:         dbPet.VetID,
 		Metas:         dbPet.Metas,
+		Avatar:        dbPet.Avatar,
 	}
 }
 

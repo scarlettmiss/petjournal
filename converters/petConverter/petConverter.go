@@ -42,6 +42,7 @@ func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID,
 	p.OwnerId = ownerId
 	p.VetId = vetId
 	p.Metas = metaToMap(requestBody.Metas)
+	p.Avatar = requestBody.Avatar
 
 	return p, nil
 }
@@ -89,6 +90,9 @@ func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId u
 	}
 	if len(requestBody.Metas) > 0 {
 		p.Metas = metaToMap(requestBody.Metas)
+	}
+	if !utils.TextIsEmpty(requestBody.Avatar) {
+		p.Avatar = requestBody.Avatar
 	}
 
 	return p, nil
@@ -148,6 +152,7 @@ func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse
 		p.Vet = userConverter.UserToResponse(vet)
 	}
 	p.Metas = pet.Metas
+	p.Avatar = pet.Avatar
 
 	return p
 }
@@ -165,6 +170,7 @@ func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.P
 	p.Description = pet.Description
 	p.Microchip = pet.Microchip
 	p.Owner = userConverter.UserToSimplifiedResponse(owner)
+	p.Avatar = pet.Avatar
 	if vet != user.Nil {
 		p.Vet = userConverter.UserToResponse(vet)
 	}

@@ -34,6 +34,7 @@ type Pet struct {
 	UpdatedAt     time.Time
 	Deleted       bool
 	Name          string
+	Avatar        string
 	DateOfBirth   time.Time
 	Gender        Gender
 	BreedName     string

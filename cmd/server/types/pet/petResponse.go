@@ -23,4 +23,5 @@ type PetResponse struct {
 	Owner         user.UserResponse `json:"owner"`
 	Vet           user.UserResponse `json:"vet,omitempty"`
 	Metas         map[string]string `json:"metas"`
+	Avatar        string            `json:"avatar"`
 }
