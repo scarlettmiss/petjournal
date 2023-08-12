@@ -114,8 +114,16 @@ func (a *Application) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
 	return a.petService.PetByUser(uId, id)
 }
 
+func (a *Application) PetByOwner(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
+	return a.petService.PetByOwner(uId, id)
+}
+
 func (a *Application) DeletePet(id uuid.UUID) error {
 	return a.petService.DeletePet(id)
+}
+
+func (a *Application) RemoveVet(id uuid.UUID) error {
+	return a.petService.RemoveVet(id)
 }
 
 func (a *Application) CreatePet(p pet.Pet) (pet.Pet, error) {

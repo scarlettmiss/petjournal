@@ -1,10 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application"
+	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	typesPet "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
 	typesTreatment "github.com/scarlettmiss/bestPal/cmd/server/types/treatment"
@@ -29,7 +31,9 @@ func New(application *application.Application) *API {
 	}
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 
 	api.Use(cors.New(config))
 
@@ -302,7 +306,8 @@ func (api *API) pets(c *gin.Context) {
 	for _, p := range pets {
 		owner, err := api.app.User(p.OwnerId)
 		if err != nil {
-			hasError = true
+			fmt.Println(err)
+			continue
 		}
 		vet := user.Nil
 		if p.VetId != uuid.Nil {
@@ -351,8 +356,7 @@ func (api *API) petSimplified(c *gin.Context) {
 
 	owner, err := api.app.User(p.OwnerId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
+		fmt.Println(err)
 	}
 	vet := user.Nil
 	if p.VetId != uuid.Nil {
@@ -394,8 +398,7 @@ func (api *API) pet(c *gin.Context) {
 
 	owner, err := api.app.User(p.OwnerId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
+		fmt.Println(err)
 	}
 	vet := user.Nil
 	if p.VetId != uuid.Nil {
@@ -474,11 +477,26 @@ func (api *API) updatePet(c *gin.Context) {
 
 	owner, err := api.app.User(p.OwnerId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		fmt.Println(err)
+	}
+
+	c.JSON(http.StatusOK, petConverter.PetToResponse(p, owner, vet))
+}
+
+func (api *API) removeVet(c *gin.Context, uId uuid.UUID, pId uuid.UUID) {
+	_, err := api.app.PetByUser(uId, pId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"pet": petConverter.PetToResponse(p, owner, vet)})
+	err = api.app.RemoveVet(pId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "pet removed"})
+	return
 }
 
 func (api *API) deletePet(c *gin.Context) {
@@ -495,9 +513,14 @@ func (api *API) deletePet(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
-	_, err = api.app.PetByUser(uId, pId)
+	_, err = api.app.PetByOwner(uId, pId)
+
 	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		if err == pet.ErrNotFound {
+			api.removeVet(c, uId, pId)
+		} else {
+			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		}
 		return
 	}
 
