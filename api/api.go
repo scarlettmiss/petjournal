@@ -307,7 +307,6 @@ func (api *API) pets(c *gin.Context) {
 		owner, err := api.app.User(p.OwnerId)
 		if err != nil {
 			fmt.Println(err)
-			continue
 		}
 		vet := user.Nil
 		if p.VetId != uuid.Nil {
