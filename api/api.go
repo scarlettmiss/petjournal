@@ -445,18 +445,11 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	vet := user.Nil
 	vId := uuid.Nil
 	if requestBody.VetId != "" {
 		vId, err = uuid.Parse(requestBody.VetId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-			return
-		}
-
-		vet, err = api.app.UserByType(vId, user.Vet)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 			return
 		}
 	}
@@ -477,6 +470,15 @@ func (api *API) updatePet(c *gin.Context) {
 	owner, err := api.app.User(p.OwnerId)
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	vet := user.Nil
+	if p.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(p.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, petConverter.PetToResponse(p, owner, vet))
