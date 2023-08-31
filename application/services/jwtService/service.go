@@ -23,7 +23,7 @@ func GenerateJWT(userId uuid.UUID, userType user.Type) (string, error) {
 		UserId:   userId,
 		UserType: userType,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+			ExpiresAt: expirationTime.UnixMilli(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

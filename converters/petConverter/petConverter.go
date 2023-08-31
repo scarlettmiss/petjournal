@@ -136,6 +136,7 @@ func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse
 	p.Id = pet.Id.String()
 	p.CreatedAt = pet.CreatedAt
 	p.UpdatedAt = pet.UpdatedAt
+	p.Deleted = pet.Deleted
 	p.Name = pet.Name
 	p.DateOfBirth = pet.DateOfBirth
 	p.Gender = string(pet.Gender)
@@ -162,6 +163,7 @@ func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.P
 	p.Id = pet.Id.String()
 	p.CreatedAt = pet.CreatedAt
 	p.UpdatedAt = pet.UpdatedAt
+	p.Deleted = pet.Deleted
 	p.Name = pet.Name
 	p.DateOfBirth = pet.DateOfBirth
 	p.Gender = string(pet.Gender)

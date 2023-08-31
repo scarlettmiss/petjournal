@@ -79,6 +79,9 @@ func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) u
 func UserToResponse(u user.User) user2.UserResponse {
 	resp := user2.UserResponse{}
 	resp.Id = u.Id.String()
+	resp.CreatedAt = u.CreatedAt
+	resp.UpdatedAt = u.UpdatedAt
+	resp.Deleted = u.Deleted
 	resp.UserType = u.UserType
 	resp.Email = u.Email
 	resp.Name = u.Name
@@ -89,13 +92,13 @@ func UserToResponse(u user.User) user2.UserResponse {
 	resp.State = u.State
 	resp.Country = u.Country
 	resp.Zip = u.Zip
-	resp.Deleted = u.Deleted
 	return resp
 }
 
 func UserToSimplifiedResponse(u user.User) user2.UserResponse {
 	resp := user2.UserResponse{}
 	resp.Id = u.Id.String()
+	resp.Deleted = u.Deleted
 	resp.UserType = u.UserType
 	resp.Email = u.Email
 	resp.Name = u.Name

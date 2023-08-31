@@ -79,6 +79,9 @@ func TreatmentUpdateRequestToTreatment(requestBody treatmentType.TreatmentUpdate
 func TreatmentToResponse(t treatment.Treatment, administeredBy user.User, verifiedBy user.User) treatmentType.TreatmentResponse {
 	resp := treatmentType.TreatmentResponse{}
 	resp.Id = t.Id.String()
+	resp.CreatedAt = t.CreatedAt
+	resp.UpdatedAt = t.UpdatedAt
+	resp.Deleted = t.Deleted
 	resp.PetId = t.PetId.String()
 	resp.TreatmentType = string(t.TreatmentType)
 	resp.Name = t.Name

@@ -9,6 +9,7 @@ type PetResponse struct {
 	Id            string            `json:"id"`
 	CreatedAt     time.Time         `json:"createdAt"`
 	UpdatedAt     time.Time         `json:"updatedAt"`
+	Deleted       bool              `json:"deleted"`
 	Name          string            `json:"name"`
 	DateOfBirth   time.Time         `json:"dateOfBirth"`
 	Gender        string            `json:"gender"`

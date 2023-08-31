@@ -7,6 +7,9 @@ import (
 
 type TreatmentResponse struct {
 	Id             string            `json:"id"`
+	CreatedAt      time.Time         `json:"createdAt"`
+	UpdatedAt      time.Time         `json:"updatedAt"`
+	Deleted        bool              `json:"deleted"`
 	PetId          string            `json:"petId"`
 	TreatmentType  string            `json:"treatmentType"`
 	Name           string            `json:"name"`
