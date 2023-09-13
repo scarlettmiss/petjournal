@@ -28,7 +28,6 @@ type PetDBModel struct {
 	WeightMax     float64               `bson:"weight_max,omitempty"`
 	WeightHistory map[time.Time]float64 `bson:"weight_history,omitempty"`
 	OwnerID       uuid.UUID             `bson:"owner_id,omitempty"`
-	VetID         uuid.UUID             `bson:"vet_id,omitempty"`
 	Metas         map[string]string     `bson:"metas,omitempty"`
 	Avatar        string                `bson:"avatar,omitempty"`
 }
@@ -51,7 +50,6 @@ func ConvertToPetDBModel(pet pet.Pet) PetDBModel {
 		WeightMax:     pet.WeightMax,
 		WeightHistory: pet.WeightHistory,
 		OwnerID:       pet.OwnerId,
-		VetID:         pet.VetId,
 		Metas:         pet.Metas,
 		Avatar:        pet.Avatar,
 	}
@@ -75,7 +73,6 @@ func ConvertToPetDomainModel(dbPet PetDBModel) pet.Pet {
 		WeightMax:     dbPet.WeightMax,
 		WeightHistory: dbPet.WeightHistory,
 		OwnerId:       dbPet.OwnerID,
-		VetId:         dbPet.VetID,
 		Metas:         dbPet.Metas,
 		Avatar:        dbPet.Avatar,
 	}

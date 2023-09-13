@@ -1,13 +1,14 @@
 package userConverter
 
 import (
+	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	authService "github.com/scarlettmiss/bestPal/application/services/authService"
 	user2 "github.com/scarlettmiss/bestPal/cmd/server/types/user"
 	"github.com/scarlettmiss/bestPal/utils"
 )
 
-func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, error) {
+func UserCreateRequestToUser(requestBody user2.UserCreateRequest, vetId uuid.UUID) (user.User, error) {
 	u := user.User{}
 	typ, err := user.ParseType(requestBody.UserType)
 	if err != nil {
@@ -41,10 +42,11 @@ func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, er
 	u.State = requestBody.State
 	u.Country = requestBody.Country
 	u.Zip = requestBody.Zip
+	u.VetId = vetId
 	return u, nil
 }
 
-func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) user.User {
+func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User, vetId uuid.UUID) user.User {
 	if requestBody.Email != "" {
 		u.Email = requestBody.Email
 	}
@@ -72,6 +74,9 @@ func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) u
 	if requestBody.Zip != "" {
 		u.Zip = requestBody.Zip
 	}
+	if vetId != uuid.Nil {
+		u.VetId = vetId
+	}
 
 	return u
 }
@@ -92,6 +97,7 @@ func UserToResponse(u user.User) user2.UserResponse {
 	resp.State = u.State
 	resp.Country = u.Country
 	resp.Zip = u.Zip
+	resp.VetId = u.VetId.String()
 	return resp
 }
 

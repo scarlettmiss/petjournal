@@ -102,16 +102,16 @@ func (a *Application) Authenticate(email string, password string) (user.User, er
 	return u, nil
 }
 
-func (a *Application) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
-	return a.petService.PetsByUser(uId)
+func (a *Application) PetsByUser(uId uuid.UUID, vId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
+	return a.petService.PetsByUser(uId, vId)
 }
 
 func (a *Application) Pet(id uuid.UUID) (pet.Pet, error) {
 	return a.petService.Pet(id)
 }
 
-func (a *Application) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
-	return a.petService.PetByUser(uId, id)
+func (a *Application) PetByUser(uId uuid.UUID, vId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
+	return a.petService.PetByUser(uId, vId, id)
 }
 
 func (a *Application) PetByOwner(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
@@ -120,10 +120,6 @@ func (a *Application) PetByOwner(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
 
 func (a *Application) DeletePet(id uuid.UUID) error {
 	return a.petService.DeletePet(id)
-}
-
-func (a *Application) RemoveVet(id uuid.UUID) error {
-	return a.petService.RemoveVet(id)
 }
 
 func (a *Application) CreatePet(p pet.Pet) (pet.Pet, error) {
@@ -138,8 +134,8 @@ func (a *Application) CreateTreatment(t treatment.Treatment) (treatment.Treatmen
 	return a.treatmentService.CreateTreatment(t)
 }
 
-func (a *Application) TreatmentsByUser(uId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
-	pets, err := a.PetsByUser(uId)
+func (a *Application) TreatmentsByUser(uId uuid.UUID, vId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
+	pets, err := a.PetsByUser(uId, vId)
 	if err != nil {
 		return nil, err
 	}

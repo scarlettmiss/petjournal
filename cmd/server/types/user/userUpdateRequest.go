@@ -10,4 +10,5 @@ type UserUpdateRequest struct {
 	State   string `json:"state,omitempty"`
 	Country string `json:"country,omitempty"`
 	Zip     string `json:"zip,omitempty"`
+	VetId   string `json:"vetId,omitempty"`
 }

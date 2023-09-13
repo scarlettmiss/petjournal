@@ -26,6 +26,7 @@ type UserDBModel struct {
 	State        string    `bson:"state,omitempty"`
 	Country      string    `bson:"country,omitempty"`
 	Zip          string    `bson:"zip,omitempty"`
+	VetId        uuid.UUID `bson:"vet_id"`
 }
 
 func ConvertToUserDBModel(user user.User) UserDBModel {
@@ -45,6 +46,7 @@ func ConvertToUserDBModel(user user.User) UserDBModel {
 		State:        user.State,
 		Country:      user.Country,
 		Zip:          user.Zip,
+		VetId:        user.VetId,
 	}
 }
 
@@ -65,6 +67,7 @@ func ConvertToUserDomainModel(dbUser UserDBModel) user.User {
 		State:        dbUser.State,
 		Country:      dbUser.Country,
 		Zip:          dbUser.Zip,
+		VetId:        dbUser.VetId,
 	}
 }
 

@@ -46,7 +46,6 @@ type Pet struct {
 	WeightMax     float64
 	WeightHistory map[time.Time]float64
 	OwnerId       uuid.UUID
-	VetId         uuid.UUID
 	Metas         map[string]string
 }
 

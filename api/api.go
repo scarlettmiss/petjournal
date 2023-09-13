@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	typesPet "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
 	typesTreatment "github.com/scarlettmiss/bestPal/cmd/server/types/treatment"
@@ -78,7 +77,26 @@ func (api *API) register(c *gin.Context) {
 		return
 	}
 
-	u, err := userConverter.UserCreateRequestToUser(requestBody)
+	vId := uuid.Nil
+	if requestBody.VetId != "" {
+		vId, err = uuid.Parse(requestBody.VetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+
+		_, err = api.app.UserByType(vId, user.Vet)
+		if err != nil {
+			if err == user.ErrNotFound {
+				c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+				return
+			}
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	u, err := userConverter.UserCreateRequestToUser(requestBody, vId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -178,7 +196,26 @@ func (api *API) updateUser(c *gin.Context) {
 		return
 	}
 
-	u = userConverter.UserUpdateRequestToUser(requestBody, u)
+	vId := uuid.Nil
+	if requestBody.VetId != "" {
+		vId, err = uuid.Parse(requestBody.VetId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+
+		_, err = api.app.UserByType(vId, user.Vet)
+		if err != nil {
+			if err == user.ErrNotFound {
+				c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+				return
+			}
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	u = userConverter.UserUpdateRequestToUser(requestBody, u, vId)
 
 	u, err = api.app.UpdateUser(u)
 	if err != nil {
@@ -254,15 +291,8 @@ func (api *API) createPet(c *gin.Context) {
 		return
 	}
 	vet := user.Nil
-	vId := uuid.Nil
-	if requestBody.VetId != "" {
-		vId, err = uuid.Parse(requestBody.VetId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-			return
-		}
-
-		vet, err = api.app.UserByType(vId, user.Vet)
+	if owner.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(owner.VetId, user.Vet)
 		if err != nil {
 			if err == user.ErrNotFound {
 				c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
@@ -273,7 +303,7 @@ func (api *API) createPet(c *gin.Context) {
 		}
 	}
 
-	p, err := petConverter.PetCreateRequestToPet(requestBody, owner.Id, vId)
+	p, err := petConverter.PetCreateRequestToPet(requestBody, owner.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -295,7 +325,12 @@ func (api *API) pets(c *gin.Context) {
 		return
 	}
 
-	pets, err := api.app.PetsByUser(uId)
+	u, err := api.app.User(uId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	pets, err := api.app.PetsByUser(uId, u.VetId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -309,8 +344,8 @@ func (api *API) pets(c *gin.Context) {
 			fmt.Println(err)
 		}
 		vet := user.Nil
-		if p.VetId != uuid.Nil {
-			vet, err = api.app.UserByType(p.VetId, user.Vet)
+		if owner.VetId != uuid.Nil {
+			vet, err = api.app.UserByType(owner.VetId, user.Vet)
 			if err != nil {
 				hasError = true
 			}
@@ -358,8 +393,8 @@ func (api *API) petSimplified(c *gin.Context) {
 		fmt.Println(err)
 	}
 	vet := user.Nil
-	if p.VetId != uuid.Nil {
-		vet, err = api.app.User(p.VetId)
+	if owner.VetId != uuid.Nil {
+		vet, err = api.app.User(owner.VetId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 			return
@@ -383,13 +418,27 @@ func (api *API) pet(c *gin.Context) {
 		return
 	}
 
+	u, err := api.app.User(uId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
 	//parse
 	pId, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
-	p, err := api.app.PetByUser(uId, pId)
+	p, err := api.app.PetByUser(uId, vet.Id, pId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
@@ -398,14 +447,6 @@ func (api *API) pet(c *gin.Context) {
 	owner, err := api.app.User(p.OwnerId)
 	if err != nil {
 		fmt.Println(err)
-	}
-	vet := user.Nil
-	if p.VetId != uuid.Nil {
-		vet, err = api.app.User(p.VetId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-			return
-		}
 	}
 
 	c.JSON(http.StatusOK, petConverter.PetToResponse(p, owner, vet))
@@ -416,6 +457,11 @@ func (api *API) updatePet(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
+	}
+
+	u, err := api.app.User(uId)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	id := c.Param("petId")
@@ -439,22 +485,22 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, pId)
-	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		return
-	}
-
-	vId := uuid.Nil
-	if requestBody.VetId != "" {
-		vId, err = uuid.Parse(requestBody.VetId)
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 			return
 		}
 	}
 
-	p, err = petConverter.PetUpdateRequestToPet(requestBody, p, vId)
+	p, err := api.app.PetByUser(uId, vet.Id, pId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		return
+	}
+
+	p, err = petConverter.PetUpdateRequestToPet(requestBody, p)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
@@ -472,32 +518,7 @@ func (api *API) updatePet(c *gin.Context) {
 		fmt.Println(err)
 	}
 
-	vet := user.Nil
-	if p.VetId != uuid.Nil {
-		vet, err = api.app.UserByType(p.VetId, user.Vet)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
-			return
-		}
-	}
-
 	c.JSON(http.StatusOK, petConverter.PetToResponse(p, owner, vet))
-}
-
-func (api *API) removeVet(c *gin.Context, uId uuid.UUID, pId uuid.UUID) {
-	_, err := api.app.PetByUser(uId, pId)
-	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		return
-	}
-
-	err = api.app.RemoveVet(pId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "pet removed"})
-	return
 }
 
 func (api *API) deletePet(c *gin.Context) {
@@ -517,11 +538,7 @@ func (api *API) deletePet(c *gin.Context) {
 	_, err = api.app.PetByOwner(uId, pId)
 
 	if err != nil {
-		if err == pet.ErrNotFound {
-			api.removeVet(c, uId, pId)
-		} else {
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		}
+		c.JSON(http.StatusForbidden, gin.H{"error": "no permission to delete this pet"})
 		return
 	}
 
@@ -555,7 +572,16 @@ func (api *API) createTreatment(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	_, err = api.app.PetByUser(uId, vet.Id, petId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -601,6 +627,12 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 		return
 	}
 
+	u, err := api.app.User(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
 	pId := c.Param("petId")
 
 	petId, err := uuid.Parse(pId)
@@ -609,7 +641,16 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	_, err = api.app.PetByUser(uId, vet.Id, petId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -656,7 +697,21 @@ func (api *API) treatments(c *gin.Context) {
 		return
 	}
 
-	treatments, err := api.app.TreatmentsByUser(uId)
+	u, err := api.app.User(uId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	treatments, err := api.app.TreatmentsByUser(uId, vet.Id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -697,6 +752,12 @@ func (api *API) treatmentByPet(c *gin.Context) {
 		return
 	}
 
+	u, err := api.app.User(uId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
 	pId := c.Param("petId")
 
 	petId, err := uuid.Parse(pId)
@@ -713,7 +774,16 @@ func (api *API) treatmentByPet(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	_, err = api.app.PetByUser(uId, petId, vet.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -770,7 +840,16 @@ func (api *API) updateTreatment(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
+	}
+
+	_, err = api.app.PetByUser(uId, petId, vet.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -830,10 +909,19 @@ func (api *API) deleteTreatment(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.User(uId)
+	u, err := api.app.User(uId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
+	}
+
+	vet := user.Nil
+	if u.VetId != uuid.Nil {
+		vet, err = api.app.UserByType(u.VetId, user.Vet)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			return
+		}
 	}
 
 	pId := c.Param("petId")
@@ -843,7 +931,7 @@ func (api *API) deleteTreatment(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	_, err = api.app.PetByUser(uId, petId, vet.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return

@@ -13,6 +13,5 @@ type PetUpdateRequest struct {
 	WeightMin     float64              `json:"weightMin,omitempty"`
 	WeightMax     float64              `json:"weightMax,omitempty"`
 	WeightHistory []WeightEntryRequest `json:"weightHistory,omitempty"`
-	VetId         string               `json:"vetId,omitempty"`
 	Metas         []Meta               `json:"metas,omitempty"`
 }

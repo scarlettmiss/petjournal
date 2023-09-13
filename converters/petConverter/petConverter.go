@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID, vetId uuid.UUID) (pet.Pet, error) {
+func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID) (pet.Pet, error) {
 	p := pet.Pet{}
 	if utils.TextIsEmpty(requestBody.Name) {
 		return pet.Nil, pet.ErrNoValidName
@@ -40,14 +40,13 @@ func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID,
 	p.WeightMax = requestBody.WeightMax
 	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	p.OwnerId = ownerId
-	p.VetId = vetId
 	p.Metas = metaToMap(requestBody.Metas)
 	p.Avatar = requestBody.Avatar
 
 	return p, nil
 }
 
-func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId uuid.UUID) (pet.Pet, error) {
+func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet) (pet.Pet, error) {
 	if !utils.TextIsEmpty(requestBody.Name) {
 		p.Name = requestBody.Name
 	}
@@ -84,9 +83,6 @@ func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId u
 	}
 	if len(requestBody.WeightHistory) > 0 {
 		p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
-	}
-	if vetId != uuid.Nil {
-		p.VetId = vetId
 	}
 	if len(requestBody.Metas) > 0 {
 		p.Metas = metaToMap(requestBody.Metas)

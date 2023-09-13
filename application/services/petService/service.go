@@ -25,7 +25,7 @@ func (s *Service) Pets() ([]pet.Pet, error) {
 	return s.repo.Pets()
 }
 
-func (s *Service) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
+func (s *Service) PetsByUser(uId uuid.UUID, vId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	uPets := make(map[uuid.UUID]pet.Pet)
 
 	pets, err := s.Pets()
@@ -34,7 +34,7 @@ func (s *Service) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	}
 
 	for _, p := range pets {
-		if p.OwnerId == uId || p.VetId == uId {
+		if p.OwnerId == uId || vId == uId {
 			uPets[p.Id] = p
 		}
 	}
@@ -59,8 +59,8 @@ func (s *Service) PetsByOwner(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	return uPets, nil
 }
 
-func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
-	pets, err := s.PetsByUser(uId)
+func (s *Service) PetByUser(uId uuid.UUID, vId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
+	pets, err := s.PetsByUser(uId, vId)
 	if err != nil {
 		return pet.Nil, err
 	}
@@ -97,16 +97,4 @@ func (s *Service) UpdatePet(p pet.Pet) (pet.Pet, error) {
 
 func (s *Service) DeletePet(id uuid.UUID) error {
 	return s.repo.DeletePet(id)
-}
-
-func (s *Service) RemoveVet(id uuid.UUID) error {
-	p, err := s.Pet(id)
-
-	if err != nil {
-		return err
-	}
-	p.VetId = uuid.Nil
-
-	_, err = s.repo.UpdatePet(p)
-	return err
 }

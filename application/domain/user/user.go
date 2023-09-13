@@ -44,6 +44,7 @@ type User struct {
 	State        string
 	Country      string
 	Zip          string
+	VetId        uuid.UUID
 }
 
 var Nil = User{}
