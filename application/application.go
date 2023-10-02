@@ -10,6 +10,7 @@ import (
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
 	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
 	userService "github.com/scarlettmiss/bestPal/application/services/userService"
+	"github.com/scarlettmiss/bestPal/utils"
 )
 
 /*
@@ -48,6 +49,10 @@ func (a *Application) UserToken(u user.User) (string, error) {
 }
 
 func (a *Application) CheckEmail(email string, id uuid.UUID) error {
+	if !utils.IsEmailValid(email) {
+		return user.ErrNoValidMail
+	}
+
 	u, ok := a.userService.UserByEmail(email)
 
 	if !ok {
@@ -64,7 +69,7 @@ func (a *Application) CheckEmail(email string, id uuid.UUID) error {
 func (a *Application) UpdateUser(u user.User) (user.User, error) {
 	err := a.CheckEmail(u.Email, u.Id)
 	if err != nil {
-		return user.Nil, err
+		return u, err
 	}
 	return a.userService.UpdateUser(u)
 }

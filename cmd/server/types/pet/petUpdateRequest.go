@@ -2,9 +2,9 @@ package pet
 
 type PetUpdateRequest struct {
 	Avatar        string               `json:"avatar,omitempty"`
-	Name          string               `json:"name,omitempty"`
-	DateOfBirth   int64                `json:"dateOfBirth,omitempty"`
-	Gender        string               `json:"gender,omitempty"`
+	Name          string               `json:"name"`
+	DateOfBirth   int64                `json:"dateOfBirth"`
+	Gender        string               `json:"gender"`
 	BreedName     string               `json:"breedName,omitempty"`
 	Colors        []string             `json:"colors,omitempty"`
 	Description   string               `json:"description,omitempty"`

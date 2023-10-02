@@ -48,52 +48,31 @@ func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID,
 }
 
 func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId uuid.UUID) (pet.Pet, error) {
-	if !utils.TextIsEmpty(requestBody.Name) {
-		p.Name = requestBody.Name
+	if utils.TextIsEmpty(requestBody.Name) {
+		return p, pet.ErrNoValidName
 	}
+	p.Name = requestBody.Name
 	if requestBody.DateOfBirth != 0 {
-		p.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
+		return p, pet.ErrNoValidBirthDate
+
 	}
-	if !utils.TextIsEmpty(requestBody.Gender) {
-		gender, err := pet.ParseGender(requestBody.Gender)
-		if err != nil {
-			return pet.Nil, err
-		}
-		p.Gender = gender
+	p.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
+	gender, err := pet.ParseGender(requestBody.Gender)
+	if err != nil {
+		return p, err
 	}
-	if !utils.TextIsEmpty(requestBody.BreedName) {
-		p.BreedName = requestBody.BreedName
-	}
-	if len(requestBody.Colors) > 0 {
-		p.Colors = requestBody.Colors
-	}
-	if !utils.TextIsEmpty(requestBody.Description) {
-		p.Description = requestBody.Description
-	}
-	if !utils.TextIsEmpty(requestBody.Pedigree) {
-		p.Pedigree = requestBody.Pedigree
-	}
-	if !utils.TextIsEmpty(requestBody.Microchip) {
-		p.Microchip = requestBody.Microchip
-	}
-	if requestBody.WeightMin != 0 {
-		p.WeightMin = requestBody.WeightMin
-	}
-	if requestBody.WeightMax != 0 {
-		p.WeightMax = requestBody.WeightMax
-	}
-	if len(requestBody.WeightHistory) > 0 {
-		p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
-	}
-	if vetId != uuid.Nil {
-		p.VetId = vetId
-	}
-	if len(requestBody.Metas) > 0 {
-		p.Metas = metaToMap(requestBody.Metas)
-	}
-	if !utils.TextIsEmpty(requestBody.Avatar) {
-		p.Avatar = requestBody.Avatar
-	}
+	p.Gender = gender
+	p.BreedName = requestBody.BreedName
+	p.Colors = requestBody.Colors
+	p.Description = requestBody.Description
+	p.Pedigree = requestBody.Pedigree
+	p.Microchip = requestBody.Microchip
+	p.WeightMin = requestBody.WeightMin
+	p.WeightMax = requestBody.WeightMax
+	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
+	p.VetId = vetId
+	p.Metas = metaToMap(requestBody.Metas)
+	p.Avatar = requestBody.Avatar
 
 	return p, nil
 }

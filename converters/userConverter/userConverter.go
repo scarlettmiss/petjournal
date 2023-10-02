@@ -8,32 +8,36 @@ import (
 )
 
 func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, error) {
-	u := user.User{}
+	u := user.Nil
 	typ, err := user.ParseType(requestBody.UserType)
 	if err != nil {
-		return user.Nil, err
+		return u, err
 	}
-	u.UserType = typ
+
 	if !utils.IsEmailValid(requestBody.Email) {
-		return user.Nil, user.ErrNoValidMail
+		return u, user.ErrNoValidMail
 	}
-	u.Email = requestBody.Email
+
 	err = utils.IsPasswordValid(requestBody.Password)
 	if err != nil {
-		return user.Nil, err
+		return u, err
 	}
 	hashed, err := authService.HashPassword(requestBody.Password)
 	if err != nil {
-		return user.Nil, err
+		return u, err
 	}
-	u.PasswordHash = hashed
+
 	if utils.TextIsEmpty(requestBody.Name) {
-		return user.Nil, user.ErrNoValidName
+		return u, user.ErrNoValidName
 	}
-	u.Name = requestBody.Name
 	if utils.TextIsEmpty(requestBody.Surname) {
-		return user.Nil, user.ErrNoValidSurname
+		return u, user.ErrNoValidSurname
 	}
+
+	u.UserType = typ
+	u.Email = requestBody.Email
+	u.PasswordHash = hashed
+	u.Name = requestBody.Name
 	u.Surname = requestBody.Surname
 	u.Phone = requestBody.Phone
 	u.Address = requestBody.Address
@@ -44,36 +48,27 @@ func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, er
 	return u, nil
 }
 
-func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) user.User {
-	if requestBody.Email != "" {
-		u.Email = requestBody.Email
+func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) (user.User, error) {
+	if utils.IsEmailValid(requestBody.Email) {
+		return u, user.ErrNoValidMail
 	}
-	if requestBody.Name != "" {
-		u.Name = requestBody.Name
+	if utils.TextIsEmpty(requestBody.Name) {
+		return u, user.ErrNoValidName
 	}
-	if requestBody.Surname != "" {
-		u.Surname = requestBody.Surname
-	}
-	if requestBody.Phone != "" {
-		u.Phone = requestBody.Phone
-	}
-	if requestBody.Address != "" {
-		u.Address = requestBody.Address
-	}
-	if requestBody.City != "" {
-		u.City = requestBody.City
-	}
-	if requestBody.State != "" {
-		u.State = requestBody.State
-	}
-	if requestBody.Country != "" {
-		u.Country = requestBody.Country
-	}
-	if requestBody.Zip != "" {
-		u.Zip = requestBody.Zip
+	if utils.TextIsEmpty(requestBody.Surname) {
+		return u, user.ErrNoValidSurname
 	}
 
-	return u
+	u.Email = requestBody.Email
+	u.Name = requestBody.Name
+	u.Surname = requestBody.Surname
+	u.Phone = requestBody.Phone
+	u.Address = requestBody.Address
+	u.City = requestBody.City
+	u.State = requestBody.State
+	u.Country = requestBody.Country
+	u.Zip = requestBody.Zip
+	return u, nil
 }
 
 func UserToResponse(u user.User) user2.UserResponse {

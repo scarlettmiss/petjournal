@@ -11,68 +11,55 @@ import (
 )
 
 func TreatmentCreateRequestToTreatment(requestBody treatmentType.TreatmentCreateRequest, petId uuid.UUID, administeredBy uuid.UUID) (treatment.Treatment, error) {
-	t := treatment.Treatment{}
-	t.PetId = petId
+	t := treatment.Nil
 
 	typ, err := treatment.ParseType(requestBody.TreatmentType)
 	if err != nil {
-		return treatment.Nil, err
+		return t, err
 	}
-	t.TreatmentType = typ
 
 	if utils.TextIsEmpty(requestBody.Name) {
-		return treatment.Nil, treatment.ErrNotValidName
+		return t, treatment.ErrNotValidName
 	}
-	t.Name = requestBody.Name
-
 	if requestBody.Date == 0 {
-		return treatment.Nil, treatment.ErrNotValidDate
+		return t, treatment.ErrNotValidDate
 	}
-	t.Date = time.Unix(requestBody.Date/1000, (requestBody.Date%1000)*1000000)
 
+	t.PetId = petId
+	t.TreatmentType = typ
+	t.Name = requestBody.Name
+	t.Date = time.Unix(requestBody.Date/1000, (requestBody.Date%1000)*1000000)
 	t.Lot = requestBody.Lot
 	t.Result = requestBody.Result
 	t.Description = requestBody.Description
 	t.Notes = requestBody.Notes
 	t.AdministeredBy = administeredBy
-	if err != nil {
-		return treatment.Nil, err
-	}
 	t.RecurringRule = requestBody.RecurringRule
 
 	return t, nil
 }
 
 func TreatmentUpdateRequestToTreatment(requestBody treatmentType.TreatmentUpdateRequest, t treatment.Treatment) (treatment.Treatment, error) {
-	if !utils.TextIsEmpty(requestBody.TreatmentType) {
-		typ, err := treatment.ParseType(requestBody.TreatmentType)
-		if err != nil {
-			return treatment.Nil, err
-		}
-		t.TreatmentType = typ
-	}
-	if !utils.TextIsEmpty(requestBody.Name) {
-		t.Name = requestBody.Name
-	}
-	if requestBody.Date != 0 {
-		t.Date = time.Unix(requestBody.Date/1000, (requestBody.Date%1000)*1000000)
-	}
-	if !utils.TextIsEmpty(requestBody.Lot) {
-		t.Lot = requestBody.Lot
-	}
-	if !utils.TextIsEmpty(requestBody.Result) {
-		t.Result = requestBody.Result
-	}
-	if !utils.TextIsEmpty(requestBody.Description) {
-		t.Description = requestBody.Description
-	}
-	if !utils.TextIsEmpty(requestBody.Notes) {
-		t.Notes = requestBody.Notes
-	}
-	if requestBody.RecurringRule != "" {
-		t.RecurringRule = requestBody.RecurringRule
+	typ, err := treatment.ParseType(requestBody.TreatmentType)
+	if err != nil {
+		return t, err
 	}
 
+	if utils.TextIsEmpty(requestBody.Name) {
+		return t, treatment.ErrNotValidName
+	}
+	if requestBody.Date == 0 {
+		return t, treatment.ErrNotValidDate
+	}
+
+	t.TreatmentType = typ
+	t.Name = requestBody.Name
+	t.Date = time.Unix(requestBody.Date/1000, (requestBody.Date%1000)*1000000)
+	t.Lot = requestBody.Lot
+	t.Result = requestBody.Result
+	t.Description = requestBody.Description
+	t.Notes = requestBody.Notes
+	t.RecurringRule = requestBody.RecurringRule
 	return t, nil
 }
 

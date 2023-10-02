@@ -178,8 +178,11 @@ func (api *API) updateUser(c *gin.Context) {
 		return
 	}
 
-	u = userConverter.UserUpdateRequestToUser(requestBody, u)
-
+	u, err = userConverter.UserUpdateRequestToUser(requestBody, u)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
 	u, err = api.app.UpdateUser(u)
 	if err != nil {
 		if err == user.ErrMailExists {
@@ -792,7 +795,7 @@ func (api *API) updateTreatment(c *gin.Context) {
 
 	t, err = treatmentConverter.TreatmentUpdateRequestToTreatment(requestBody, t)
 	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
