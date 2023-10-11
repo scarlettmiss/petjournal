@@ -21,5 +21,5 @@ type TreatmentResponse struct {
 	Notes          string            `json:"notes,omitempty"`
 	AdministeredBy user.UserResponse `json:"administeredBy"`
 	VerifiedBy     user.UserResponse `json:"verifiedBy,omitempty"`
-	NextDate       time.Time         `json:"nextDate,omitempty"`
+	NextDate       string            `json:"nextDate,omitempty"`
 }

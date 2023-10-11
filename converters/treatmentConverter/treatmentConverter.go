@@ -86,7 +86,9 @@ func TreatmentToResponse(t treatment.Treatment, pet pet.Pet, administeredBy user
 	if verifiedBy != user.Nil {
 		resp.VerifiedBy = userConverter.UserToResponse(verifiedBy)
 	}
-	resp.NextDate = t.NextDate
+	if !t.NextDate.IsZero() {
+		resp.NextDate = t.NextDate.String()
+	}
 
 	return resp
 }
