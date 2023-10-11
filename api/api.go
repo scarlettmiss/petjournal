@@ -61,7 +61,7 @@ func New(application *application.Application) *API {
 	treatmentApi := api.Group("/").Use(middlewares.Auth())
 	treatmentApi.POST("/api/pet/:petId/treatment", api.createTreatment)
 	treatmentApi.GET("/api/pet/:petId/treatments", api.treatmentsByPet)
-	treatmentApi.GET("/api/treatments", api.treatmentsByPet)
+	treatmentApi.GET("/api/treatments", api.treatments)
 	treatmentApi.GET("/api/pet/:petId/treatment/:treatmentId", api.treatmentByPet)
 	treatmentApi.PATCH("/api/pet/:petId/treatment/:treatmentId", api.updateTreatment)
 	treatmentApi.DELETE("/api/pet/:petId/treatment/:treatmentId", api.deleteTreatment)
@@ -558,7 +558,7 @@ func (api *API) createTreatment(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -594,7 +594,7 @@ func (api *API) createTreatment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, treatmentConverter.TreatmentToResponse(t, u, verifier))
+	c.JSON(http.StatusCreated, treatmentConverter.TreatmentToResponse(t, p, u, verifier))
 }
 
 func (api *API) treatmentsByPet(c *gin.Context) {
@@ -612,7 +612,7 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -640,7 +640,7 @@ func (api *API) treatmentsByPet(c *gin.Context) {
 			}
 		}
 
-		treatmentResponse := treatmentConverter.TreatmentToResponse(t, administer, verifier)
+		treatmentResponse := treatmentConverter.TreatmentToResponse(t, p, administer, verifier)
 		treatmentsResp = append(treatmentsResp, treatmentResponse)
 	}
 
@@ -681,7 +681,12 @@ func (api *API) treatments(c *gin.Context) {
 			}
 		}
 
-		treatmentResponse := treatmentConverter.TreatmentToResponse(t, administer, verifier)
+		p, err := api.app.Pet(t.PetId)
+		if err != nil {
+			hasError = true
+		}
+
+		treatmentResponse := treatmentConverter.TreatmentToResponse(t, p, administer, verifier)
 		treatmentsResp = append(treatmentsResp, treatmentResponse)
 	}
 
@@ -716,7 +721,7 @@ func (api *API) treatmentByPet(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -742,7 +747,7 @@ func (api *API) treatmentByPet(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, administer, verifier))
+	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, p, administer, verifier))
 }
 
 func (api *API) updateTreatment(c *gin.Context) {
@@ -773,7 +778,7 @@ func (api *API) updateTreatment(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -816,7 +821,7 @@ func (api *API) updateTreatment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, u, verifier))
+	c.JSON(http.StatusOK, treatmentConverter.TreatmentToResponse(t, p, u, verifier))
 }
 
 func (api *API) deleteTreatment(c *gin.Context) {

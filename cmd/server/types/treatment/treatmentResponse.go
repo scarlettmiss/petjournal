@@ -1,6 +1,7 @@
 package treatment
 
 import (
+	"github.com/scarlettmiss/bestPal/application/domain/pet"
 	"github.com/scarlettmiss/bestPal/cmd/server/types/user"
 	"time"
 )
@@ -10,7 +11,7 @@ type TreatmentResponse struct {
 	CreatedAt      time.Time         `json:"createdAt"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
 	Deleted        bool              `json:"deleted"`
-	PetId          string            `json:"petId"`
+	Pet            pet.Pet           `json:"pet"`
 	TreatmentType  string            `json:"treatmentType"`
 	Name           string            `json:"name"`
 	Date           time.Time         `json:"date"`
@@ -20,5 +21,5 @@ type TreatmentResponse struct {
 	Notes          string            `json:"notes,omitempty"`
 	AdministeredBy user.UserResponse `json:"administeredBy"`
 	VerifiedBy     user.UserResponse `json:"verifiedBy,omitempty"`
-	RecurringRule  string            `json:"recurringRule,omitempty"`
+	NextDate       time.Time         `json:"nextDate,omitempty"`
 }

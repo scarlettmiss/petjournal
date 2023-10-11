@@ -26,7 +26,7 @@ type TreatmentDBModel struct {
 	Notes          string         `bson:"notes,omitempty"`
 	AdministeredBy uuid.UUID      `bson:"administered_by,omitempty"`
 	VerifiedBy     uuid.UUID      `bson:"verified_by,omitempty"`
-	RecurringRule  string         `bson:"recurring_rule,omitempty"`
+	NextDate       time.Time      `bson:"next_date,omitempty"`
 }
 
 func ConvertToTreatmentDBModel(treatment treatment.Treatment) TreatmentDBModel {
@@ -45,7 +45,7 @@ func ConvertToTreatmentDBModel(treatment treatment.Treatment) TreatmentDBModel {
 		Notes:          treatment.Notes,
 		AdministeredBy: treatment.AdministeredBy,
 		VerifiedBy:     treatment.VerifiedBy,
-		RecurringRule:  treatment.RecurringRule,
+		NextDate:       treatment.NextDate,
 	}
 }
 
@@ -65,7 +65,7 @@ func ConvertToTreatmentDomainModel(dbTreatment TreatmentDBModel) treatment.Treat
 		Notes:          dbTreatment.Notes,
 		AdministeredBy: dbTreatment.AdministeredBy,
 		VerifiedBy:     dbTreatment.VerifiedBy,
-		RecurringRule:  dbTreatment.RecurringRule,
+		NextDate:       dbTreatment.NextDate,
 	}
 }
 

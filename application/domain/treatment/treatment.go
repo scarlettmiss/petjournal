@@ -11,6 +11,7 @@ type Type string
 
 const (
 	Vaccine      Type = "vaccine"
+	Nutering     Type = "nutering"
 	Surgery      Type = "surgery"
 	Medicine     Type = "medicine"
 	Endoparasite Type = "endoparasite"
@@ -24,6 +25,7 @@ const (
 
 var treatmentTypes = map[Type]Type{
 	Vaccine:      Vaccine,
+	Nutering:     Nutering,
 	Surgery:      Surgery,
 	Medicine:     Medicine,
 	Endoparasite: Endoparasite,
@@ -59,7 +61,7 @@ type Treatment struct {
 	Notes          string
 	AdministeredBy uuid.UUID
 	VerifiedBy     uuid.UUID
-	RecurringRule  string
+	NextDate       time.Time
 }
 
 var Nil = Treatment{}
