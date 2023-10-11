@@ -64,6 +64,8 @@ func TreatmentUpdateRequestToTreatment(requestBody treatmentType.TreatmentUpdate
 	t.Notes = requestBody.Notes
 	if requestBody.NextDate != 0 {
 		t.NextDate = time.Unix(requestBody.NextDate/1000, (requestBody.NextDate%1000)*1000000)
+	} else {
+		t.NextDate = time.Time{}
 	}
 	return t, nil
 }
