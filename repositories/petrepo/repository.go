@@ -12,72 +12,63 @@ import (
 )
 
 type PetDBModel struct {
-	Id            uuid.UUID             `bson:"_id"`
-	CreatedAt     time.Time             `bson:"created_at"`
-	UpdatedAt     time.Time             `bson:"updated_at"`
-	Deleted       bool                  `bson:"deleted"`
-	Name          string                `bson:"name"`
-	DateOfBirth   time.Time             `bson:"date_of_birth,omitempty"`
-	Gender        string                `bson:"gender,omitempty"`
-	BreedName     string                `bson:"breed_name,omitempty"`
-	Colors        []string              `bson:"colors,omitempty"`
-	Description   string                `bson:"description,omitempty"`
-	Pedigree      string                `bson:"pedigree,omitempty"`
-	Microchip     string                `bson:"microchip,omitempty"`
-	WeightMin     float64               `bson:"weight_min,omitempty"`
-	WeightMax     float64               `bson:"weight_max,omitempty"`
-	WeightHistory map[time.Time]float64 `bson:"weight_history,omitempty"`
-	OwnerID       uuid.UUID             `bson:"owner_id,omitempty"`
-	VetID         uuid.UUID             `bson:"vet_id,omitempty"`
-	Metas         map[string]string     `bson:"metas,omitempty"`
-	Avatar        string                `bson:"avatar,omitempty"`
+	Id          uuid.UUID         `bson:"_id"`
+	CreatedAt   time.Time         `bson:"created_at"`
+	UpdatedAt   time.Time         `bson:"updated_at"`
+	Deleted     bool              `bson:"deleted"`
+	Name        string            `bson:"name"`
+	DateOfBirth time.Time         `bson:"date_of_birth,omitempty"`
+	Gender      string            `bson:"gender,omitempty"`
+	BreedName   string            `bson:"breed_name,omitempty"`
+	Colors      []string          `bson:"colors,omitempty"`
+	Description string            `bson:"description,omitempty"`
+	Pedigree    string            `bson:"pedigree,omitempty"`
+	Microchip   string            `bson:"microchip,omitempty"`
+	OwnerID     uuid.UUID         `bson:"owner_id,omitempty"`
+	VetID       uuid.UUID         `bson:"vet_id,omitempty"`
+	Metas       map[string]string `bson:"metas,omitempty"`
+	Avatar      string            `bson:"avatar,omitempty"`
 }
 
 func ConvertToPetDBModel(pet pet.Pet) PetDBModel {
 	return PetDBModel{
-		Id:            pet.Id,
-		CreatedAt:     pet.CreatedAt,
-		UpdatedAt:     pet.UpdatedAt,
-		Deleted:       pet.Deleted,
-		Name:          pet.Name,
-		DateOfBirth:   pet.DateOfBirth,
-		Gender:        string(pet.Gender),
-		BreedName:     pet.BreedName,
-		Colors:        pet.Colors,
-		Description:   pet.Description,
-		Pedigree:      pet.Pedigree,
-		Microchip:     pet.Microchip,
-		WeightMin:     pet.WeightMin,
-		WeightMax:     pet.WeightMax,
-		WeightHistory: pet.WeightHistory,
-		OwnerID:       pet.OwnerId,
-		VetID:         pet.VetId,
-		Metas:         pet.Metas,
-		Avatar:        pet.Avatar,
+		Id:          pet.Id,
+		CreatedAt:   pet.CreatedAt,
+		UpdatedAt:   pet.UpdatedAt,
+		Deleted:     pet.Deleted,
+		Name:        pet.Name,
+		DateOfBirth: pet.DateOfBirth,
+		Gender:      string(pet.Gender),
+		BreedName:   pet.BreedName,
+		Colors:      pet.Colors,
+		Description: pet.Description,
+		Pedigree:    pet.Pedigree,
+		Microchip:   pet.Microchip,
+		OwnerID:     pet.OwnerId,
+		VetID:       pet.VetId,
+		Metas:       pet.Metas,
+		Avatar:      pet.Avatar,
 	}
 }
 
 func ConvertToPetDomainModel(dbPet PetDBModel) pet.Pet {
 	return pet.Pet{
-		Id:            dbPet.Id,
-		CreatedAt:     dbPet.CreatedAt,
-		UpdatedAt:     dbPet.UpdatedAt,
-		Deleted:       dbPet.Deleted,
-		Name:          dbPet.Name,
-		DateOfBirth:   dbPet.DateOfBirth,
-		Gender:        pet.Gender(dbPet.Gender),
-		BreedName:     dbPet.BreedName,
-		Colors:        dbPet.Colors,
-		Description:   dbPet.Description,
-		Pedigree:      dbPet.Pedigree,
-		Microchip:     dbPet.Microchip,
-		WeightMin:     dbPet.WeightMin,
-		WeightMax:     dbPet.WeightMax,
-		WeightHistory: dbPet.WeightHistory,
-		OwnerId:       dbPet.OwnerID,
-		VetId:         dbPet.VetID,
-		Metas:         dbPet.Metas,
-		Avatar:        dbPet.Avatar,
+		Id:          dbPet.Id,
+		CreatedAt:   dbPet.CreatedAt,
+		UpdatedAt:   dbPet.UpdatedAt,
+		Deleted:     dbPet.Deleted,
+		Name:        dbPet.Name,
+		DateOfBirth: dbPet.DateOfBirth,
+		Gender:      pet.Gender(dbPet.Gender),
+		BreedName:   dbPet.BreedName,
+		Colors:      dbPet.Colors,
+		Description: dbPet.Description,
+		Pedigree:    dbPet.Pedigree,
+		Microchip:   dbPet.Microchip,
+		OwnerId:     dbPet.OwnerID,
+		VetId:       dbPet.VetID,
+		Metas:       dbPet.Metas,
+		Avatar:      dbPet.Avatar,
 	}
 }
 

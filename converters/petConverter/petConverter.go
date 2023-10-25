@@ -36,9 +36,6 @@ func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID,
 	p.Description = requestBody.Description
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
-	p.WeightMin = requestBody.WeightMin
-	p.WeightMax = requestBody.WeightMax
-	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	p.OwnerId = ownerId
 	p.VetId = vetId
 	p.Metas = metaToMap(requestBody.Metas)
@@ -67,9 +64,6 @@ func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId u
 	p.Description = requestBody.Description
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
-	p.WeightMin = requestBody.WeightMin
-	p.WeightMax = requestBody.WeightMax
-	p.WeightHistory = weightEntriesToMap(requestBody.WeightHistory)
 	p.VetId = vetId
 	p.Metas = metaToMap(requestBody.Metas)
 	p.Avatar = requestBody.Avatar
@@ -86,30 +80,6 @@ func metaToMap(metas []pet2.Meta) map[string]string {
 	return metaMap
 }
 
-func weightEntriesToMap(weightEntries []pet2.WeightEntryRequest) map[time.Time]float64 {
-	weightMap := make(map[time.Time]float64)
-
-	for _, entry := range weightEntries {
-		date := time.Unix(entry.Date/1000, (entry.Date%1000)*1000000)
-		weightMap[date] = entry.Weight
-	}
-	return weightMap
-}
-
-func weightMapToEntries(weightEntries map[time.Time]float64) []pet2.WeightEntry {
-	weights := make([]pet2.WeightEntry, 0, len(weightEntries))
-
-	for key, value := range weightEntries {
-		meta := pet2.WeightEntry{
-			Date:   key,
-			Weight: value,
-		}
-		weights = append(weights, meta)
-	}
-
-	return weights
-}
-
 func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
@@ -124,9 +94,6 @@ func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse
 	p.Description = pet.Description
 	p.Pedigree = pet.Pedigree
 	p.Microchip = pet.Microchip
-	p.WeightMin = pet.WeightMin
-	p.WeightMax = pet.WeightMax
-	p.WeightHistory = weightMapToEntries(pet.WeightHistory)
 	p.Owner = userConverter.UserToResponse(owner)
 	if vet != user.Nil {
 		p.Vet = userConverter.UserToResponse(vet)
