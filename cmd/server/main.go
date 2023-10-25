@@ -8,10 +8,10 @@ import (
 	"github.com/scarlettmiss/bestPal/api/config"
 	"github.com/scarlettmiss/bestPal/application"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
-	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
+	recordService "github.com/scarlettmiss/bestPal/application/services/recordService"
 	userService "github.com/scarlettmiss/bestPal/application/services/userService"
 	"github.com/scarlettmiss/bestPal/repositories/petrepo"
-	"github.com/scarlettmiss/bestPal/repositories/treatmentrepo"
+	"github.com/scarlettmiss/bestPal/repositories/recordrepo"
 	"github.com/scarlettmiss/bestPal/repositories/userrepo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -55,8 +55,8 @@ func main() {
 	usersCollection := db.Collection("users")
 	userRepo := userrepo.New(usersCollection)
 
-	treatmentsCollection := db.Collection("treatments")
-	treatmentRepo := treatmentrepo.New(treatmentsCollection)
+	recordsCollection := db.Collection("records")
+	recordRepo := recordrepo.New(recordsCollection)
 	//init services
 	ps, err := petService.New(petRepo)
 	if err != nil {
@@ -66,13 +66,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	ts, err := treatmentService.New(treatmentRepo)
+	rs, err := recordService.New(recordRepo)
 	if err != nil {
 		panic(err)
 	}
 
 	//pass services to application
-	opts := application.Options{PetService: ps, UserService: us, TreatmentService: ts}
+	opts := application.Options{PetService: ps, UserService: us, RecordService: rs}
 	app := application.New(opts)
 
 	if err != nil {

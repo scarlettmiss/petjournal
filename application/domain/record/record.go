@@ -1,4 +1,4 @@
-package treatment
+package record
 
 import (
 	"errors"
@@ -11,6 +11,8 @@ type Type string
 
 const (
 	Vaccine      Type = "vaccine"
+	Weight       Type = "weight"
+	Temperature  Type = "temperature"
 	Nutering     Type = "nutering"
 	Surgery      Type = "surgery"
 	Medicine     Type = "medicine"
@@ -23,8 +25,10 @@ const (
 	Other        Type = "other"
 )
 
-var treatmentTypes = map[Type]Type{
+var recordTypes = map[Type]Type{
 	Vaccine:      Vaccine,
+	Weight:       Weight,
+	Temperature:  Temperature,
 	Nutering:     Nutering,
 	Surgery:      Surgery,
 	Medicine:     Medicine,
@@ -39,20 +43,20 @@ var treatmentTypes = map[Type]Type{
 
 func ParseType(value string) (Type, error) {
 	value = strings.TrimSpace(strings.ToLower(value))
-	typ, ok := treatmentTypes[Type(value)]
+	typ, ok := recordTypes[Type(value)]
 	if !ok {
 		return Other, errors.New("type not found")
 	}
 	return typ, nil
 }
 
-type Treatment struct {
+type Record struct {
 	Id             uuid.UUID
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Deleted        bool
 	PetId          uuid.UUID
-	TreatmentType  Type
+	RecordType     Type
 	Name           string
 	Date           time.Time
 	Lot            string
@@ -64,4 +68,4 @@ type Treatment struct {
 	NextDate       time.Time
 }
 
-var Nil = Treatment{}
+var Nil = Record{}

@@ -7,10 +7,10 @@ import (
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	authService "github.com/scarlettmiss/bestPal/application/services/authService"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
-	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
+	recordService "github.com/scarlettmiss/bestPal/application/services/recordService"
 	userService "github.com/scarlettmiss/bestPal/application/services/userService"
 	"github.com/scarlettmiss/bestPal/repositories/petrepo"
-	"github.com/scarlettmiss/bestPal/repositories/treatmentrepo"
+	"github.com/scarlettmiss/bestPal/repositories/recordrepo"
 	"github.com/scarlettmiss/bestPal/repositories/userrepo"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,7 +43,7 @@ func TestApplicationCreation(t *testing.T) {
 
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	db := client.Database("bestpal")
+	db := client.Database("bestpal-test")
 
 	//init repos
 	petsCollection := db.Collection("pets")
@@ -52,18 +52,18 @@ func TestApplicationCreation(t *testing.T) {
 	usersCollection := db.Collection("users")
 	userRepo := userrepo.New(usersCollection)
 
-	treatmentsCollection := db.Collection("treatments")
-	treatmentRepo := treatmentrepo.New(treatmentsCollection)
+	recordsCollection := db.Collection("treatments")
+	recordRepo := recordrepo.New(recordsCollection)
 	//init services
 	ps, err := petService.New(petRepo)
 	assert.Nil(t, err)
 	us, err := userService.New(userRepo)
 	assert.Nil(t, err)
-	ts, err := treatmentService.New(treatmentRepo)
+	rs, err := recordService.New(recordRepo)
 	assert.Nil(t, err)
 
 	//pass services to application
-	opts := application.Options{PetService: ps, UserService: us, TreatmentService: ts}
+	opts := application.Options{PetService: ps, UserService: us, RecordService: rs}
 	app := application.New(opts)
 
 	assert.NotNil(t, &app)
@@ -101,18 +101,18 @@ func TestUserCreation(t *testing.T) {
 	usersCollection := db.Collection("users")
 	userRepo := userrepo.New(usersCollection)
 
-	treatmentsCollection := db.Collection("treatments")
-	treatmentRepo := treatmentrepo.New(treatmentsCollection)
+	recordsCollection := db.Collection("records")
+	recordRepo := recordrepo.New(recordsCollection)
 	//init services
 	ps, err := petService.New(petRepo)
 	assert.Nil(t, err)
 	us, err := userService.New(userRepo)
 	assert.Nil(t, err)
-	ts, err := treatmentService.New(treatmentRepo)
+	rs, err := recordService.New(recordRepo)
 	assert.Nil(t, err)
 
 	//pass services to application
-	opts := application.Options{PetService: ps, UserService: us, TreatmentService: ts}
+	opts := application.Options{PetService: ps, UserService: us, RecordService: rs}
 	app := application.New(opts)
 
 	u := user.Nil

@@ -158,3 +158,13 @@ func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.P
 
 	return p
 }
+
+func PetToVerySimplifiedResponse(pet pet.Pet) pet2.PetResponse {
+	p := pet2.PetResponse{}
+	p.Id = pet.Id.String()
+	p.Name = pet.Name
+	p.DateOfBirth = pet.DateOfBirth
+	p.Gender = string(pet.Gender)
+
+	return p
+}

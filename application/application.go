@@ -4,11 +4,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/treatment"
+	"github.com/scarlettmiss/bestPal/application/domain/record"
 	"github.com/scarlettmiss/bestPal/application/domain/user"
 	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
 	petService "github.com/scarlettmiss/bestPal/application/services/petService"
-	treatmentService "github.com/scarlettmiss/bestPal/application/services/treatmentService"
+	recordService "github.com/scarlettmiss/bestPal/application/services/recordService"
 	userService "github.com/scarlettmiss/bestPal/application/services/userService"
 	"github.com/scarlettmiss/bestPal/utils"
 )
@@ -18,19 +18,19 @@ what the actor can do.
 application talks with all the services
 */
 type Application struct {
-	petService       petService.Service
-	userService      userService.Service
-	treatmentService treatmentService.Service
+	petService    petService.Service
+	userService   userService.Service
+	recordService recordService.Service
 }
 
 type Options struct {
-	PetService       petService.Service
-	UserService      userService.Service
-	TreatmentService treatmentService.Service
+	PetService    petService.Service
+	UserService   userService.Service
+	RecordService recordService.Service
 }
 
 func New(opts Options) *Application {
-	app := Application{petService: opts.PetService, userService: opts.UserService, treatmentService: opts.TreatmentService}
+	app := Application{petService: opts.PetService, userService: opts.UserService, recordService: opts.RecordService}
 
 	return &app
 }
@@ -139,30 +139,30 @@ func (a *Application) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	return a.petService.UpdatePet(p)
 }
 
-func (a *Application) CreateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
-	return a.treatmentService.CreateTreatment(t)
+func (a *Application) CreateRecord(t record.Record) (record.Record, error) {
+	return a.recordService.CreateRecord(t)
 }
 
-func (a *Application) TreatmentsByUser(uId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
+func (a *Application) RecordsByUser(uId uuid.UUID) (map[uuid.UUID]record.Record, error) {
 	pets, err := a.PetsByUser(uId)
 	if err != nil {
 		return nil, err
 	}
-	return a.treatmentService.PetsTreatments(lo.Keys[uuid.UUID, pet.Pet](pets))
+	return a.recordService.PetsRecords(lo.Keys[uuid.UUID, pet.Pet](pets))
 }
 
-func (a *Application) TreatmentsByPet(pId uuid.UUID) (map[uuid.UUID]treatment.Treatment, error) {
-	return a.treatmentService.PetTreatments(pId)
+func (a *Application) RecordsByPet(pId uuid.UUID) (map[uuid.UUID]record.Record, error) {
+	return a.recordService.PetRecords(pId)
 }
 
-func (a *Application) TreatmentByPet(pId uuid.UUID, tId uuid.UUID) (treatment.Treatment, error) {
-	return a.treatmentService.PetTreatment(pId, tId)
+func (a *Application) RecordByPet(pId uuid.UUID, tId uuid.UUID) (record.Record, error) {
+	return a.recordService.PetRecord(pId, tId)
 }
 
-func (a *Application) UpdateTreatment(t treatment.Treatment) (treatment.Treatment, error) {
-	return a.treatmentService.UpdateTreatment(t)
+func (a *Application) UpdateRecord(t record.Record) (record.Record, error) {
+	return a.recordService.UpdateRecord(t)
 }
 
-func (a *Application) DeleteTreatment(id uuid.UUID) error {
-	return a.treatmentService.DeleteTreatment(id)
+func (a *Application) DeleteRecord(id uuid.UUID) error {
+	return a.recordService.DeleteRecord(id)
 }
