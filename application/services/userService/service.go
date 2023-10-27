@@ -22,15 +22,15 @@ func (s *Service) User(id uuid.UUID) (user.User, error) {
 	return u, nil
 }
 
-func (s *Service) Users() ([]user.User, error) {
-	return s.repo.Users()
+func (s *Service) Users(includeDel bool) ([]user.User, error) {
+	return s.repo.Users(includeDel)
 }
 
-func (s *Service) UserByEmail(email string) (user.User, bool) {
+func (s *Service) UserByEmail(email string, includeDel bool) (user.User, bool) {
 	var u user.User
 	var found bool
 
-	users, err := s.Users()
+	users, err := s.Users(includeDel)
 	if err != nil {
 		return user.Nil, false
 	}
@@ -44,10 +44,10 @@ func (s *Service) UserByEmail(email string) (user.User, bool) {
 	return u, found
 }
 
-func (s *Service) UsersByType(t user.Type) ([]user.User, error) {
+func (s *Service) UsersByType(t user.Type, includeDel bool) ([]user.User, error) {
 	var users []user.User
 
-	allUsers, err := s.Users()
+	allUsers, err := s.Users(includeDel)
 	if err != nil {
 		return users, err
 	}
@@ -61,10 +61,10 @@ func (s *Service) UsersByType(t user.Type) ([]user.User, error) {
 	return users, nil
 }
 
-func (s *Service) UserByType(id uuid.UUID, t user.Type) (user.User, error) {
+func (s *Service) UserByType(id uuid.UUID, t user.Type, includeDel bool) (user.User, error) {
 	var u user.User
 
-	users, err := s.UsersByType(t)
+	users, err := s.UsersByType(t, includeDel)
 	if err != nil {
 		return user.Nil, err
 	}
@@ -88,10 +88,13 @@ func (s *Service) UpdateUser(u user.User) (user.User, error) {
 }
 
 func (s *Service) Authenticate(email string, password string) (user.User, error) {
-
-	var u, ok = s.UserByEmail(email)
+	var u, ok = s.UserByEmail(email, true)
 	if !ok {
 		return user.User{}, user.ErrNotFound
+	}
+
+	if u.Deleted {
+		return user.User{}, user.ErrUserDeleted
 	}
 
 	if !authService.CheckPasswordHash(password, u.PasswordHash) {

@@ -21,14 +21,42 @@ func (s *Service) Pet(id uuid.UUID) (pet.Pet, error) {
 	return p, nil
 }
 
-func (s *Service) Pets() ([]pet.Pet, error) {
-	return s.repo.Pets()
+func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
+	pets, err := s.PetsByUser(uId, includeDel)
+	if err != nil {
+		return pet.Nil, err
+	}
+
+	p, ok := pets[id]
+	if !ok {
+		return pet.Nil, pet.ErrNotFound
+	}
+
+	return p, nil
 }
 
-func (s *Service) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
+func (s *Service) PetByOwner(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
+	pets, err := s.PetsByOwner(uId, includeDel)
+	if err != nil {
+		return pet.Nil, err
+	}
+
+	p, ok := pets[id]
+	if !ok {
+		return pet.Nil, pet.ErrNotFound
+	}
+
+	return p, nil
+}
+
+func (s *Service) Pets(includeDel bool) ([]pet.Pet, error) {
+	return s.repo.Pets(includeDel)
+}
+
+func (s *Service) PetsByUser(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.Pet, error) {
 	uPets := make(map[uuid.UUID]pet.Pet)
 
-	pets, err := s.Pets()
+	pets, err := s.Pets(includeDel)
 	if err != nil {
 		return uPets, err
 	}
@@ -42,10 +70,10 @@ func (s *Service) PetsByUser(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	return uPets, nil
 }
 
-func (s *Service) PetsByOwner(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
+func (s *Service) PetsByOwner(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.Pet, error) {
 	uPets := make(map[uuid.UUID]pet.Pet)
 
-	pets, err := s.Pets()
+	pets, err := s.Pets(includeDel)
 	if err != nil {
 		return uPets, err
 	}
@@ -57,34 +85,6 @@ func (s *Service) PetsByOwner(uId uuid.UUID) (map[uuid.UUID]pet.Pet, error) {
 	}
 
 	return uPets, nil
-}
-
-func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
-	pets, err := s.PetsByUser(uId)
-	if err != nil {
-		return pet.Nil, err
-	}
-
-	p, ok := pets[id]
-	if !ok {
-		return pet.Nil, pet.ErrNotFound
-	}
-
-	return p, nil
-}
-
-func (s *Service) PetByOwner(uId uuid.UUID, id uuid.UUID) (pet.Pet, error) {
-	pets, err := s.PetsByOwner(uId)
-	if err != nil {
-		return pet.Nil, err
-	}
-
-	p, ok := pets[id]
-	if !ok {
-		return pet.Nil, pet.ErrNotFound
-	}
-
-	return p, nil
 }
 
 func (s *Service) CreatePet(p pet.Pet) (pet.Pet, error) {

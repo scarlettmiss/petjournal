@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"sync"
@@ -24,7 +23,7 @@ type PetDBModel struct {
 	Description string            `bson:"description,omitempty"`
 	Pedigree    string            `bson:"pedigree,omitempty"`
 	Microchip   string            `bson:"microchip,omitempty"`
-	OwnerID     uuid.UUID         `bson:"owner_id,omitempty"`
+	OwnerID     uuid.UUID         `bson:"owner_id"`
 	VetID       uuid.UUID         `bson:"vet_id,omitempty"`
 	Metas       map[string]string `bson:"metas,omitempty"`
 	Avatar      string            `bson:"avatar,omitempty"`
@@ -116,25 +115,36 @@ func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	retrievedPet, err := r.petInternal(id)
+	return ConvertToPetDomainModel(retrievedPet), err
+}
+
+func (r *Repository) petInternal(id uuid.UUID) (PetDBModel, error) {
 	var retrievedPet PetDBModel
 
 	filter := bson.M{"_id": id}
 
 	err := r.pets.FindOne(context.Background(), filter).Decode(&retrievedPet)
 	if err != nil {
-		return pet.Nil, user.ErrNotFound
+		return PetDBModel{}, pet.ErrNotFound
 	}
-	return ConvertToPetDomainModel(retrievedPet), nil
+	return retrievedPet, nil
 }
 
-func (r *Repository) Pets() ([]pet.Pet, error) {
+func (r *Repository) Pets(includeDel bool) ([]pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	var pets []pet.Pet
 
 	// Define an empty filter to retrieve all pets
-	filter := bson.M{}
+	var filter bson.M
+
+	if includeDel {
+		filter = bson.M{}
+	} else {
+		filter = bson.M{"deleted": false}
+	}
 
 	ctx := context.Background()
 	// Perform the find operation
@@ -169,19 +179,29 @@ func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	updatedPet, err := r.updatePetInternal(ConvertToPetDBModel(p))
+	if err != nil {
+		return pet.Nil, err
+	}
+
+	return ConvertToPetDomainModel(updatedPet), nil
+}
+
+func (r *Repository) updatePetInternal(p PetDBModel) (PetDBModel, error) {
 	// Define the filter to identify the document to update
 	filter := bson.M{"_id": p.Id}
 
 	// Define the update document using the '$set' operator
-	replacement, err := bson.Marshal(ConvertToPetDBModel(p))
+	p.UpdatedAt = time.Now()
+	replacement, err := bson.Marshal(p)
 	if err != nil {
-		return pet.Nil, err
+		return PetDBModel{}, err
 	}
 
 	// Perform the update operation
 	_, err = r.pets.ReplaceOne(context.Background(), filter, replacement)
 	if err != nil {
-		return pet.Nil, err
+		return PetDBModel{}, err
 	}
 
 	return p, nil
@@ -191,11 +211,14 @@ func (r *Repository) DeletePet(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	filter := bson.M{"_id": id}
-
-	result := r.pets.FindOneAndDelete(context.Background(), filter)
-	if result.Err() != nil {
-		return result.Err()
+	retrievedPet, err := r.petInternal(id)
+	if err != nil {
+		return err
 	}
-	return nil
+
+	retrievedPet.Deleted = true
+
+	_, err = r.updatePetInternal(retrievedPet)
+
+	return err
 }

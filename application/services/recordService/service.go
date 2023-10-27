@@ -14,18 +14,18 @@ func New(repo record.Repository) (Service, error) {
 	return Service{repo: repo}, nil
 }
 
-func (s Service) Records() ([]record.Record, error) {
-	return s.repo.Records()
+func (s Service) Records(includeDel bool) ([]record.Record, error) {
+	return s.repo.Records(includeDel)
 }
 
 func (s Service) Record(tId uuid.UUID) (record.Record, error) {
 	return s.repo.Record(tId)
 }
 
-func (s Service) PetsRecords(pIds []uuid.UUID) (map[uuid.UUID]record.Record, error) {
+func (s Service) PetsRecords(pIds []uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
 	petRecords := make(map[uuid.UUID]record.Record)
 
-	records, err := s.repo.Records()
+	records, err := s.repo.Records(includeDel)
 	if err != nil {
 		return petRecords, err
 	}
@@ -41,10 +41,10 @@ func (s Service) PetsRecords(pIds []uuid.UUID) (map[uuid.UUID]record.Record, err
 	return petRecords, nil
 }
 
-func (s Service) PetRecords(pId uuid.UUID) (map[uuid.UUID]record.Record, error) {
+func (s Service) PetRecords(pId uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
 	petRecords := make(map[uuid.UUID]record.Record)
 
-	records, err := s.repo.Records()
+	records, err := s.repo.Records(includeDel)
 	if err != nil {
 		return petRecords, err
 	}
@@ -58,8 +58,8 @@ func (s Service) PetRecords(pId uuid.UUID) (map[uuid.UUID]record.Record, error) 
 	return petRecords, nil
 }
 
-func (s Service) PetRecord(pId uuid.UUID, rId uuid.UUID) (record.Record, error) {
-	petRecords, err := s.PetRecords(pId)
+func (s Service) PetRecord(pId uuid.UUID, rId uuid.UUID, includeDel bool) (record.Record, error) {
+	petRecords, err := s.PetRecords(pId, includeDel)
 	if err != nil {
 		return record.Nil, err
 	}

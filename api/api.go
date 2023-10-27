@@ -104,7 +104,7 @@ func (api *API) register(c *gin.Context) {
 }
 
 func (api *API) users(c *gin.Context) {
-	users, err := api.app.Users()
+	users, err := api.app.Users(true)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -120,7 +120,7 @@ func (api *API) users(c *gin.Context) {
 }
 
 func (api *API) vets(c *gin.Context) {
-	users, err := api.app.UsersByType(user.Vet)
+	users, err := api.app.UsersByType(user.Vet, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -183,7 +183,7 @@ func (api *API) updateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
-	u, err = api.app.UpdateUser(u)
+	u, err = api.app.UpdateUser(u, false)
 	if err != nil {
 		if err == user.ErrMailExists {
 			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
@@ -222,6 +222,10 @@ func (api *API) login(c *gin.Context) {
 	}
 	u, err := api.app.Authenticate(requestBody.Email, requestBody.Password)
 	if err != nil {
+		if err == user.ErrUserDeleted {
+			c.JSON(http.StatusForbidden, utils.ErrorResponse(err))
+			return
+		}
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
@@ -265,7 +269,7 @@ func (api *API) createPet(c *gin.Context) {
 			return
 		}
 
-		vet, err = api.app.UserByType(vId, user.Vet)
+		vet, err = api.app.UserByType(vId, user.Vet, false)
 		if err != nil {
 			if err == user.ErrNotFound {
 				c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
@@ -298,7 +302,7 @@ func (api *API) pets(c *gin.Context) {
 		return
 	}
 
-	pets, err := api.app.PetsByUser(uId)
+	pets, err := api.app.PetsByUser(uId, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -313,7 +317,7 @@ func (api *API) pets(c *gin.Context) {
 		}
 		vet := user.Nil
 		if p.VetId != uuid.Nil {
-			vet, err = api.app.UserByType(p.VetId, user.Vet)
+			vet, err = api.app.UserByType(p.VetId, user.Vet, false)
 			if err != nil {
 				hasError = true
 			}
@@ -392,7 +396,7 @@ func (api *API) pet(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
-	p, err := api.app.PetByUser(uId, pId)
+	p, err := api.app.PetByUser(uId, pId, false)
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
@@ -442,7 +446,7 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, pId)
+	p, err := api.app.PetByUser(uId, pId, false)
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
@@ -477,7 +481,7 @@ func (api *API) updatePet(c *gin.Context) {
 
 	vet := user.Nil
 	if p.VetId != uuid.Nil {
-		vet, err = api.app.UserByType(p.VetId, user.Vet)
+		vet, err = api.app.UserByType(p.VetId, user.Vet, false)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 			return
@@ -488,7 +492,7 @@ func (api *API) updatePet(c *gin.Context) {
 }
 
 func (api *API) removeVet(c *gin.Context, uId uuid.UUID, pId uuid.UUID) {
-	_, err := api.app.PetByUser(uId, pId)
+	_, err := api.app.PetByUser(uId, pId, false)
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
@@ -517,7 +521,7 @@ func (api *API) deletePet(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
-	_, err = api.app.PetByOwner(uId, pId)
+	_, err = api.app.PetByOwner(uId, pId, false)
 
 	if err != nil {
 		if err == pet.ErrNotFound {
@@ -558,7 +562,7 @@ func (api *API) createRecord(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -612,13 +616,13 @@ func (api *API) recordsByPet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
-	records, err := api.app.RecordsByPet(petId)
+	records, err := api.app.RecordsByPet(petId, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -659,7 +663,7 @@ func (api *API) records(c *gin.Context) {
 		return
 	}
 
-	records, err := api.app.RecordsByUser(uId)
+	records, err := api.app.RecordsByUser(uId, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
@@ -721,13 +725,13 @@ func (api *API) recordByPet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
-	r, err := api.app.RecordByPet(petId, recordId)
+	r, err := api.app.RecordByPet(petId, recordId, false)
 	if err != nil {
 		c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		return
@@ -778,13 +782,13 @@ func (api *API) updateRecord(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId)
+	p, err := api.app.PetByUser(uId, petId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
-	r, err := api.app.RecordByPet(petId, recordId)
+	r, err := api.app.RecordByPet(petId, recordId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
@@ -851,13 +855,13 @@ func (api *API) deleteRecord(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.PetByUser(uId, petId)
+	_, err = api.app.PetByUser(uId, petId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
-	_, err = api.app.RecordByPet(petId, recordId)
+	_, err = api.app.RecordByPet(petId, recordId, false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return

@@ -112,27 +112,40 @@ func (r *Repository) Record(id uuid.UUID) (record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	retrievedRecord, err := r.recordInternal(id)
+
+	return ConvertToRecordDomainModel(retrievedRecord), err
+
+}
+
+func (r *Repository) recordInternal(id uuid.UUID) (RecordDBModel, error) {
 	var retrievedRecord RecordDBModel
 
 	filter := bson.M{"_id": id}
 
 	err := r.recordsCol.FindOne(context.Background(), filter).Decode(&retrievedRecord)
 	if err != nil {
-		return record.Nil, user.ErrNotFound
+		return RecordDBModel{}, user.ErrNotFound
 	}
 
-	return ConvertToRecordDomainModel(retrievedRecord), nil
+	return retrievedRecord, nil
 
 }
 
-func (r *Repository) Records() ([]record.Record, error) {
+func (r *Repository) Records(includeDel bool) ([]record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
 	var records []record.Record
 
-	// Define an empty filter to retrieve all users
-	filter := bson.M{}
+	var filter bson.M
+
+	if includeDel {
+		// Define an empty filter to retrieve all users
+		filter = bson.M{}
+	} else {
+		filter = bson.M{"deleted": false}
+	}
 
 	ctx := context.Background()
 	// Perform the find operation
@@ -167,19 +180,30 @@ func (r *Repository) UpdateRecord(rec record.Record) (record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	updatedRec, err := r.updateRecordInternal(ConvertToRecordDBModel(rec))
+	if err != nil {
+		return record.Nil, err
+	}
+
+	return ConvertToRecordDomainModel(updatedRec), nil
+}
+
+func (r *Repository) updateRecordInternal(rec RecordDBModel) (RecordDBModel, error) {
 	// Define the filter to identify the document to update
 	filter := bson.M{"_id": rec.Id}
 
+	rec.UpdatedAt = time.Now()
+
 	// Define the update document using the '$set' operator
-	replacement, err := bson.Marshal(ConvertToRecordDBModel(rec))
+	replacement, err := bson.Marshal(rec)
 	if err != nil {
-		return record.Nil, err
+		return RecordDBModel{}, err
 	}
 
 	// Perform the update operation
 	_, err = r.recordsCol.ReplaceOne(context.Background(), filter, replacement)
 	if err != nil {
-		return record.Nil, err
+		return RecordDBModel{}, err
 	}
 
 	return rec, nil
@@ -189,11 +213,14 @@ func (r *Repository) DeleteRecord(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	filter := bson.M{"_id": id}
-
-	result := r.recordsCol.FindOneAndDelete(context.Background(), filter)
-	if result.Err() != nil {
-		return result.Err()
+	retrievedRecord, err := r.recordInternal(id)
+	if err != nil {
+		return err
 	}
-	return nil
+
+	retrievedRecord.Deleted = true
+
+	_, err = r.updateRecordInternal(retrievedRecord)
+
+	return err
 }

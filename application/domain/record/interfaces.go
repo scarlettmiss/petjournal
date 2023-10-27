@@ -13,10 +13,11 @@ var (
 )
 
 type Service interface {
+	Records(includeDel bool) map[uuid.UUID]Record
 	Record(id uuid.UUID) (Record, error)
-	Records() map[uuid.UUID]Record
-	PetRecord(petId uuid.UUID, id uuid.UUID) (Record, error)
-	PetRecords(petId uuid.UUID) (map[uuid.UUID]Record, error)
+	PetsRecords(pIds []uuid.UUID, includeDel bool) (map[uuid.UUID]Record, error)
+	PetRecords(petId uuid.UUID, includeDel bool) (map[uuid.UUID]Record, error)
+	PetRecord(petId uuid.UUID, id uuid.UUID, includeDel bool) (Record, error)
 	CreateRecord(record Record) (Record, error)
 	UpdateRecord(record Record) (Record, error)
 	DeleteRecord(id uuid.UUID) error
@@ -25,7 +26,7 @@ type Service interface {
 type Repository interface {
 	CreateRecord(record Record) (Record, error)
 	Record(id uuid.UUID) (Record, error)
-	Records() ([]Record, error)
+	Records(includeDel bool) ([]Record, error)
 	UpdateRecord(record Record) (Record, error)
 	DeleteRecord(id uuid.UUID) error
 }
