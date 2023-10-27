@@ -74,13 +74,13 @@ func RecordUpdateRequestToRecord(requestBody recordType.RecordUpdateRequest, r r
 func RecordToResponse(r record.Record, pet pet.Pet, administeredBy user.User, verifiedBy user.User) recordType.RecordResponse {
 	resp := recordType.RecordResponse{}
 	resp.Id = r.Id.String()
-	resp.CreatedAt = r.CreatedAt
-	resp.UpdatedAt = r.UpdatedAt
+	resp.CreatedAt = r.CreatedAt.UnixMilli()
+	resp.UpdatedAt = r.UpdatedAt.UnixMilli()
 	resp.Deleted = r.Deleted
 	resp.Pet = petConverter.PetToVerySimplifiedResponse(pet)
 	resp.RecordType = string(r.RecordType)
 	resp.Name = r.Name
-	resp.Date = r.Date
+	resp.Date = r.Date.UnixMilli()
 	resp.Lot = r.Lot
 	resp.Result = r.Result
 	resp.Description = r.Description

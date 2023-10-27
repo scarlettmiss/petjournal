@@ -38,7 +38,7 @@ func PetCreateRequestToPet(requestBody pet2.PetCreateRequest, ownerId uuid.UUID,
 	p.Microchip = requestBody.Microchip
 	p.OwnerId = ownerId
 	p.VetId = vetId
-	p.Metas = metaToMap(requestBody.Metas)
+	p.Metas = requestBody.Metas
 	p.Avatar = requestBody.Avatar
 
 	return p, nil
@@ -49,7 +49,7 @@ func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId u
 		return p, pet.ErrNoValidName
 	}
 	p.Name = requestBody.Name
-	if requestBody.DateOfBirth != 0 {
+	if requestBody.DateOfBirth == 0 {
 		return p, pet.ErrNoValidBirthDate
 
 	}
@@ -65,29 +65,20 @@ func PetUpdateRequestToPet(requestBody pet2.PetUpdateRequest, p pet.Pet, vetId u
 	p.Pedigree = requestBody.Pedigree
 	p.Microchip = requestBody.Microchip
 	p.VetId = vetId
-	p.Metas = metaToMap(requestBody.Metas)
+	p.Metas = requestBody.Metas
 	p.Avatar = requestBody.Avatar
 
 	return p, nil
 }
 
-func metaToMap(metas []pet2.Meta) map[string]string {
-	metaMap := make(map[string]string)
-
-	for _, meta := range metas {
-		metaMap[meta.Key] = meta.Value
-	}
-	return metaMap
-}
-
 func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
-	p.CreatedAt = pet.CreatedAt
-	p.UpdatedAt = pet.UpdatedAt
+	p.CreatedAt = pet.CreatedAt.UnixMilli()
+	p.UpdatedAt = pet.UpdatedAt.UnixMilli()
 	p.Deleted = pet.Deleted
 	p.Name = pet.Name
-	p.DateOfBirth = pet.DateOfBirth
+	p.DateOfBirth = pet.DateOfBirth.UnixMilli()
 	p.Gender = string(pet.Gender)
 	p.BreedName = pet.BreedName
 	p.Colors = pet.Colors
@@ -107,11 +98,11 @@ func PetToResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse
 func PetToSimplifiedResponse(pet pet.Pet, owner user.User, vet user.User) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
-	p.CreatedAt = pet.CreatedAt
-	p.UpdatedAt = pet.UpdatedAt
+	p.CreatedAt = pet.CreatedAt.UnixMilli()
+	p.UpdatedAt = pet.UpdatedAt.UnixMilli()
 	p.Deleted = pet.Deleted
 	p.Name = pet.Name
-	p.DateOfBirth = pet.DateOfBirth
+	p.DateOfBirth = pet.DateOfBirth.UnixMilli()
 	p.Gender = string(pet.Gender)
 	p.BreedName = pet.BreedName
 	p.Colors = pet.Colors
@@ -130,7 +121,7 @@ func PetToVerySimplifiedResponse(pet pet.Pet) pet2.PetResponse {
 	p := pet2.PetResponse{}
 	p.Id = pet.Id.String()
 	p.Name = pet.Name
-	p.DateOfBirth = pet.DateOfBirth
+	p.DateOfBirth = pet.DateOfBirth.UnixMilli()
 	p.Gender = string(pet.Gender)
 
 	return p

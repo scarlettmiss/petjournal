@@ -2,16 +2,15 @@ package pet
 
 import (
 	"github.com/scarlettmiss/bestPal/cmd/server/types/user"
-	"time"
 )
 
 type PetResponse struct {
 	Id          string            `json:"id"`
-	CreatedAt   time.Time         `json:"createdAt"`
-	UpdatedAt   time.Time         `json:"updatedAt"`
+	CreatedAt   int64             `json:"createdAt"`
+	UpdatedAt   int64             `json:"updatedAt"`
 	Deleted     bool              `json:"deleted"`
 	Name        string            `json:"name"`
-	DateOfBirth time.Time         `json:"dateOfBirth"`
+	DateOfBirth int64             `json:"dateOfBirth"`
 	Gender      string            `json:"gender"`
 	BreedName   string            `json:"breedName"`
 	Colors      []string          `json:"colors"`

@@ -2,13 +2,12 @@ package user
 
 import (
 	"github.com/scarlettmiss/bestPal/application/domain/user"
-	"time"
 )
 
 type UserResponse struct {
 	Id        string    `json:"id"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	CreatedAt int64     `json:"createdAt,omitempty"`
+	UpdatedAt int64     `json:"updatedAt,omitempty"`
 	Deleted   bool      `json:"deleted,omitempty"`
 	UserType  user.Type `json:"userType,omitempty"`
 	Email     string    `json:"email,omitempty"`
