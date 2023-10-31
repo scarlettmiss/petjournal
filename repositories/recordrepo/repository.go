@@ -18,7 +18,7 @@ type RecordDBModel struct {
 	Deleted        bool        `bson:"deleted"`
 	PetId          uuid.UUID   `bson:"petId"`
 	RecordType     record.Type `bson:"recordType"`
-	Name           string      `bson:"name"`
+	Name           string      `bson:"name,omitempty"`
 	Date           time.Time   `bson:"date"`
 	Lot            string      `bson:"lot,omitempty"`
 	Result         string      `bson:"result,omitempty"`

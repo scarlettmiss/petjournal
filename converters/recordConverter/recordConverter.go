@@ -8,7 +8,6 @@ import (
 	recordType "github.com/scarlettmiss/bestPal/cmd/server/types/record"
 	"github.com/scarlettmiss/bestPal/converters/petConverter"
 	"github.com/scarlettmiss/bestPal/converters/userConverter"
-	"github.com/scarlettmiss/bestPal/utils"
 	"time"
 )
 
@@ -20,9 +19,6 @@ func RecordCreateRequestToRecord(requestBody recordType.RecordCreateRequest, pet
 		return r, err
 	}
 
-	if utils.TextIsEmpty(requestBody.Name) {
-		return r, record.ErrNotValidName
-	}
 	if requestBody.Date == 0 {
 		return r, record.ErrNotValidDate
 	}
@@ -49,9 +45,6 @@ func RecordUpdateRequestToRecord(requestBody recordType.RecordUpdateRequest, r r
 		return r, err
 	}
 
-	if utils.TextIsEmpty(requestBody.Name) {
-		return r, record.ErrNotValidName
-	}
 	if requestBody.Date == 0 {
 		return r, record.ErrNotValidDate
 	}
