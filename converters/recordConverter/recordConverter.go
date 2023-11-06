@@ -83,7 +83,7 @@ func RecordToResponse(r record.Record, pet pet.Pet, administeredBy user.User, ve
 		resp.VerifiedBy = userConverter.UserToResponse(verifiedBy)
 	}
 	if !r.NextDate.IsZero() {
-		resp.NextDate = r.NextDate.String()
+		resp.NextDate = r.NextDate.UnixMilli()
 	}
 
 	return resp

@@ -20,5 +20,5 @@ type RecordResponse struct {
 	Notes          string            `json:"notes,omitempty"`
 	AdministeredBy user.UserResponse `json:"administeredBy"`
 	VerifiedBy     user.UserResponse `json:"verifiedBy,omitempty"`
-	NextDate       string            `json:"nextDate,omitempty"`
+	NextDate       int64             `json:"nextDate,omitempty"`
 }
