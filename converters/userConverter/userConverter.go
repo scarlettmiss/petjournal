@@ -49,7 +49,7 @@ func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, er
 }
 
 func UserUpdateRequestToUser(requestBody user2.UserUpdateRequest, u user.User) (user.User, error) {
-	if utils.IsEmailValid(requestBody.Email) {
+	if !utils.IsEmailValid(requestBody.Email) {
 		return u, user.ErrNoValidMail
 	}
 	if utils.TextIsEmpty(requestBody.Name) {
