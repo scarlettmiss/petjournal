@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
 	"os"
 	"time"
 )

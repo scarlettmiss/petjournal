@@ -3,15 +3,15 @@ package main_test
 import (
 	"context"
 	"fmt"
-	"github.com/scarlettmiss/bestPal/application"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	authService "github.com/scarlettmiss/bestPal/application/services/authService"
-	petService "github.com/scarlettmiss/bestPal/application/services/petService"
-	recordService "github.com/scarlettmiss/bestPal/application/services/recordService"
-	userService "github.com/scarlettmiss/bestPal/application/services/userService"
-	"github.com/scarlettmiss/bestPal/repositories/petrepo"
-	"github.com/scarlettmiss/bestPal/repositories/recordrepo"
-	"github.com/scarlettmiss/bestPal/repositories/userrepo"
+	"github.com/scarlettmiss/petJournal/application"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	authService "github.com/scarlettmiss/petJournal/application/services/authService"
+	petService "github.com/scarlettmiss/petJournal/application/services/petService"
+	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
+	userService "github.com/scarlettmiss/petJournal/application/services/userService"
+	"github.com/scarlettmiss/petJournal/repositories/petrepo"
+	"github.com/scarlettmiss/petJournal/repositories/recordrepo"
+	"github.com/scarlettmiss/petJournal/repositories/userrepo"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +43,7 @@ func TestApplicationCreation(t *testing.T) {
 
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	db := client.Database("bestpal-test")
+	db := client.Database("petjournal-test")
 
 	//init repos
 	petsCollection := db.Collection("pets")
@@ -92,7 +92,7 @@ func TestUserCreation(t *testing.T) {
 
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	db := client.Database("bestpal-test")
+	db := client.Database("petjournal-test")
 
 	//init repos
 	petsCollection := db.Collection("pets")

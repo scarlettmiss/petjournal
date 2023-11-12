@@ -1,10 +1,10 @@
 package userConverter
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	authService "github.com/scarlettmiss/bestPal/application/services/authService"
-	user2 "github.com/scarlettmiss/bestPal/cmd/server/types/user"
-	"github.com/scarlettmiss/bestPal/utils"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	authService "github.com/scarlettmiss/petJournal/application/services/authService"
+	user2 "github.com/scarlettmiss/petJournal/cmd/server/types/user"
+	"github.com/scarlettmiss/petJournal/utils"
 )
 
 func UserCreateRequestToUser(requestBody user2.UserCreateRequest) (user.User, error) {

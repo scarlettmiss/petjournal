@@ -3,16 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/scarlettmiss/bestPal/api"
-	"github.com/scarlettmiss/bestPal/api/config"
-	"github.com/scarlettmiss/bestPal/application"
-	petService "github.com/scarlettmiss/bestPal/application/services/petService"
-	recordService "github.com/scarlettmiss/bestPal/application/services/recordService"
-	userService "github.com/scarlettmiss/bestPal/application/services/userService"
-	"github.com/scarlettmiss/bestPal/repositories/petrepo"
-	"github.com/scarlettmiss/bestPal/repositories/recordrepo"
-	"github.com/scarlettmiss/bestPal/repositories/userrepo"
+	"github.com/scarlettmiss/petJournal/api"
+	"github.com/scarlettmiss/petJournal/api/config"
+	"github.com/scarlettmiss/petJournal/application"
+	petService "github.com/scarlettmiss/petJournal/application/services/petService"
+	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
+	userService "github.com/scarlettmiss/petJournal/application/services/userService"
+	"github.com/scarlettmiss/petJournal/repositories/petrepo"
+	"github.com/scarlettmiss/petJournal/repositories/recordrepo"
+	"github.com/scarlettmiss/petJournal/repositories/userrepo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,11 +21,16 @@ import (
 	"time"
 )
 
+import "embed"
+
+//go:embed all:public
+var ui embed.FS
+
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
+	//err := godotenv.Overload()
+	//if err != nil {
+	//	panic("Error loading .env file")
+	//}
 
 	uri := os.Getenv("DB_URL")
 	if uri == "" {
@@ -88,7 +92,7 @@ func main() {
 		panic(err)
 	}
 
-	restServer := api.New(app)
+	restServer := api.New(app, ui)
 
 	go func() { // Start listening and serving requests
 		err = restServer.Run(config.Host + ":" + config.Port)

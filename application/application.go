@@ -3,14 +3,14 @@ package application
 import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/record"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
-	petService "github.com/scarlettmiss/bestPal/application/services/petService"
-	recordService "github.com/scarlettmiss/bestPal/application/services/recordService"
-	userService "github.com/scarlettmiss/bestPal/application/services/userService"
-	"github.com/scarlettmiss/bestPal/utils"
+	"github.com/scarlettmiss/petJournal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/domain/record"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	jwtService "github.com/scarlettmiss/petJournal/application/services/jwtService"
+	petService "github.com/scarlettmiss/petJournal/application/services/petService"
+	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
+	userService "github.com/scarlettmiss/petJournal/application/services/userService"
+	"github.com/scarlettmiss/petJournal/utils"
 )
 
 /*

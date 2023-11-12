@@ -2,12 +2,12 @@ package recordConverter
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/record"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	recordType "github.com/scarlettmiss/bestPal/cmd/server/types/record"
-	"github.com/scarlettmiss/bestPal/converters/petConverter"
-	"github.com/scarlettmiss/bestPal/converters/userConverter"
+	"github.com/scarlettmiss/petJournal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/domain/record"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	recordType "github.com/scarlettmiss/petJournal/cmd/server/types/record"
+	"github.com/scarlettmiss/petJournal/converters/petConverter"
+	"github.com/scarlettmiss/petJournal/converters/userConverter"
 	"time"
 )
 
@@ -83,7 +83,7 @@ func RecordToResponse(r record.Record, pet pet.Pet, administeredBy user.User, ve
 		resp.VerifiedBy = userConverter.UserToResponse(verifiedBy)
 	}
 	if !r.NextDate.IsZero() {
-		resp.NextDate = r.NextDate.String()
+		resp.NextDate = r.NextDate.UnixMilli()
 	}
 
 	return resp

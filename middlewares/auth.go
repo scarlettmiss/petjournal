@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	jwtService "github.com/scarlettmiss/bestPal/application/services/jwtService"
+	jwtService "github.com/scarlettmiss/petJournal/application/services/jwtService"
 	"net/http"
 	"strings"
 )

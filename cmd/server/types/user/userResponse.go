@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
 )
 
 type UserResponse struct {

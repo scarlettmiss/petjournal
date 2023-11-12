@@ -1,8 +1,8 @@
 package Record
 
 import (
-	"github.com/scarlettmiss/bestPal/cmd/server/types/pet"
-	"github.com/scarlettmiss/bestPal/cmd/server/types/user"
+	"github.com/scarlettmiss/petJournal/cmd/server/types/pet"
+	"github.com/scarlettmiss/petJournal/cmd/server/types/user"
 )
 
 type RecordResponse struct {
@@ -20,5 +20,5 @@ type RecordResponse struct {
 	Notes          string            `json:"notes,omitempty"`
 	AdministeredBy user.UserResponse `json:"administeredBy"`
 	VerifiedBy     user.UserResponse `json:"verifiedBy,omitempty"`
-	NextDate       string            `json:"nextDate,omitempty"`
+	NextDate       int64             `json:"nextDate,omitempty"`
 }

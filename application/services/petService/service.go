@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/domain/pet"
 )
 
 type Service struct {

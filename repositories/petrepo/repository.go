@@ -3,7 +3,7 @@ package petrepo
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"sync"

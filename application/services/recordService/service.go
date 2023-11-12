@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"github.com/scarlettmiss/bestPal/application/domain/record"
+	"github.com/scarlettmiss/petJournal/application/domain/record"
 )
 
 type Service struct {

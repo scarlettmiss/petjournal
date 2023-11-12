@@ -1,7 +1,7 @@
 package pet
 
 import (
-	"github.com/scarlettmiss/bestPal/cmd/server/types/user"
+	"github.com/scarlettmiss/petJournal/cmd/server/types/user"
 )
 
 type PetResponse struct {

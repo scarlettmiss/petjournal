@@ -1,21 +1,22 @@
 package api
 
 import (
+	"embed"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	typesPet "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
-	typesRecord "github.com/scarlettmiss/bestPal/cmd/server/types/record"
-	typesUser "github.com/scarlettmiss/bestPal/cmd/server/types/user"
-	"github.com/scarlettmiss/bestPal/converters/petConverter"
-	"github.com/scarlettmiss/bestPal/converters/recordConverter"
-	"github.com/scarlettmiss/bestPal/converters/userConverter"
-	"github.com/scarlettmiss/bestPal/middlewares"
-	"github.com/scarlettmiss/bestPal/utils"
+	"github.com/scarlettmiss/petJournal/application"
+	"github.com/scarlettmiss/petJournal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	typesPet "github.com/scarlettmiss/petJournal/cmd/server/types/pet"
+	typesRecord "github.com/scarlettmiss/petJournal/cmd/server/types/record"
+	typesUser "github.com/scarlettmiss/petJournal/cmd/server/types/user"
+	"github.com/scarlettmiss/petJournal/converters/petConverter"
+	"github.com/scarlettmiss/petJournal/converters/recordConverter"
+	"github.com/scarlettmiss/petJournal/converters/userConverter"
+	"github.com/scarlettmiss/petJournal/middlewares"
+	"github.com/scarlettmiss/petJournal/utils"
 	"net/http"
 )
 
@@ -24,11 +25,12 @@ type API struct {
 	app *application.Application
 }
 
-func New(application *application.Application) *API {
+func New(application *application.Application, ui embed.FS) *API {
 	api := &API{
 		Engine: gin.Default(),
 		app:    application,
 	}
+	api.NoRoute(middlewares.NoRouteMiddleware("/", ui, "public"))
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
@@ -36,8 +38,6 @@ func New(application *application.Application) *API {
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 
 	api.Use(cors.New(config))
-
-	api.NoRoute(func(ctx *gin.Context) { ctx.Status(http.StatusNotFound) })
 
 	api.POST("/api/auth/register", api.register)
 	api.POST("/api/auth/login", api.login)

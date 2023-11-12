@@ -3,8 +3,8 @@ package recordrepo
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/record"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/domain/record"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"sync"

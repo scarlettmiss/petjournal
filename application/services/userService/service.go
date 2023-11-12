@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	authService "github.com/scarlettmiss/bestPal/application/services/authService"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	authService "github.com/scarlettmiss/petJournal/application/services/authService"
 )
 
 type Service struct {

@@ -2,11 +2,11 @@ package petConverter
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/bestPal/application/domain/pet"
-	"github.com/scarlettmiss/bestPal/application/domain/user"
-	pet2 "github.com/scarlettmiss/bestPal/cmd/server/types/pet"
-	"github.com/scarlettmiss/bestPal/converters/userConverter"
-	"github.com/scarlettmiss/bestPal/utils"
+	"github.com/scarlettmiss/petJournal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/domain/user"
+	pet2 "github.com/scarlettmiss/petJournal/cmd/server/types/pet"
+	"github.com/scarlettmiss/petJournal/converters/userConverter"
+	"github.com/scarlettmiss/petJournal/utils"
 	"time"
 )
 
