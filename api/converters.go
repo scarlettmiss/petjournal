@@ -42,7 +42,9 @@ func PetUpdateRequestToPetUpdateOpts(requestBody PetUpdateRequest, pId uuid.UUID
 	if !utils.TextIsEmpty(requestBody.VetId) {
 		var err error
 		vId, err = uuid.Parse(requestBody.VetId)
-		return application.PetUpdateOptions{}, err
+		if err != nil {
+			return application.PetUpdateOptions{}, err
+		}
 	}
 
 	opts := application.PetUpdateOptions{}

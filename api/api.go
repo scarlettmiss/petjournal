@@ -410,21 +410,19 @@ func (api *API) updatePet(c *gin.Context) {
 	}
 
 	id := c.Param("petId")
-
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}
 
-	var requestBody PetUpdateRequest
-
-	err = c.ShouldBindJSON(&requestBody)
+	pId, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
-	pId, err := uuid.Parse(id)
+	var requestBody PetUpdateRequest
+	err = c.ShouldBindJSON(&requestBody)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
