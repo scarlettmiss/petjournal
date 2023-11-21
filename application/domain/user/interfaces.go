@@ -14,6 +14,7 @@ var (
 	ErrNoValidSurname = errors.New("a valid surname should be provided")
 	ErrAuthentication = errors.New("wrong credentials")
 	ErrUserDeleted    = errors.New("user has been deleted")
+	ErrNoValidType    = errors.New("a valid userType should be provided")
 )
 
 type Service interface {

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/scarlettmiss/petJournal/application"
-	"github.com/scarlettmiss/petJournal/application/domain/user"
-	authService "github.com/scarlettmiss/petJournal/application/services/authService"
 	petService "github.com/scarlettmiss/petJournal/application/services/petService"
 	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
 	userService "github.com/scarlettmiss/petJournal/application/services/userService"
@@ -115,8 +113,8 @@ func TestUserCreation(t *testing.T) {
 	opts := application.Options{PetService: ps, UserService: us, RecordService: rs}
 	app := application.New(opts)
 
-	u := user.Nil
-	u.UserType = user.Vet
+	u := application.UserCreateOptions{}
+	u.UserType = "vet"
 
 	_, err = app.CreateUser(u)
 	assert.NotNil(t, err)
@@ -129,14 +127,13 @@ func TestUserCreation(t *testing.T) {
 	_, err = app.CreateUser(u)
 	assert.NotNil(t, err)
 
-	u.Email = "surname@mail.com"
+	u.Email = "surnamee@mail.com"
 	_, err = app.CreateUser(u)
 	assert.NotNil(t, err)
 
-	pass, err := authService.HashPassword("password")
-	assert.Nil(t, err)
-	u.PasswordHash = pass
+	u.Password = "Password1!"
 	_, err = app.CreateUser(u)
 	assert.Nil(t, err)
 
+	db.Drop(ctx)
 }

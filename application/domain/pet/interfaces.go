@@ -20,7 +20,7 @@ type Service interface {
 	Pets(includeDel bool) []Pet
 	PetsByUser(userId uuid.UUID, includeDel bool) (map[uuid.UUID]Pet, error)
 	PetsByOwner(userId uuid.UUID, includeDel bool) (map[uuid.UUID]Pet, error)
-	CreatePet(pet Pet) error
+	CreatePet(opts Pet) error
 	UpdatePet() error
 	DeletePet(id uuid.UUID) error
 	RemoveVet(id uuid.UUID) error

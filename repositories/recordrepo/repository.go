@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
-	"github.com/scarlettmiss/petJournal/application/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"sync"
@@ -125,7 +124,7 @@ func (r *Repository) recordInternal(id uuid.UUID) (RecordDBModel, error) {
 
 	err := r.recordsCol.FindOne(context.Background(), filter).Decode(&retrievedRecord)
 	if err != nil {
-		return RecordDBModel{}, user.ErrNotFound
+		return RecordDBModel{}, record.ErrNotFound
 	}
 
 	return retrievedRecord, nil
