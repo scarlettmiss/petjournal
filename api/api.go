@@ -94,7 +94,13 @@ func (api *API) register(c *gin.Context) {
 
 	token, err := api.app.UserToken(u)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		switch err {
+		case user.ErrUserDeleted:
+			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		default:
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+
+		}
 		return
 	}
 
@@ -590,7 +596,7 @@ func (api *API) createRecord(c *gin.Context) {
 	}
 
 	verifier := user.Nil
-	if r.VerifiedBy == uuid.Nil {
+	if r.VerifiedBy != uuid.Nil {
 		var err error
 		verifier, err = api.app.User(r.VerifiedBy)
 		if err != nil {
@@ -841,7 +847,7 @@ func (api *API) updateRecord(c *gin.Context) {
 	}
 
 	verifier := user.Nil
-	if r.VerifiedBy == uuid.Nil {
+	if r.VerifiedBy != uuid.Nil {
 		var err error
 		verifier, err = api.app.User(r.VerifiedBy)
 		if err != nil {

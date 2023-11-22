@@ -36,7 +36,7 @@ type UserUpdateRequest struct {
 }
 
 type UserResponse struct {
-	Id        string    `json:"id"`
+	Id        string    `json:"id,omitempty"`
 	CreatedAt int64     `json:"createdAt,omitempty"`
 	UpdatedAt int64     `json:"updatedAt,omitempty"`
 	Deleted   bool      `json:"deleted,omitempty"`

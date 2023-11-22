@@ -174,6 +174,9 @@ func (a *Application) CreateUser(opts UserCreateOptions) (user.User, error) {
 }
 
 func (a *Application) UserToken(u user.User) (string, error) {
+	if u.Deleted {
+		return "", user.ErrUserDeleted
+	}
 	return jwtService.GenerateJWT(u.Id, u.UserType)
 }
 
