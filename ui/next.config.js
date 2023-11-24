@@ -3,7 +3,7 @@ const nextConfig = {
     output: "export",
     // reactStrictMode: true,
     env: {
-        apiUrl: "https://petjournal-app-aeqg2.ondigitalocean.app/api",
+        apiUrl: "https://mypetjournal-lqkz3.ondigitalocean.app/api",
         // apiUrl: "http://localhost:8080/api",
     },
     images: {
