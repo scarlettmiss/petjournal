@@ -3,7 +3,7 @@ import LoginViewModel from "@/viewmodels/user/LoginViewModel";
 import RegistrationViewModel from "@/viewmodels/user/RegistrationViewModel";
 
 export function loginHandler(vm: LoginViewModel): Promise<Response> {
-    return fetch(`${process.env.apiUrl}/auth/login`, {
+    return fetch(`/api/auth/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -13,7 +13,7 @@ export function loginHandler(vm: LoginViewModel): Promise<Response> {
 }
 
 export function signUpHandler(vm: RegistrationViewModel): Promise<Response> {
-    return fetch(`${process.env.apiUrl}/auth/register`, {
+    return fetch(`/api/auth/register`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -23,7 +23,7 @@ export function signUpHandler(vm: RegistrationViewModel): Promise<Response> {
 }
 
 export function userUpdateHandler(vm: UpdateUserViewModel, token?: string): Promise<Response> {
-    return fetch(`${process.env.apiUrl}/user`, {
+    return fetch(`/api/user`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export function userUpdateHandler(vm: UpdateUserViewModel, token?: string): Prom
 }
 
 export function userHandler(token?: string): Promise<Response> {
-    return fetch(`${process.env.apiUrl}/user`, {
+    return fetch(`/api/user`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +43,7 @@ export function userHandler(token?: string): Promise<Response> {
 }
 
 export function userDeleteHandler(token?: string): Promise<Response> {
-    return fetch(`${process.env.apiUrl}/user`, {
+    return fetch(`/api/user`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ export function userDeleteHandler(token?: string): Promise<Response> {
 }
 
 export function VetsHandler(): Promise<Response> {
-    return fetch(`${process.env.apiUrl}/vets`, {
+    return fetch(`/api/vets`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
