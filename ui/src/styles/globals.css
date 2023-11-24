@@ -1,0 +1,96 @@
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Change Autocomplete styles in Chrome*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    border: 0.5px solid rgb(71 85 105);
+    -webkit-text-fill-color: rgb(203, 213, 225);
+    -webkit-box-shadow: 0 0 0 1000px rgb(51, 65, 85) inset;
+    box-shadow: 0 0 0 1000px rgb(51, 65, 85) inset;
+    transition: background-color 5000s ease-in-out 0s;
+    color: rgb(203, 213, 225);
+}
+
+:root {
+    color-scheme: dark;
+}
+
+.rbc-toolbar button {
+    @apply inline-block border border-indigo-400 shadow-md bg-slate-800 px-1.5 md:px-4 py-2 align-middle text-center m-0 text-indigo-100 rounded-md whitespace-nowrap hover:border-indigo-600 hover:bg-indigo-500 hover:text-indigo-100 active:bg-indigo-700 focus:bg-indigo-700 active:text-indigo-100 focus:text-indigo-100;
+}
+
+.rbc-toolbar button:active, .rbc-toolbar button.rbc-active {
+    @apply border border-indigo-400 shadow-md bg-indigo-700 hover:bg-indigo-900 hover:text-indigo-100 focus:bg-indigo-700 focus:text-indigo-100;
+}
+
+.rbc-day-bg, .rbc-time-content, .rbc-time-header-gutter {
+    @apply bg-slate-800 bg-opacity-60
+}
+
+.rbc-day-bg, .rbc-day-bg + .rbc-day-bg {
+    @apply border-indigo-400 border border-l-indigo-400 text-indigo-100
+}
+
+.rbc-time-content > * + * > * {
+    @apply border-l-indigo-400
+}
+
+.rbc-time-content, .rbc-time-header-content, .rbc-time-header.rbc-overflowing, .rbc-timeslot-group, .rbc-day-slot .rbc-time-slot {
+    @apply border-indigo-400
+}
+
+.rbc-current-time-indicator {
+    @apply bg-teal-400
+}
+
+.rbc-month-row + .rbc-month-row {
+    @apply border-0 text-indigo-100
+}
+
+.rbc-header, .rbc-header + .rbc-header {
+    @apply border-indigo-400 border border-l-indigo-400 bg-slate-800 text-indigo-100
+}
+
+.rbc-month-view, .rbc-time-view {
+    @apply border-indigo-400 border rounded-md
+}
+
+.rbc-toolbar-label {
+    @apply text-indigo-100
+}
+
+.rbc-today {
+    @apply bg-indigo-400 bg-opacity-20
+}
+
+.rbc-date-cell {
+    @apply text-indigo-100
+}
+
+.rbc-off-range-bg {
+    @apply bg-slate-700
+}
+
+@layer utilities {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+}
