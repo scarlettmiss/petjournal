@@ -1,10 +1,26 @@
+# Step 1: Build the Next.js frontend
+FROM node:18 as frontend
+
+WORKDIR /app
+
+# Copy the entire application code
+COPY ui .
+
+RUN yarn install
+
+# Build the Next.js application and output to the "build" directory
+RUN yarn build
+
 FROM golang:1.21.3 as builder
 
 # Set the working directory to /go/src/app
 WORKDIR /go/src/app
 
 # Copy the local package files to the container's workspace
-COPY . .
+COPY server .
+
+# Copy the "build" directory from the frontend build
+COPY --from=frontend /app/build ./cmd/server/public
 
 # Set environment variables
 ENV CGO_ENABLED=0
