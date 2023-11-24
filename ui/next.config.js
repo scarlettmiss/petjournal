@@ -9,7 +9,7 @@ const nextConfig = {
     images: {
         unoptimized: true
     },
-    distDir: ''
+    distDir: 'build'
 }
 
 module.exports = nextConfig
