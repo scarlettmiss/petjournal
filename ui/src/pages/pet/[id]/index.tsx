@@ -390,11 +390,6 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         this.recordDialogRef?.show()
     }
 
-    private setCreateRecordWithDate = (date: Date) => {
-        this.recordDialogRef?.setDataForCreationWithDate({}, date)
-        this.recordDialogRef?.show()
-    }
-
     private setCreateWeightEntry = () => {
         this.weightEntriesDialogRef?.setData(this.state.records)
         this.weightEntriesDialogRef?.setRecordType(this.state.selectedLineModel)
@@ -492,12 +487,11 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         return (
             <div
                 key={r.id}
-                onClick={() => this.onViewRecordSelected(r)}
                 className={`flex grow flex-col md:flex-row border-b ${
                     r.administeredBy !== undefined ? "border-indigo-600" : "border-teal-600"
                 } justify-between last:border-b-0`}
             >
-                <div className={"flex flex-col md:flex-row grow"}>
+                <div onClick={() => this.onViewRecordSelected(r)} className={"flex flex-col md:flex-row grow"}>
                     <p className={"flex grow w-full"}>{r.name}</p>
                     <div className={"flex grow w-full"}>{format(new Date(r.date!), "dd/MM/yyyy")}</div>
                 </div>
