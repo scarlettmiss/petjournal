@@ -47,8 +47,7 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
     render() {
         const vet = this.state.info
         return (
-            <div id="defaultModal" tabIndex={-1}
-                 className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
+            <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
                     <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -60,7 +59,7 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
                                 className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                                 onClick={this.props.onDismiss}
                             >
-                                <XMarkIcon className={"h-6 w-6"}/>
+                                <XMarkIcon className={"h-6 w-6"} />
                                 <span className="sr-only">Close modal</span>
                             </button>
                         </div>
@@ -68,7 +67,7 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
                         {this.state.info !== undefined && (
                             <div className="px-12 py-4 space-y-4 max-h-96 overflow-y-auto justify-center">
                                 <div className={"flex items-center justify-center"}>
-                                    <Avatar icon={<UserIcon className={"flex p-1 h-[70px] w-[70px]"}/>}/>
+                                    <Avatar icon={<UserIcon className={"flex p-1 h-[70px] w-[70px]"} />} />
                                 </div>
                                 <h3 className="text-center text-2xl text-indigo-100">
                                     {vet.surname} {vet.name}
@@ -81,7 +80,7 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
                                             target={"_blank"}
                                             className={"flex gap-2 items-center text-indigo-100 hover:text-indigo-300 underline"}
                                         >
-                                            <EnvelopeIcon className={"h-5 w-5"}/>
+                                            <EnvelopeIcon className={"h-5 w-5"} />
                                             {vet.email}
                                         </a>
                                     )}
@@ -91,7 +90,7 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
                                             target={"_parent"}
                                             className={"flex gap-2 items-center text-indigo-100 hover:text-indigo-300 underline"}
                                         >
-                                            <PhoneIcon className={"h-5 w-5"}/>
+                                            <PhoneIcon className={"h-5 w-5"} />
                                             {vet.phone}
                                         </a>
                                     )}
@@ -99,7 +98,7 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
                                 {TextUtils.isNotEmpty(this.vetAddress) && (
                                     <div className="space-y-1">
                                         <div className={"flex gap-2 items-center mt-5 "}>
-                                            <MapIcon className={"h-5 w-5"}/>
+                                            <MapIcon className={"h-5 w-5"} />
                                             <h2 className="text-lg font-bold tracking-tight text-indigo-100 ">Address</h2>
                                         </div>
 

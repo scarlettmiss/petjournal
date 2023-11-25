@@ -29,8 +29,7 @@ const ProtectedPage = dynamic(() => import("@/components/ProtectedPage"), {
     ssr: false,
 })
 
-interface EditProps extends WithRouterProps {
-}
+interface EditProps extends WithRouterProps {}
 
 interface EditState {
     pet?: Pet
@@ -306,8 +305,7 @@ class Edit extends BaseComponent<EditProps, EditState> {
             >
                 {/*<div className={"flex fixed self-end mt-4 me-4 hover:bg-gray-600 hover:text-red-600 p-1 rounded-md"}></div>*/}
 
-                <div
-                    className="flex items-center mx-auto my-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
+                <div className="flex items-center mx-auto my-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
                     <div className="shadow-sm px-4 py-4">
                         <div className={"flex flex-row items-baseline justify-end"}>
                             <div className="flex justify-center pb-4 grow">
@@ -315,8 +313,7 @@ class Edit extends BaseComponent<EditProps, EditState> {
                                     Update Pet Profile
                                 </h2>
                             </div>
-                            <TrashIcon className={" h-6 w-6 text-red-500"}
-                                       onClick={() => this.deleteDialogRef?.show()}/>
+                            <TrashIcon className={" h-6 w-6 text-red-500"} onClick={() => this.deleteDialogRef?.show()} />
                         </div>
 
                         <form className="space-y-1 mb-3" method="POST" onSubmit={this.onSubmit}>
@@ -559,7 +556,7 @@ class Edit extends BaseComponent<EditProps, EditState> {
                                     })}
                                 </select>
                             </div>
-                            <ErrorMessage message={this.state.serverError} key={"errorMessage"}/>
+                            <ErrorMessage message={this.state.serverError} key={"errorMessage"} />
                         </form>
                         <div className="w-full align-center inline-flex rounded-md shadow-sm gap-2">
                             <Button
@@ -583,7 +580,7 @@ class Edit extends BaseComponent<EditProps, EditState> {
                 </div>
 
                 <DeleteModal
-                    ref={(ref) => this.deleteDialogRef = ref}
+                    ref={(ref) => (this.deleteDialogRef = ref)}
                     message={"Are you sure you want to delete your pet?"}
                     onDelete={this.deletePressed}
                     onCancel={() => this.deleteDialogRef?.hide()}

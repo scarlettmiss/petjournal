@@ -16,8 +16,7 @@ interface NavBarProps extends WithRouterProps {
     buttons?: ReactElement
 }
 
-interface NavBarState {
-}
+interface NavBarState {}
 
 class NavBar extends BaseComponent<NavBarProps, NavBarState> {
     constructor(props: NavBarProps) {
@@ -31,7 +30,7 @@ class NavBar extends BaseComponent<NavBarProps, NavBarState> {
             return pages
         }
         // pages.push(new Page('/', "Pets"))
-        pages.push(new Page('/agenda', "Agenda"))
+        pages.push(new Page("/agenda", "Agenda"))
         if (this.props.pages) {
             pages.push(...this.props.pages)
         }
@@ -44,8 +43,7 @@ class NavBar extends BaseComponent<NavBarProps, NavBarState> {
                 <div className={styles.container}>
                     <div className={styles.rightSideContainer}>
                         <Link href="/" className={styles.logoContainer}>
-                            <Image src="/logo.png" width={33} height={35} className={styles.logo}
-                                   alt="Pet Journal Logo"/>
+                            <Image src="/logo.png" width={33} height={35} className={styles.logo} alt="Pet Journal Logo" />
                             <span className={styles.logoTitle}>Pet Journal</span>
                         </Link>
                     </div>
@@ -66,7 +64,7 @@ class NavBar extends BaseComponent<NavBarProps, NavBarState> {
                         {!this.props.hideAllPages && (
                             <div className={"flex flex-row gap-2 items-center"}>
                                 <Avatar
-                                    icon={<UserIcon className={"flex p-1"}/>}
+                                    icon={<UserIcon className={"flex p-1"} />}
                                     onCLick={() => this.props.router.push("/account")}
                                     className={"hover:bg-indigo-200 hover:text-indigo-700 h-[30px] w-[30px]"}
                                 />

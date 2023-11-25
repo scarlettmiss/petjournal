@@ -4,10 +4,12 @@ import Button from "@/components/Button"
 import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
 import {Record} from "@/models/record/Record"
 import TextInput from "@/components/TextInput"
-import {addDays, format, isAfter, isBefore} from "date-fns"
+import {addDays, format, isBefore} from "date-fns"
 import {RecordTypeUtils} from "@/enums/RecordType"
 import styles from "@/components/textInput.module.css"
 import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
+import {Pet} from "@/models/pet/Pet"
+import Avatar from "@/components/Avatar"
 
 interface RecordDialogProps {
     data?: Record
@@ -23,18 +25,20 @@ interface RecordDialogState {
     show: boolean
     mode: Mode
     step: Step
+    pet?: Pet
 }
 
 export enum Mode {
     CREATE = "CREATE",
     UPDATE = "UPDATE",
+    VIEW = "VIEW",
 }
 
 export enum Step {
     BASE = "BASE",
     EXTRA_INFO = "EXTRA_INFO",
     NEXT_DATE = "NEXT_DATE",
-    LINEDATA = "LINEDATA"
+    LINEDATA = "LINEDATA",
 }
 
 export default class RecordDialog extends Component<RecordDialogProps, RecordDialogState> {
@@ -49,7 +53,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
         }
     }
 
-    public setDataForCreation = (data: Record) => {
+    public setDataForCreation = (data: Record, pet?: Pet) => {
         const vm = new RecordCreationViewModel()
         vm.name = data.name ?? ""
         vm.recordType = data.recordType ?? ""
@@ -64,12 +68,13 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                 step: Step.BASE,
                 vm,
                 title: "Create Record",
+                pet,
             },
             () => setTimeout(() => document?.getElementById("date")?.focus(), 1)
         )
     }
 
-    public setDataForCreationWithDate = (data: Record, date: Date) => {
+    public setDataForCreationWithDate = (data: Record, date: Date, pet?: Pet) => {
         const vm = new RecordCreationViewModel()
         vm.name = data.name ?? ""
         vm.recordType = data.recordType ?? ""
@@ -85,12 +90,13 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                 step: Step.BASE,
                 vm,
                 title: "Create Record",
+                pet,
             },
             () => setTimeout(() => document?.getElementById("date")?.focus(), 1)
         )
     }
 
-    public setDataForUpdate = (data: Record) => {
+    public setDataForUpdate = (data: Record, pet?: Pet) => {
         const vm = new UpdateRecordViewModel()
         vm.name = data.name ?? ""
         vm.date = data.date ? format(new Date(data.date), "yyyy-MM-dd") : ""
@@ -100,9 +106,19 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
         vm.result = data.result ?? ""
         vm.description = data.description ?? ""
         vm.notes = data.notes ?? ""
-        vm.hasNextDate = data.nextDate !== undefined
-        vm.nextDate = data.nextDate ? format(new Date(data.nextDate), "yyyy-MM-dd") : ""
-        this.setState({step: Step.BASE, vm, title: "Update Record"})
+        this.setState({step: Step.BASE, vm, title: "Update Record", pet})
+    }
+
+    private get title() {
+        switch (this.state.mode) {
+            case Mode.CREATE:
+                return "Create Record"
+            case Mode.UPDATE:
+                return "Update Record"
+            case Mode.VIEW:
+            default:
+                return "Record"
+        }
     }
 
     public hide = () => {
@@ -119,6 +135,10 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
 
     public setUpdate = () => {
         this.setState({mode: Mode.UPDATE})
+    }
+
+    public setViewOnly = () => {
+        this.setState({mode: Mode.VIEW})
     }
 
     private onNameChange = (value: string) => {
@@ -153,7 +173,8 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
 
     private onDateChange = (value: string) => {
         const vm = this.state.vm
-        vm.date = isAfter(new Date(value), new Date()) ? format(new Date(), "yyyy-MM-dd").toString() : value
+        vm.date = value
+        console.log(vm.date)
         this.setState({vm})
     }
 
@@ -170,7 +191,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
     }
 
     private onNextDateChange = (value: string) => {
-        const vm = this.state.vm
+        const vm = this.state.vm as RecordCreationViewModel
         const minDate = addDays(new Date(), 1)
         vm.nextDate = isBefore(new Date(value), minDate) ? format(minDate, "yyyy-MM-dd").toString() : value
         this.setState({vm})
@@ -187,7 +208,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
     }
 
     private checkNextDate = () => {
-        this.state.vm.checkNextDate()
+        ;(this.state.vm as RecordCreationViewModel).checkNextDate()
         this.forceUpdate()
     }
 
@@ -197,8 +218,10 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
     }
 
     private get primaryButtonTitle() {
+        const isView = this.state.mode === Mode.VIEW
+
         if (this.state.step === Step.BASE) {
-            return "Add Extra Information"
+            return isView ? "More Info" : "Add Extra Information"
         }
 
         if (this.state.vm.hasNextDate && this.state.step === Step.EXTRA_INFO) {
@@ -206,15 +229,19 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
         }
 
         switch (this.state.mode) {
+            case Mode.VIEW:
+                return "Done"
             case Mode.CREATE:
                 return "Create Record"
-
             case Mode.UPDATE:
                 return "Update Record"
         }
     }
 
     private get secondaryButtonTitle() {
+        if (this.state.mode === Mode.VIEW) {
+            return "Edit"
+        }
         if (this.state.step !== Step.BASE) {
             return "Back"
         }
@@ -223,12 +250,13 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
     }
 
     private primaryButtonPress = (): void => {
-        this.state.vm.validate(this.state.step)
-        if (!this.state.vm.isValid) {
-            this.forceUpdate()
-            return
+        if (this.state.mode !== Mode.VIEW) {
+            this.state.vm.validate(this.state.step)
+            if (!this.state.vm.isValid) {
+                this.forceUpdate()
+                return
+            }
         }
-
         if (this.state.step === Step.BASE) {
             this.setState({step: Step.EXTRA_INFO})
             return
@@ -238,6 +266,9 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
         }
 
         switch (this.state.mode) {
+            case Mode.VIEW:
+                this.hide()
+                break
             case Mode.CREATE:
                 return this.props.onCreate!(this.state.vm as RecordCreationViewModel)
             case Mode.UPDATE:
@@ -246,6 +277,11 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
     }
 
     private secondButtonPress = () => {
+        if (this.state.mode === Mode.VIEW) {
+            this.setUpdate()
+            this.setState({step: Step.BASE})
+            return
+        }
         if (this.state.step === Step.BASE) {
             this.props.onDismiss()
             return
@@ -256,8 +292,6 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
             this.setState({step: Step.EXTRA_INFO})
             return
         }
-
-
     }
 
     private get formBody() {
@@ -281,6 +315,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             onBlur={this.checkName}
                             hasError={vm.hasNameError}
                             errorMessage={vm.nameError}
+                            disabled={this.state.mode === Mode.VIEW}
                             showLabel={true}
                         />
 
@@ -289,6 +324,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                                 Record Type
                             </label>
                             <select
+                                disabled={this.state.mode === Mode.VIEW}
                                 value={vm.recordType}
                                 id="recordType"
                                 name="recordType"
@@ -308,15 +344,13 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                                     )
                                 })}
                             </select>
-                            <span
-                                className={styles.errorMessage}>{vm.hasRecordTypeError ? vm.recordTypeError : ""}</span>
+                            <span className={styles.errorMessage}>{vm.hasRecordTypeError ? vm.recordTypeError : ""}</span>
                         </div>
 
                         <TextInput
                             id="date"
                             name="date"
                             type="date"
-                            max={format(new Date(), "yyyy-MM-dd")}
                             autoComplete="off"
                             required
                             width={"full"}
@@ -328,6 +362,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             hasError={vm.hasDateError}
                             errorMessage={vm.dateError}
                             showLabel={true}
+                            disabled={this.state.mode === Mode.VIEW}
                         />
                     </>
                 )}
@@ -345,6 +380,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             value={vm.lot}
                             onInput={this.onLotChange}
                             showLabel
+                            disabled={this.state.mode === Mode.VIEW}
                         />
                         <TextInput
                             id="result"
@@ -358,6 +394,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             value={vm.result}
                             onInput={this.onResultChange}
                             showLabel
+                            disabled={this.state.mode === Mode.VIEW}
                         />
                         <TextInput
                             id="description"
@@ -371,6 +408,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             value={vm.description}
                             onInput={this.onDescriptionChange}
                             showLabel
+                            disabled={this.state.mode === Mode.VIEW}
                         />
                         <TextInput
                             id="notes"
@@ -384,24 +422,26 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             value={vm.notes}
                             onInput={this.onNotesChange}
                             showLabel
+                            disabled={this.state.mode === Mode.VIEW}
                         />
-                        <div>
-                            <input
-                                id="link-checkbox"
-                                type="checkbox"
-                                value={""}
-                                checked={vm.hasNextDate}
-                                onChange={this.onHasNextDateChange}
-                                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
-                            />
-                            <label htmlFor="link-checkbox"
-                                   className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                Is recurring
-                            </label>
-                        </div>
+                        {this.state.mode === Mode.CREATE && (
+                            <div>
+                                <input
+                                    id="link-checkbox"
+                                    type="checkbox"
+                                    value={""}
+                                    checked={vm.hasNextDate}
+                                    onChange={this.onHasNextDateChange}
+                                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+                                />
+                                <label htmlFor="link-checkbox" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                    Is recurring
+                                </label>
+                            </div>
+                        )}
                     </>
                 )}
-                {this.state.step === Step.NEXT_DATE &&
+                {this.state.step === Step.NEXT_DATE && (
                     <TextInput
                         id="date"
                         name="date"
@@ -412,33 +452,45 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                         min={format(addDays(new Date(), 1), "yyyy-MM-dd")}
                         classNames="rounded-md"
                         placeholder="Schedule Next Occurance"
-                        value={vm.nextDate}
+                        value={(vm as RecordCreationViewModel).nextDate}
                         onInput={this.onNextDateChange}
                         onBlur={this.checkNextDate}
                         hasError={vm.hasNextDateError}
                         errorMessage={vm.dateError}
                         showLabel={true}
-                    />}
+                    />
+                )}
             </>
         )
     }
 
     render() {
         return (
-            <div id="defaultModal" tabIndex={-1}
-                 className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
+            <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
                     <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
                         {/*Modal header*/}
                         <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white text-center">{this.state.title}</h3>
+                            {this.state.pet && (
+                                <div className={"flex flex-row gap-x-2 mx-3"}>
+                                    <Avatar
+                                        avatarTitle={this.state.pet?.name?.slice(0, 1) ?? "-"}
+                                        avatar={this.state.pet.avatar}
+                                        className={"self-center h-[30px] w-[30px] "}
+                                    />
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
+                                        {this.state.pet?.name}
+                                    </h3>
+                                </div>
+                            )}
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white text-center">{this.title}</h3>
                             <button
                                 type="button"
                                 className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                                 onClick={this.props.onDismiss}
                             >
-                                <XMarkIcon className={"h-6 w-6"}/>
+                                <XMarkIcon className={"h-6 w-6"} />
                                 <span className="sr-only">Close modal</span>
                             </button>
                         </div>
@@ -452,8 +504,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             </div>
                         </div>
                         {/*footer*/}
-                        <div
-                            className="flex items-center p-6 justify-end space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                        <div className="flex items-center p-6 justify-end space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
                             <Button
                                 className={"right-0"}
                                 title={this.secondaryButtonTitle}

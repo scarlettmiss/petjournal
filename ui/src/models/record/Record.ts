@@ -14,5 +14,5 @@ export interface Record extends Dto {
     notes?: string
     administeredBy?: User
     verifiedBy?: User
-    nextDate?: number
+    groupId?: string
 }

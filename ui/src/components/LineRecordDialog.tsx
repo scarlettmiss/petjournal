@@ -6,10 +6,10 @@ import Button from "@/components/Button"
 import {Record} from "@/models/record/Record"
 import TextUtils from "@/Utils/TextUtils"
 import {PlusCircleIcon} from "@heroicons/react/24/outline"
-import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel";
-import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel";
-import {Step} from "@/components/RecordDialog";
-import {RecordType, RecordTypeUtils} from "@/enums/RecordType";
+import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
+import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
+import {Step} from "@/components/RecordDialog"
+import {RecordType, RecordTypeUtils} from "@/enums/RecordType"
 
 interface LineRecordDialogProps {
     data: Record[]
@@ -47,7 +47,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
             show: false,
             updatedData: props.data,
             mode: Mode.LIST,
-            recordType: this.props.recordType
+            recordType: this.props.recordType,
         }
     }
 
@@ -66,7 +66,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
     }
 
     public setData = (data: Record[]) => {
-        this.setState({updatedData: data.filter(it => it.recordType === this.state.recordType)})
+        this.setState({updatedData: data.filter((it) => it.recordType === this.state.recordType)})
     }
 
     public setCreate = () => {
@@ -143,7 +143,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
             return
         }
 
-        this.props.onUpdate(vm as UpdateRecordViewModel, this.state.recordIdToUpdate);
+        this.props.onUpdate(vm as UpdateRecordViewModel, this.state.recordIdToUpdate)
         this.setList()
     }
 
@@ -186,20 +186,21 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
 
     render() {
         return (
-            <div id="defaultModal" tabIndex={-1}
-                 className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
+            <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
                     <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
                         {/*Modal header*/}
                         <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white capitalize">{RecordTypeUtils.getTitle(this.state.recordType)} Entries</h3>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white capitalize">
+                                {RecordTypeUtils.getTitle(this.state.recordType)} Entries
+                            </h3>
                             <button
                                 type="button"
                                 className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                                 onClick={this.props.onDismiss}
                             >
-                                <XMarkIcon className={"h-6 w-6"}/>
+                                <XMarkIcon className={"h-6 w-6"} />
                                 <span className="sr-only">Close modal</span>
                             </button>
                         </div>
@@ -230,9 +231,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
                                     width={"full"}
                                     classNames="rounded-md"
                                     placeholder={RecordTypeUtils.getTitle(this.state.recordType)}
-                                    value={
-                                        TextUtils.isNotEmpty(this.state.vm.result) ? this.state.vm.result : undefined
-                                    }
+                                    value={TextUtils.isNotEmpty(this.state.vm.result) ? this.state.vm.result : undefined}
                                     onInput={this.onEntryInput}
                                     hasError={this.state.vm.hasResultError}
                                     errorMessage={this.state.vm.resultError}
@@ -244,16 +243,13 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
                             <div>
                                 <div key={"header"} className={"px-6 py-2 flex flex-row gap-x-4"}>
                                     <div className={"flex grow"}>Date</div>
-                                    <div
-                                        className={"flex grow capitalize"}>{RecordTypeUtils.getTitle(this.state.recordType)}</div>
+                                    <div className={"flex grow capitalize"}>{RecordTypeUtils.getTitle(this.state.recordType)}</div>
                                 </div>
                                 <div className="p-6 space-y-3 max-h-60 overflow-y-auto">
                                     {this.state.updatedData?.map((d, index) => (
-                                        <div key={d.date! + index}
-                                             className={"flex flex-row border-b border-indigo-600 justify-between"}>
+                                        <div key={d.date! + index} className={"flex flex-row border-b border-indigo-600 justify-between"}>
                                             <div className={"flex flex-row grow"}>
-                                                <div
-                                                    className={"flex grow"}>{format(new Date(d.date!), "dd/MM/yyyy")}</div>
+                                                <div className={"flex grow"}>{format(new Date(d.date!), "dd/MM/yyyy")}</div>
                                                 <div className={"flex grow"}>{d.result}</div>
                                             </div>
                                             <div className={"flex flex-row gap-x-2 items-center"}>
@@ -263,20 +259,18 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
                                                         this.loadEntryToVmToEdit(d)
                                                     }}
                                                 />
-                                                <XMarkIcon className={"h-8 w-6 text-red-500"}
-                                                           onClick={() => this.petRemoveEntry(index)}/>
+                                                <XMarkIcon className={"h-8 w-6 text-red-500"} onClick={() => this.petRemoveEntry(index)} />
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                <div className={"flex py-3 justify-center hover:bg-gray-600 rounded-md"}
-                                     onClick={this.setCreate}>
+                                <div className={"flex py-3 justify-center hover:bg-gray-600 rounded-md"} onClick={this.setCreate}>
                                     <button
                                         type={"button"}
                                         className={"flex flex-row justify-center items-center gap-2"}
                                         onClick={this.setCreate}
                                     >
-                                        <PlusCircleIcon className={"flex h-6 text-indigo-400"}/>
+                                        <PlusCircleIcon className={"flex h-6 text-indigo-400"} />
                                         <h3 className={"text-cyan-200  font-semibold"}>Add entry</h3>
                                     </button>
                                 </div>
@@ -284,15 +278,16 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
                         )}
 
                         {/*footer*/}
-                        <div
-                            className="flex items-center p-6 justify-end space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-                            {this.state.mode !== Mode.LIST && <Button
-                                className={"right-0"}
-                                title={"Cancel"}
-                                variant={"secondary"}
-                                type={"button"}
-                                onClick={this.dismissButton}
-                            />}
+                        <div className="flex items-center p-6 justify-end space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                            {this.state.mode !== Mode.LIST && (
+                                <Button
+                                    className={"right-0"}
+                                    title={"Cancel"}
+                                    variant={"secondary"}
+                                    type={"button"}
+                                    onClick={this.dismissButton}
+                                />
+                            )}
                             <Button
                                 className={"right-0"}
                                 title={this.primaryButtonTitle}

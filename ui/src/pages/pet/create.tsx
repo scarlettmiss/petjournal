@@ -26,8 +26,7 @@ const ProtectedPage = dynamic(() => import("@/components/ProtectedPage"), {
     ssr: false,
 })
 
-interface CreateProps extends WithRouterProps {
-}
+interface CreateProps extends WithRouterProps {}
 
 interface CreateState {
     vm: PetCreationViewModel
@@ -246,21 +245,15 @@ class Create extends BaseComponent<CreateProps, CreateState> {
     render() {
         const vm = this.state.vm
         return (
-            <ProtectedPage
-                hideNav={true}
-                init={this.initPage}
-                className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}
-            >
-                <div
-                    className="container items-center mx-auto my-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
+            <ProtectedPage hideNav={true} init={this.initPage} className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}>
+                <div className="container items-center mx-auto my-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
                     <div className="shadow-sm px-4 py-4">
                         <h2 className=" pb-4 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-indigo-100">
                             Create a Pet profile
                         </h2>
                         <form className="space-y-1 mb-3" method="POST" onSubmit={this.onSubmit}>
                             <div className={"flex py-2"}>
-                                {this.state.vm.avatar &&
-                                    <ColorExtractor src={this.state.vm.avatar} getColors={this.getAvatarColors}/>}
+                                {this.state.vm.avatar && <ColorExtractor src={this.state.vm.avatar} getColors={this.getAvatarColors} />}
                                 <div className={"mx-auto"}>
                                     <Avatar
                                         avatarTitle={"Add Image"}
@@ -497,7 +490,7 @@ class Create extends BaseComponent<CreateProps, CreateState> {
                                     })}
                                 </select>
                             </div>
-                            <ErrorMessage message={this.state.serverError} key={"errorMessage"}/>
+                            <ErrorMessage message={this.state.serverError} key={"errorMessage"} />
                         </form>
                         <div className="w-full align-center inline-flex rounded-md shadow-sm gap-2">
                             <Button

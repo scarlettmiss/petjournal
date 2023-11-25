@@ -1,6 +1,6 @@
 export enum RecordViewType {
     RECORDS = "RECORDS",
-    AGENDA = "AGENDA"
+    AGENDA = "AGENDA",
 }
 
 export class RecordViewTypeUtils {

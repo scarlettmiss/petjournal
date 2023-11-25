@@ -10,14 +10,14 @@ interface DeleteModalProps {
 }
 
 interface DeleteModalState {
- show: boolean
+    show: boolean
 }
 
 export default class DeleteModal extends Component<DeleteModalProps, DeleteModalState> {
     constructor(props: DeleteModalProps) {
         super(props)
         this.state = {
-            show: false
+            show: false,
         }
     }
 

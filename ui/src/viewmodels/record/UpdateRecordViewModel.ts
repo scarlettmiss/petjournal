@@ -1,5 +1,5 @@
 import TextUtils from "@/Utils/TextUtils"
-import {Step} from "@/components/RecordDialog";
+import {Step} from "@/components/RecordDialog"
 
 export default class UpdateRecordViewModel {
     private _recordType: string = ""
@@ -9,8 +9,8 @@ export default class UpdateRecordViewModel {
     private _result: string = ""
     private _description: string = ""
     private _notes: string = ""
-    private _hasNextDate: boolean = false
-    private _nextDate: string = ""
+    public hasNextDate: boolean = false
+    public nextDate: string = ""
 
     public nameError: string = ""
     public dateError: string = ""
@@ -37,24 +37,24 @@ export default class UpdateRecordViewModel {
                 this.checkDate()
                 this.checkNumberResult()
                 this.checkType()
-                this._valid = TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.resultError) && TextUtils.isEmpty(this.recordTypeError)
-                break;
+                this._valid =
+                    TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.resultError) && TextUtils.isEmpty(this.recordTypeError)
+                break
             case Step.BASE:
                 this.checkName()
                 this.checkDate()
                 this.checkType()
-                this._valid = TextUtils.isEmpty(this.nameError) && TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.recordTypeError)
-                break;
+                this._valid =
+                    TextUtils.isEmpty(this.nameError) && TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.recordTypeError)
+                break
             case Step.EXTRA_INFO:
                 this._valid = true
-                break;
+                break
             case Step.NEXT_DATE:
                 this.checkNextDate()
                 this._valid = TextUtils.isEmpty(this.nextDateError)
-                break;
-
+                break
         }
-
     }
 
     get recordType(): string {
@@ -69,14 +69,6 @@ export default class UpdateRecordViewModel {
         return this._valid
     }
 
-    get hasNextDate(): boolean {
-        return this._hasNextDate
-    }
-
-    set hasNextDate(value: boolean) {
-        this._hasNextDate = value
-    }
-
     public checkDate = () => {
         const isEmpty = TextUtils.isEmpty(this._date)
         this.dateError = isEmpty ? "The date is required" : ""
@@ -84,9 +76,7 @@ export default class UpdateRecordViewModel {
     }
 
     public checkNextDate = () => {
-        const isEmpty = TextUtils.isEmpty(this._nextDate)
-        this.nextDateError = isEmpty ? "The date is required" : ""
-        this.hasNextDateError = isEmpty
+        return
     }
 
     public checkType = () => {
@@ -113,14 +103,6 @@ export default class UpdateRecordViewModel {
 
     set name(value: string) {
         this._name = value
-    }
-
-    get nextDate(): string {
-        return this._nextDate
-    }
-
-    set nextDate(value: string) {
-        this._nextDate = value
     }
 
     get notes(): string {
@@ -167,14 +149,11 @@ export default class UpdateRecordViewModel {
         return {
             recordType: this._recordType,
             name: this._name,
-            date: new Date(this._date!).getTime(),
+            date: new Date(this._date! + "T00:00").getTime(),
             lot: this._lot,
             result: this._result,
             description: this._description,
             notes: this._notes,
-            nextDate: this.hasNextDate ? new Date(this._nextDate!).getTime() : 0,
         }
     }
-
 }
-

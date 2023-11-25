@@ -20,8 +20,7 @@ import DeleteModal from "@/components/DeleteModal"
 import {WithRouterProps} from "next/dist/client/with-router"
 import BaseComponent from "@/components/BaseComponent"
 
-interface AccountProps extends WithRouterProps {
-}
+interface AccountProps extends WithRouterProps {}
 
 interface AccountState {
     vm: UpdateUserViewModel
@@ -194,7 +193,7 @@ class Account extends BaseComponent<AccountProps, AccountState> {
         this.deleteDialogRef?.hide()
 
         const resp = await userDeleteHandler(this.state.token)
-        const data: { message: string; error?: string } = await resp.json()
+        const data: {message: string; error?: string} = await resp.json()
         if (resp.ok) {
             this.logout(() => this.props.router.replace("/auth/login"))
         } else {
@@ -204,14 +203,12 @@ class Account extends BaseComponent<AccountProps, AccountState> {
 
     render() {
         if (this.state.viewOnly && TextUtils.isNotEmpty(this.state.serverError)) {
-            return <ErrorMessage message={this.state.serverError}/>
+            return <ErrorMessage message={this.state.serverError} />
         }
 
         return (
-            <ProtectedPage init={this.initPage} key={"account"}
-                           className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}>
-                <div
-                    className="flex items-center mx-auto my-auto bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
+            <ProtectedPage init={this.initPage} key={"account"} className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}>
+                <div className="flex items-center mx-auto my-auto bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
                     <div className="shadow-sm z-10 px-4 py-6">
                         <div className="flex w-full justify-center">
                             <h2 className="mb-6 text-center text-3xl font-bold tracking-tight text-indigo-100"></h2>
@@ -385,7 +382,7 @@ class Account extends BaseComponent<AccountProps, AccountState> {
                                 value={this.state.vm.phone}
                                 disabled={this.state.viewOnly}
                             />
-                            <ErrorMessage message={this.state.serverError}/>
+                            <ErrorMessage message={this.state.serverError} />
                             <div className="w-full align-center inline-flex rounded-md shadow-sm gap-2">
                                 {!this.state.viewOnly ? (
                                     <>
@@ -432,7 +429,7 @@ class Account extends BaseComponent<AccountProps, AccountState> {
                 </div>
 
                 <DeleteModal
-                    ref={(ref) => this.deleteDialogRef = ref}
+                    ref={(ref) => (this.deleteDialogRef = ref)}
                     message={"Are you sure you want to delete your account?"}
                     onDelete={this.deletePressed}
                     onCancel={() => this.deleteDialogRef?.hide()}
