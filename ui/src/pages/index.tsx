@@ -67,11 +67,10 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
         const sortedPets = this.state.pets.sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime())
         return (
             <ProtectedPage init={this.initPage} key={"pets"} className={"pt-4 px-7 overflow-y-hidden"}>
-                <ErrorMessage message={this.state.serverError}/>
+                <ErrorMessage message={this.state.serverError} />
                 <div className={`flex flex-row justify-between items-center `}>
                     <h2 className={"align-middle text-indigo-200 text-2xl"}>Pets</h2>
-                    <Button title={"Create Pet"} variant={"primary"} type={"button"}
-                            onClick={this.navigateToPetCreate}/>
+                    <Button title={"Create Pet"} variant={"primary"} type={"button"} onClick={this.navigateToPetCreate} />
                 </div>
                 {this.state.loading ? (
                     <div role="status" className={"flex grow justify-center items-center"}>
@@ -94,21 +93,22 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
                         <span className="sr-only">Loading...</span>
                     </div>
                 ) : sortedPets.length > 0 ? (
-                    <div
-                        className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 py-2 overflow-y-auto mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 py-2 overflow-y-auto mt-2">
                         {sortedPets.map((pet) => {
                             return (
                                 <Link key={pet.id} href={`/pet/${pet.id}`}>
-                                    <div
-                                        className="flex flex-col aspect-square p-8 border rounded-md shadow bg-slate-800 border-indigo-500 hover:bg-slate-600 justify-center items-center">
-                                        <Avatar avatarTitle={pet.name?.slice(0, 1) ?? "-"}
-                                                avatar={pet.avatar} className={"h-[100px] w-[100px]"}/>
+                                    <div className="flex flex-col aspect-square p-8 border rounded-md shadow bg-slate-800 border-indigo-500 hover:bg-slate-600 justify-center items-center">
+                                        <Avatar
+                                            avatarTitle={pet.name?.slice(0, 1) ?? "-"}
+                                            avatar={pet.avatar}
+                                            className={"h-[100px] w-[100px]"}
+                                        />
                                         <div className={"text-indigo-200 text-2xl py-2"}>{pet.name}</div>
                                         <div>
-                                            <div className={"text-indigo-200 text-md"}>
+                                            <div className={"text-indigo-200 text-md h-6"}>
                                                 Breed: {TextUtils.valueOrEmpty(pet.breedName, "-")}
                                             </div>
-                                            <div className={"text-indigo-200 text-md"}>
+                                            <div className={"text-indigo-200 text-md h-6"}>
                                                 Gender: {TextUtils.valueOrEmpty(PetGenderUtils.getTitle(pet.gender!), "-")}
                                             </div>
                                         </div>
@@ -116,12 +116,31 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
                                 </Link>
                             )
                         })}
+                        <button
+                            onClick={this.navigateToPetCreate}
+                            className="flex flex-col aspect-square p-8 border rounded-md shadow bg-slate-800 border-indigo-500 hover:bg-slate-600 justify-center items-center"
+                        >
+                            <div className={"h-6"}> </div>
+                            <PlusCircleIcon className={"flex h-[100px] text-indigo-400"} />
+                            <div className={"text-indigo-200 text-2xl py-2"}>Create Pet</div>
+                            <div className={"h-6"}> </div>
+                        </button>
                     </div>
                 ) : (
-                    <div className={"flex flex-col grow justify-center items-center"}
-                         onClick={this.navigateToPetCreate}>
-                        <PlusCircleIcon className={"flex h-80 text-indigo-400"}/>
-                        <h3 className={"text-cyan-200 text-5xl font-semibold"}>Create your first pet</h3>
+                    // <div className={"flex flex-col grow justify-center items-center"} onClick={this.navigateToPetCreate}>
+                    //     <PlusCircleIcon className={"flex h-80 text-indigo-400"} />
+                    //     <h3 className={"text-cyan-200 text-5xl font-semibold"}>Create your first pet</h3>
+                    // </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 py-2 overflow-y-auto mt-2">
+                        <button
+                            onClick={this.navigateToPetCreate}
+                            className="flex flex-col aspect-square p-8 border rounded-md shadow bg-slate-800 border-indigo-500 hover:bg-slate-600 justify-center items-center"
+                        >
+                            <div className={"h-6"}> </div>
+                            <PlusCircleIcon className={"flex h-[100px] text-indigo-400"} />
+                            <div className={"text-indigo-200 text-2xl py-2"}>Create your first pet</div>
+                            <div className={"h-6"}> </div>
+                        </button>
                     </div>
                 )}
             </ProtectedPage>

@@ -13,16 +13,11 @@ import {
     DocumentDuplicateIcon,
     PencilIcon,
     PlusIcon,
-    XMarkIcon
+    XMarkIcon,
 } from "@heroicons/react/20/solid"
-import {
-    ArrowTopRightOnSquareIcon,
-    CheckBadgeIcon as CheckBadgeIconOutline,
-    PlusCircleIcon
-} from "@heroicons/react/24/outline"
+import {ArrowTopRightOnSquareIcon, CheckBadgeIcon as CheckBadgeIconOutline, PlusCircleIcon} from "@heroicons/react/24/outline"
 import ErrorMessage from "@/components/ErrorMessage"
 import TextUtils from "@/Utils/TextUtils"
-import _ from "lodash"
 import {differenceInCalendarMonths, differenceInCalendarWeeks, differenceInCalendarYears, format} from "date-fns"
 import {Area, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
 import VetDialog from "@/components/VetDialog"
@@ -31,18 +26,23 @@ import RecordDialog from "@/components/RecordDialog"
 import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
 import BaseComponent from "@/components/BaseComponent"
 import {WithRouterProps} from "next/dist/client/with-router"
-import {petRecordsHandler, recordCreationHandler, recordDeletionHandler, recordUpdateHandler} from "@/pages/api/record"
+import {
+    petRecordsHandler,
+    recordCreationHandler,
+    recordDeletionHandler,
+    recordsCreationHandler,
+    recordUpdateHandler,
+} from "@/pages/api/record"
 import DeleteModal from "@/components/DeleteModal"
 import {RecordType, RecordTypeUtils} from "@/enums/RecordType"
 import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
-import LineRecordDialog from "@/components/LineRecordDialog";
-import {noop} from "chart.js/helpers";
-import {RecordViewType, RecordViewTypeUtils} from "@/enums/RecordViewType";
-import CalendarEvent from "@/models/CalendarEvent";
-import CalendarComponent from "@/components/CalendarComponent";
+import LineRecordDialog from "@/components/LineRecordDialog"
+import {noop} from "chart.js/helpers"
+import {RecordViewType, RecordViewTypeUtils} from "@/enums/RecordViewType"
+import CalendarEvent from "@/models/CalendarEvent"
+import CalendarComponent from "@/components/CalendarComponent"
 
-interface PetProps extends WithRouterProps {
-}
+interface PetProps extends WithRouterProps {}
 
 class WeightLineData {
     date: string
@@ -80,12 +80,15 @@ class PetPage extends BaseComponent<PetProps, PetState> {
     private recordDialogRef: RecordDialog | null = null
     private deleteDialogRef: DeleteModal | null = null
 
+    private readonly REMINDER = "reminder"
+
     constructor(props: PetProps) {
         super(props)
         const expanded = new Map()
-        RecordTypeUtils.getAll().forEach(t => {
-            expanded.set(t, true)
+        RecordTypeUtils.getAll().forEach((t) => {
+            expanded.set(t, false)
         })
+        expanded.set(this.REMINDER, true)
         this.state = {
             records: [],
             lineData: [],
@@ -93,7 +96,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
             expandedTypes: expanded,
             selectedLineModel: RecordType.WEIGHT,
             recordViewType: RecordViewType.RECORDS,
-            loading: true
+            loading: true,
         }
     }
 
@@ -122,7 +125,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         const response: Record[] = await resp.json()
         if (resp.ok) {
             this.setState({records: response, loading: false}, () => {
-                this.updateLineDatasets();
+                this.updateLineDatasets()
                 this.updateEvents()
             })
         } else if (resp.status === 401) {
@@ -143,8 +146,29 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         if (resp.ok) {
             this.state.records.push(response)
             this.setState({records: this.state.records}, () => {
-                this.updateLineDatasets();
-                this.updateEvents();
+                this.updateLineDatasets()
+                this.updateEvents()
+            })
+        } else if (resp.status === 401) {
+            this.logout(() => this.props.router.replace("/auth/login"))
+        } else {
+            throw Error((response as ErrorDto).error)
+        }
+    }
+
+    private createRecords = async (vm: RecordCreationViewModel) => {
+        const id = this.props.router.query.id as string
+        if (!id) {
+            throw Error("Pet Id was not defined")
+        }
+
+        const resp = await recordsCreationHandler(vm, id, this.state.token)
+        const response: Record[] = await resp.json()
+        if (resp.ok) {
+            this.state.records.push(...response)
+            this.setState({records: this.state.records}, () => {
+                this.updateLineDatasets()
+                this.updateEvents()
             })
         } else if (resp.status === 401) {
             this.logout(() => this.props.router.replace("/auth/login"))
@@ -211,8 +235,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
     }
 
     private getLineEntriesFrom(records: Record[]): Record[] {
-        return records.filter(r => r.recordType === this.state.selectedLineModel)
-            .sort((a, b) => a.date! - b.date!)
+        return records.filter((r) => r.recordType === this.state.selectedLineModel).sort((a, b) => a.date! - b.date!)
     }
 
     private initPage = (token?: string) => {
@@ -230,10 +253,13 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         const metas = new Map<string, string>(Object.entries(this.state.pet?.metas ?? {}))
         const lineData: WeightLineData[] = data.map(
             (entry) =>
-                new WeightLineData(format(new Date(entry.date!), "dd/MM/yyyy"), Number(entry.result!), entry.recordType === RecordType.WEIGHT ? [
-                    Number(metas?.get(PetMinWeight)) ?? 0,
-                    Number(metas?.get(PetMaxWeight)) ?? 0,
-                ] : [])
+                new WeightLineData(
+                    format(new Date(entry.date!), "dd/MM/yyyy"),
+                    Number(entry.result!),
+                    entry.recordType === RecordType.WEIGHT
+                        ? [Number(metas?.get(PetMinWeight)) ?? 0, Number(metas?.get(PetMaxWeight)) ?? 0]
+                        : []
+                )
         )
         this.setState({lineData: lineData})
     }
@@ -261,15 +287,18 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         const pet = this.state.pet!
         return (
             <div key={pet.id} className={"flex flex-col grow w-full"}>
-                <div
-                    className={"flex flex-col bg-slate-800 py-4 px-6 border border-indigo-600 rounded-md shadow-2xl relative"}>
+                <div className={"flex flex-col bg-slate-800 py-4 px-6 border border-indigo-600 rounded-md shadow-2xl relative"}>
                     <PencilIcon
                         className={"absolute h-8 w-8 self-end text-indigo-300 z-1 hover:bg-gray-600 p-1 rounded-md"}
-                        onClick={this.navigateToEdit}/>
+                        onClick={this.navigateToEdit}
+                    />
                     <h3 className="text-center text-3xl tracking-wider text-indigo-100">{pet.name}</h3>
                     <div className={"flex flex-col lg:flex-row gap-2 my-4 justify-evenly align-middle"}>
-                        <Avatar avatarTitle={pet.name?.slice(0, 1) ?? "-"} avatar={pet.avatar}
-                                className={"self-center h-[100px] w-[100px] "}/>
+                        <Avatar
+                            avatarTitle={pet.name?.slice(0, 1) ?? "-"}
+                            avatar={pet.avatar}
+                            className={"self-center h-[100px] w-[100px] "}
+                        />
                         <div className={"gap-2 mt-2"}>
                             <div className={"flex flex-row items-center"}>
                                 <h3 className="text-indigo-200 md:text-lg pe-2 capitalize">breed :</h3>
@@ -314,12 +343,13 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                     </div>
                     <div className={"self-center gap-2"}>
                         {/*<h3 className="text-center text-3xl tracking-wider text-indigo-100">{pet.name}</h3>*/}
-                        {pet.description &&
-                            <p className="text-indigo-100 text-md md:text-lg pe-2 capitalize flex-wrap">{pet.description}</p>}
+                        {pet.description && (
+                            <p className="text-indigo-100 text-md md:text-lg pe-2 capitalize flex-wrap">{pet.description}</p>
+                        )}
                     </div>
 
                     <div className={"flex flex-col md:flex-row gap-1 mt-2"}>
-                        {!_.isEmpty(pet.vet!) && TextUtils.isNotEmpty(pet.vet?.id) && (
+                        {pet.vet !== undefined && TextUtils.isNotEmpty(pet.vet?.id) && (
                             <div
                                 className={
                                     "flex border border-indigo-600 grow justify-center items-center gap-2 p-1 hover:bg-gray-700 rounded-md text-indigo-100"
@@ -331,10 +361,10 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 }}
                             >
                                 Show Vet Info
-                                <ArrowTopRightOnSquareIcon className={"h-4 w-4 z-1"}/>
+                                <ArrowTopRightOnSquareIcon className={"h-4 w-4 z-1"} />
                             </div>
                         )}
-                        {!_.isEmpty(pet.owner!) && TextUtils.isNotEmpty(pet.owner?.name) && (
+                        {pet.owner !== undefined && TextUtils.isNotEmpty(pet.owner?.name) && (
                             <div
                                 className={
                                     "flex border border-indigo-600 grow justify-center items-center gap-2 p-1 hover:bg-gray-700 rounded-md text-indigo-100"
@@ -346,7 +376,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 }}
                             >
                                 Show Owner Info
-                                <ArrowTopRightOnSquareIcon className={"h-4 w-4 z-1"}/>
+                                <ArrowTopRightOnSquareIcon className={"h-4 w-4 z-1"} />
                             </div>
                         )}
                     </div>
@@ -357,6 +387,11 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
 
     private setCreateRecord = () => {
         this.recordDialogRef?.setCreate()
+        this.recordDialogRef?.show()
+    }
+
+    private setCreateRecordWithDate = (date: Date) => {
+        this.recordDialogRef?.setDataForCreationWithDate({}, date)
         this.recordDialogRef?.show()
     }
 
@@ -379,23 +414,35 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         return (
             <div className={"flex flex-col grow h-full w-full"}>
                 <div
-                    className={`${this.state.loading ? "animate-pulse" : ""} flex flex-col bg-slate-800 py-2 px-4 border border-indigo-600 rounded-md shadow-2xl grow`}>
+                    className={`${
+                        this.state.loading ? "animate-pulse" : ""
+                    } flex flex-col bg-slate-800 py-2 px-4 border border-indigo-600 rounded-md shadow-2xl grow`}
+                >
                     <div className={`flex flex-row items-center justify-between mb-6`}>
-                        <div className={'flex flex-row gap-4'}>
-                            {[RecordType.WEIGHT, RecordType.TEMPERATURE].map((it) => <button
+                        <div className={"flex flex-row gap-4"}>
+                            {[RecordType.WEIGHT, RecordType.TEMPERATURE].map((it) => (
+                                <button
                                     key={it}
                                     onClick={() => {
                                         this.weightEntriesDialogRef?.setRecordType(it)
-                                        this.setState({
-                                            //@ts-ignore
-                                            selectedLineModel: it!,
-                                        }, this.updateLineDatasets)
-                                    }}>
-                                    <h2 className={`capitalize justify-self-center text-lg lg:text-3xl font-bold tracking-tight ${this.state.selectedLineModel === it ? "text-indigo-300" : "text-indigo-100"}`}>
+                                        this.setState(
+                                            {
+                                                //@ts-ignore
+                                                selectedLineModel: it!,
+                                            },
+                                            this.updateLineDatasets
+                                        )
+                                    }}
+                                >
+                                    <h2
+                                        className={`capitalize justify-self-center text-lg lg:text-3xl font-bold tracking-tight ${
+                                            this.state.selectedLineModel === it ? "text-indigo-300" : "text-indigo-100"
+                                        }`}
+                                    >
                                         {RecordTypeUtils.getTitle(it)}
                                     </h2>
                                 </button>
-                            )}
+                            ))}
                         </div>
                         <div className={"flex flex-row items-center lg:align-baseline align-middle"}>
                             <PlusIcon
@@ -403,42 +450,39 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 onClick={this.setCreateWeightEntry}
                             />
                             <PencilIcon
-                                className={`flex h-7 lg:h-8 w-8 lg:mt-4 lg:ml-4 z-1 hover:bg-gray-600 lg:p-1 rounded-md ${supportsEdit ? "text-indigo-300" : "text-slate-300"}`}
+                                className={`flex h-7 lg:h-8 w-8 lg:mt-4 lg:ml-4 z-1 hover:bg-gray-600 lg:p-1 rounded-md ${
+                                    supportsEdit ? "text-indigo-300" : "text-slate-300"
+                                }`}
                                 onClick={supportsEdit ? this.setEditWeightEntry : noop}
                             />
                         </div>
                     </div>
-                    {this.state.loading ? <></> :
-                        this.state.lineData.length > 0 ? (
-                            <ResponsiveContainer className={`flex grow items-center justify-center`} width={"95%"}
-                                                 height={250}>
-                                <ComposedChart data={this.state.lineData}>
-                                    <XAxis dataKey="date" stroke="#818CF8"/>
-                                    <YAxis stroke="#818CF8"/>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#818CF84a"/>
-                                    <Area dataKey="weightLimit" stroke="#818CF8" strokeWidth={0.3} fill="#818CF84a"
-                                          activeDot={false}/>
-                                    <Line
-                                        type="monotone"
-                                        dataKey="weight"
-                                        stroke="#6366F1"
-                                        strokeWidth={2.5}
-                                        dot={{stroke: "#6366F1", strokeWidth: 3}}
-                                    />
-                                    <Tooltip filterNull
-                                             contentStyle={{backgroundColor: "#1E293B", borderColor: "#4F46E5"}}/>
-                                    <Legend/>
-                                </ComposedChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div
-                                className={"flex flex-col grow justify-center items-center h-[250px]"}
-                                onClick={this.setCreateWeightEntry}
-                            >
-                                <PlusCircleIcon className={"flex h-12 text-indigo-400"}/>
-                                <h3 className={"text-cyan-200 text-2xl font-semibold"}>Create the first entry</h3>
-                            </div>
-                        )}
+                    {this.state.loading ? (
+                        <></>
+                    ) : this.state.lineData.length > 0 ? (
+                        <ResponsiveContainer className={`flex grow items-center justify-center`} width={"95%"} height={230}>
+                            <ComposedChart data={this.state.lineData}>
+                                <XAxis dataKey="date" stroke="#818CF8" />
+                                <YAxis stroke="#818CF8" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#818CF84a" />
+                                <Area dataKey="weightLimit" stroke="#818CF8" strokeWidth={0.3} fill="#818CF84a" activeDot={false} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="weight"
+                                    stroke="#6366F1"
+                                    strokeWidth={2.5}
+                                    dot={{stroke: "#6366F1", strokeWidth: 3}}
+                                />
+                                <Tooltip filterNull contentStyle={{backgroundColor: "#1E293B", borderColor: "#4F46E5"}} />
+                                <Legend />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className={"flex flex-col grow justify-center items-center h-[250px]"} onClick={this.setCreateWeightEntry}>
+                            <PlusCircleIcon className={"flex h-12 text-indigo-400"} />
+                            <h3 className={"text-cyan-200 text-2xl font-semibold"}>Create the first entry</h3>
+                        </div>
+                    )}
                 </div>
             </div>
         )
@@ -446,36 +490,60 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
 
     private recordEntry = (r: Record) => {
         return (
-            <div key={r.id}
-                 className={"flex grow flex-col md:flex-row border-b border-indigo-600 justify-between last:border-b-0"}>
+            <div
+                key={r.id}
+                onClick={() => this.onViewRecordSelected(r)}
+                className={`flex grow flex-col md:flex-row border-b ${
+                    r.administeredBy !== undefined ? "border-indigo-600" : "border-teal-600"
+                } justify-between last:border-b-0`}
+            >
                 <div className={"flex flex-col md:flex-row grow"}>
                     <p className={"flex grow w-full"}>{r.name}</p>
                     <div className={"flex grow w-full"}>{format(new Date(r.date!), "dd/MM/yyyy")}</div>
-
                 </div>
-                <div className={"flex flex-row md:gap-x-2 items-center py-0.5"}>
-                    {r.verifiedBy && !_.isEmpty(r.verifiedBy) ?
-                        <CheckBadgeIcon
+                {r.administeredBy !== undefined ? (
+                    <div className={"flex flex-row md:gap-x-2 items-center py-0.5"}>
+                        {r.verifiedBy ? (
+                            <CheckBadgeIcon
+                                className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
+                                onClick={() => {
+                                    this.vetDialogRef?.setData(r.verifiedBy!)
+                                    this.vetDialogRef?.setTitle("Vet Information")
+                                    this.vetDialogRef?.show()
+                                }}
+                            />
+                        ) : (
+                            <CheckBadgeIconOutline className={"h-8 w-8 text-indigo-300 z-1 p-0.5 rounded-md"} />
+                        )}
+                        <DocumentDuplicateIcon
                             className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
+                            onClick={() => this.onCopyRecord(r)}
+                        />
+                        <PencilIcon
+                            className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
+                            onClick={() => this.onUpdateRecordSelected(r)}
+                        />
+                        <XMarkIcon
+                            className={"h-8 w-8 text-red-400 hover:bg-red-600 hover:bg-opacity-20 p-0.5 rounded-md"}
                             onClick={() => {
-                                this.vetDialogRef?.setData(r.verifiedBy!)
-                                this.vetDialogRef?.setTitle("Vet Information")
-                                this.vetDialogRef?.show()
+                                this.setState({selectedRecordId: r.id}, () => this.deleteDialogRef?.show())
                             }}
-                        /> :
-                        <CheckBadgeIconOutline className={"h-8 w-8 text-indigo-300 z-1 p-0.5 rounded-md"}/>
-                    }
-                    <DocumentDuplicateIcon className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
-                                           onClick={() => this.onCopyRecord(r)}/>
-                    <PencilIcon className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
-                                onClick={() => this.onUpdateRecordSelected(r)}/>
-                    <XMarkIcon
-                        className={"h-8 w-8 text-red-400 hover:bg-red-600 hover:bg-opacity-20 p-0.5 rounded-md"}
-                        onClick={() => {
-                            this.setState({selectedRecordId: r.id}, () => this.deleteDialogRef?.show())
-                        }}
-                    />
-                </div>
+                        />
+                    </div>
+                ) : (
+                    <div className={"flex flex-row md:gap-x-2 items-center py-0.5"}>
+                        <PencilIcon
+                            className={"h-8 w-8 text-teal-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
+                            onClick={() => this.onUpdateRecordSelected(r)}
+                        />
+                        <XMarkIcon
+                            className={"h-8 w-8 text-red-400 hover:bg-red-600 hover:bg-opacity-20 p-0.5 rounded-md"}
+                            onClick={() => {
+                                this.setState({selectedRecordId: r.id}, () => this.deleteDialogRef?.show())
+                            }}
+                        />
+                    </div>
+                )}
             </div>
         )
     }
@@ -498,10 +566,38 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         if (this.state.loading) {
             return <></>
         }
-        const records = this.state.records
-            .sort((a, b) => a.date! - b.date!)
+        const records = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy !== undefined)
+        const upcoming = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy === undefined)
+        const expandedUpcoming = this.state.expandedTypes.get(this.REMINDER)
         return records.length > 0 ? (
             <div className={"overflow-y-auto"}>
+                {upcoming.length > 0 && (
+                    <div
+                        key={`header${this.REMINDER}`}
+                        className={"flex flex-col border-teal-600 border rounded-md bg-teal-600 bg-opacity-10 px-2.5 mb-2"}
+                    >
+                        <div key={`header_title_${this.REMINDER}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
+                            <div
+                                className={"flex flex-row grow w-full capitalize"}
+                                onClick={() => this.updateExpanded(this.REMINDER, !expandedUpcoming)}
+                            >
+                                <span className={"flex grow"}>Upcoming </span>
+                                {expandedUpcoming ? (
+                                    <ChevronUpIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
+                                ) : (
+                                    <ChevronDownIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
+                                )}
+                            </div>
+                        </div>
+                        <div className={`${expandedUpcoming ? "" : "hidden"}`}>
+                            <div key={"header"} className={"flex flex-row grow border-teal-600 border-b mb-2"}>
+                                <div className={"flex grow capitalize"}>Name</div>
+                                <div className={"flex grow capitalize"}>Date</div>
+                            </div>
+                            {upcoming.map(this.recordEntry)}
+                        </div>
+                    </div>
+                )}
                 {RecordTypeUtils.getAll().map((t) => {
                     const tRecords = records.filter((it) => it.recordType === t)
                     const expanded = this.state.expandedTypes.get(t)
@@ -510,19 +606,18 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                             key={`header${t}`}
                             className={"flex flex-col border-indigo-600 border rounded-md bg-indigo-600 bg-opacity-10 px-2.5 mb-2"}
                         >
-                            <div key={`header${t}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
-                                <div className={"flex flex-row grow w-full capitalize"}
-                                     onClick={() => this.updateExpanded(t, !expanded)}>
-                                    <span className={'flex grow'}>{t}</span>
-                                    {expanded ? <ChevronUpIcon
-                                            className={"static h-6 w-6 self-end text-indigo-300 z-1"}/> :
-                                        <ChevronDownIcon
-                                            className={"static h-6 w-6 self-end text-indigo-300 z-1"}/>}
+                            <div key={`header_title_${t}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
+                                <div className={"flex flex-row grow w-full capitalize"} onClick={() => this.updateExpanded(t, !expanded)}>
+                                    <span className={"flex grow"}>{t}</span>
+                                    {expanded ? (
+                                        <ChevronUpIcon className={"static h-6 w-6 self-end text-indigo-300 z-1"} />
+                                    ) : (
+                                        <ChevronDownIcon className={"static h-6 w-6 self-end text-indigo-300 z-1"} />
+                                    )}
                                 </div>
                             </div>
                             <div className={`${expanded ? "" : "hidden"}`}>
-                                <div key={"header"}
-                                     className={"flex flex-row grow pe-24 border-indigo-600 border-b mb-2"}>
+                                <div key={"header"} className={"flex flex-row grow pe-24 border-indigo-600 border-b mb-2"}>
                                     <div className={"flex grow capitalize"}>Name</div>
                                     <div className={"flex grow capitalize"}>Date</div>
                                 </div>
@@ -535,9 +630,8 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                 })}
             </div>
         ) : (
-            <div className={"flex flex-col grow justify-center items-center h-[250px]"}
-                 onClick={this.setCreateRecord}>
-                <PlusCircleIcon className={"flex h-12 text-indigo-400"}/>
+            <div className={"flex flex-col grow justify-center items-center h-[250px]"} onClick={this.setCreateRecord}>
+                <PlusCircleIcon className={"flex h-12 text-indigo-400"} />
                 <h3 className={"text-cyan-200 text-2xl font-semibold"}>Create the first record</h3>
             </div>
         )
@@ -555,21 +649,18 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
     }
 
     private updateEvents = () => {
-        const events = this.state.records.filter(it => it.recordType !== RecordType.WEIGHT && it.recordType !== RecordType.TEMPERATURE).flatMap((t) => {
-            const events: CalendarEvent[] = []
-            const d = new Date(t.date!)
-            events.push(new CalendarEvent(true, t.name!, d, d, t, true))
-            if (t.nextDate) {
-                const date = new Date(t.nextDate!)
-                events.push(new CalendarEvent(true, t.name!, date, date, t))
-            }
-            return events
-        })
+        const events = this.state.records
+            .filter((it) => it.recordType !== RecordType.WEIGHT && it.recordType !== RecordType.TEMPERATURE)
+            .flatMap((t) => {
+                const events: CalendarEvent[] = []
+                const d = new Date(t.date!)
+                events.push(new CalendarEvent(true, t.name!, d, d, t, true))
+                return events
+            })
         this.setState({events})
     }
 
     private get calendarListView() {
-
         return this.state.events.length > 0 ? (
             <div className={"overflow-y-auto h-[500px]"}>
                 <CalendarComponent
@@ -580,9 +671,8 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                 />
             </div>
         ) : (
-            <div className={"flex flex-col grow justify-center items-center h-[250px]"}
-                 onClick={this.setCreateRecord}>
-                <PlusCircleIcon className={"flex h-12 text-indigo-400"}/>
+            <div className={"flex flex-col grow justify-center items-center h-[250px]"} onClick={this.setCreateRecord}>
+                <PlusCircleIcon className={"flex h-12 text-indigo-400"} />
                 <h3 className={"text-cyan-200 text-2xl font-semibold"}>Create the first record</h3>
             </div>
         )
@@ -591,26 +681,36 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
     private get ListWidget() {
         return (
             <div
-                className={`${this.state.loading ? "animate-pulse" : ""} flex flex-col bg-slate-800 py-4 px-6 border border-indigo-600 rounded-md grow overflow-y-auto`}>
+                className={`${
+                    this.state.loading ? "animate-pulse" : ""
+                } flex flex-col bg-slate-800 py-4 px-6 border border-indigo-600 rounded-md grow overflow-y-auto`}
+            >
                 <div className={`sticky flex flex-row items-center justify-between mb-6`}>
-                    <div className={'flex flex-row gap-4'}>
-                        {RecordViewTypeUtils.getAll().map((it) => <button
+                    <div className={"flex flex-row gap-4"}>
+                        {RecordViewTypeUtils.getAll().map((it) => (
+                            <button
                                 key={it}
                                 onClick={() => {
-                                    this.setState({
-                                        //@ts-ignore
-                                        recordViewType: it,
-                                    }, this.updateLineDatasets)
-                                }}>
-                                <h2 className={`capitalize justify-self-center text-lg lg:text-3xl font-bold tracking-tight ${this.state.recordViewType === it ? "text-indigo-300" : "text-indigo-100"}`}>
+                                    this.setState(
+                                        {
+                                            //@ts-ignore
+                                            recordViewType: it,
+                                        },
+                                        this.updateLineDatasets
+                                    )
+                                }}
+                            >
+                                <h2
+                                    className={`capitalize justify-self-center text-lg lg:text-3xl font-bold tracking-tight ${
+                                        this.state.recordViewType === it ? "text-indigo-300" : "text-indigo-100"
+                                    }`}
+                                >
                                     {RecordViewTypeUtils.getTitle(it)}
                                 </h2>
                             </button>
-                        )}
+                        ))}
                     </div>
-                    <PlusIcon className={"flex h-8 lg:h-10 text-indigo-200 hover:text-indigo-400 "}
-                              onClick={this.setCreateRecord}
-                    />
+                    <PlusIcon className={"flex h-8 lg:h-10 text-indigo-200 hover:text-indigo-400 "} onClick={this.setCreateRecord} />
                 </div>
                 {this.state.recordViewType === RecordViewType.RECORDS && this.recordsListView}
                 {this.state.recordViewType === RecordViewType.AGENDA && this.calendarListView}
@@ -619,23 +719,25 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
     }
 
     private onCreateLineRecord = async (vm: RecordCreationViewModel) => {
-        await this.createRecord(vm)
+        await this.createRecord(vm).catch((err) => this.setState({serverError: err.message}))
         this.weightEntriesDialogRef?.setData(this.state.records)
     }
 
     private onUpdateLineRecord = async (vm: UpdateRecordViewModel, recordId: string) => {
-        await this.updateRecord(vm, recordId)
+        await this.updateRecord(vm, recordId).catch((err) => this.setState({serverError: err.message}))
         this.weightEntriesDialogRef?.setData(this.state.records)
     }
 
     private onCreateRecord = async (vm: RecordCreationViewModel) => {
         this.recordDialogRef?.hide()
-        await this.createRecord(vm)
+        vm.hasNextDate
+            ? await this.createRecords(vm).catch((err) => this.setState({serverError: err.message}))
+            : await this.createRecord(vm).catch((err) => this.setState({serverError: err.message}))
     }
 
     private onUpdateRecord = async (vm: UpdateRecordViewModel) => {
         this.recordDialogRef?.hide()
-        await this.updateRecord(vm, this.state.selectedRecordId)
+        await this.updateRecord(vm, this.state.selectedRecordId).catch((err) => this.setState({serverError: err.message}))
     }
 
     private onCopyRecord = (record: Record) => {
@@ -646,6 +748,13 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
     private onUpdateRecordSelected = (record: Record) => {
         this.setState({selectedRecordId: record.id})
         this.recordDialogRef?.setUpdate()
+        this.recordDialogRef?.setDataForUpdate(record)
+        this.recordDialogRef?.show()
+    }
+
+    private onViewRecordSelected = (record: Record) => {
+        this.setState({selectedRecordId: record.id})
+        this.recordDialogRef?.setViewOnly()
         this.recordDialogRef?.setDataForUpdate(record)
         this.recordDialogRef?.show()
     }
@@ -662,7 +771,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                 <LineRecordDialog
                     ref={(ref) => (this.weightEntriesDialogRef = ref)}
                     recordType={this.state.selectedLineModel}
-                    data={this.state.records.filter(it => it.recordType === this.state.selectedLineModel)}
+                    data={this.state.records.filter((it) => it.recordType === this.state.selectedLineModel)}
                     onDismiss={() => {
                         this.weightEntriesDialogRef?.hide()
                         this.updateLineDatasets()
@@ -671,7 +780,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                     onUpdate={this.onUpdateLineRecord}
                     onDelete={this.onDeleteLineRecord}
                 />
-                <VetDialog ref={(ref) => (this.vetDialogRef = ref)} onDismiss={() => this.vetDialogRef?.hide()}/>
+                <VetDialog ref={(ref) => (this.vetDialogRef = ref)} onDismiss={() => this.vetDialogRef?.hide()} />
                 <RecordDialog
                     ref={(ref) => (this.recordDialogRef = ref)}
                     onDismiss={() => this.recordDialogRef?.hide()}
@@ -685,8 +794,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                     onCancel={() => this.deleteDialogRef?.hide()}
                 />
                 {this.state.loading && (
-                    <div role="status"
-                         className={"absolute z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
+                    <div role="status" className={"absolute z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
                         <svg
                             aria-hidden="true"
                             className="w-20 h-20 animate-spin dark:text-indigo-300 fill-indigo-600"
@@ -712,8 +820,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                             {this.petCard}
                             {this.weightLine}
                         </div>
-                        <div
-                            className={"flex flex-col md:max-lg:flex-row grow gap-2 xl:ms-4 md:w-3/5"}>{this.ListWidget}</div>
+                        <div className={"flex flex-col md:max-lg:flex-row grow gap-2 xl:ms-4 md:w-3/5"}>{this.ListWidget}</div>
                     </span>
                 )}
             </ProtectedPage>

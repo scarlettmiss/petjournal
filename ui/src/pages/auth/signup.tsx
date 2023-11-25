@@ -19,8 +19,7 @@ import {WithRouterProps} from "next/dist/client/with-router"
 import BaseComponent from "@/components/BaseComponent"
 import jwtDecode from "jwt-decode"
 
-interface SingUpProps extends WithRouterProps {
-}
+interface SingUpProps extends WithRouterProps {}
 
 interface SingUpState {
     vm: RegistrationViewModel
@@ -132,7 +131,7 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
     }
 
     private onLoginSuccess = (token: string) => {
-        const decoded: { exp: number } = jwtDecode(token)
+        const decoded: {exp: number} = jwtDecode(token)
         this.cookies.set("token", token, {expires: decoded?.exp > Date.now() ? new Date(decoded?.exp) : undefined})
         this.props.router.replace("/")
     }
@@ -165,12 +164,9 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
         const vm = this.state.vm
         return (
             <main className="flex flex-col h-screen ">
-                <NavBar hideAllPages
-                        buttons={<Button title={"Sign In"} variant={"primary"} onClick={this.navigateToSignIn}/>}/>
-                <div
-                    className="flex grow items-center justify-center bg-slate-900 bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
-                    <div
-                        className="my-4 flex items-center mx-auto bg-white dark:bg-slate-800 max-w-sm md:max-w-xl border rounded-md border-indigo-600">
+                <NavBar hideAllPages buttons={<Button title={"Sign In"} variant={"primary"} onClick={this.navigateToSignIn} />} />
+                <div className="flex grow items-center justify-center bg-slate-900 bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
+                    <div className="my-4 flex items-center mx-auto bg-white dark:bg-slate-800 max-w-sm md:max-w-xl border rounded-md border-indigo-600">
                         <div className="shadow-sm z-10 px-4 py-4">
                             <h2 className="py-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-indigo-100">
                                 Create your account
@@ -207,6 +203,7 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
                                         onBlur={this.checkName}
                                         hasError={vm.hasNameError}
                                         errorMessage={vm.nameError}
+                                        showLabel
                                     />
                                     <TextInput
                                         id="surname"
@@ -222,121 +219,44 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
                                         onBlur={this.checkSurname}
                                         hasError={vm.hasSurnameError}
                                         errorMessage={vm.surnameError}
+                                        showLabel
                                     />
                                 </div>
 
-                                <TextInput
-                                    id="email-address"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="off"
-                                    required
-                                    width={"full"}
-                                    classNames="rounded-md shadow-sm"
-                                    placeholder="Email address"
-                                    value={vm.email}
-                                    onInput={this.onEmailChange}
-                                    onBlur={this.checkMail}
-                                    hasError={vm.hasEmailError}
-                                    errorMessage={vm.emailError}
-                                />
-
-                                <TextInput
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="new-password"
-                                    required
-                                    width={"full"}
-                                    classNames="rounded-md shadow-sm"
-                                    placeholder="Password"
-                                    value={vm.password}
-                                    onInput={this.onPasswordChange}
-                                    onBlur={this.checkPassword}
-                                    hasError={vm.hasPasswordError}
-                                    errorMessage={vm.passwordError}
-                                />
-
-                                <div className="w-full shadow-sm">
-                                    <select
-                                        value={vm.country}
-                                        id="country"
-                                        name="country"
-                                        onChange={this.onCountryChange}
-                                        className={`${textInputStyle.textInput} ${textInputStyle.textInputFull} rounded-t-md`}
-                                    >
-                                        <option className={styles.textInputText} value="">
-                                            Choose a Country
-                                        </option>
-                                        {this.state.countriesKeys.map((k) => {
-                                            const name = countries.getName(k, "en")
-                                            return (
-                                                <option className={styles.textInputText} key={name} value={name}>
-                                                    {name}
-                                                </option>
-                                            )
-                                        })}
-                                    </select>
+                                <div className="shadow-sm">
                                     <TextInput
-                                        id="address"
-                                        name="address"
-                                        type="text"
-                                        autoComplete="off"
-                                        width="full"
-                                        placeholder="Address"
-                                        value={vm.address}
-                                        onInput={this.onAddressChange}
+                                        id="email-address"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        width={"full"}
+                                        classNames="rounded-t-md"
+                                        placeholder="Email address"
+                                        value={vm.email}
+                                        onInput={this.onEmailChange}
+                                        onBlur={this.checkMail}
+                                        hasError={vm.hasEmailError}
+                                        errorMessage={vm.emailError}
+                                        autoComplete={"email"}
                                     />
-                                    <div className="w-full align-center inline-flex rounded-md shadow-sm ">
-                                        <TextInput
-                                            id="city"
-                                            name="city"
-                                            type="text"
-                                            autoComplete="off"
-                                            width="full"
-                                            classNames="rounded-bl-md"
-                                            placeholder="City"
-                                            value={vm.city}
-                                            onInput={this.onCityChange}
-                                        />
-                                        <TextInput
-                                            id="zip"
-                                            name="zip"
-                                            type="text"
-                                            autoComplete="off"
-                                            width="full"
-                                            placeholder="Zip"
-                                            value={vm.zip}
-                                            onInput={this.onZipChange}
-                                        />
-                                        <TextInput
-                                            id="state"
-                                            name="state"
-                                            type="text"
-                                            autoComplete="off"
-                                            width="full"
-                                            classNames="rounded-br-md"
-                                            placeholder="State"
-                                            value={vm.state}
-                                            onInput={this.onStateChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="w-full shadow-sm">
-                                    <PhoneInput
-                                        width="full"
-                                        autoFormat
-                                        countryCodeEditable={false}
-                                        preferredCountries={["gr"]}
-                                        id="phone"
-                                        name="phone"
-                                        autoFocus={true}
-                                        country={TextUtils.isEmpty(vm.country) ? "gr" : vm.country.toLowerCase()}
-                                        onChange={this.onPhoneChanged}
-                                        value={vm.phone}
+
+                                    <TextInput
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        autoComplete="new-password"
+                                        required
+                                        width={"full"}
+                                        classNames="rounded-b-md"
+                                        placeholder="Password"
+                                        value={vm.password}
+                                        onInput={this.onPasswordChange}
+                                        onBlur={this.checkPassword}
+                                        hasError={vm.hasPasswordError}
+                                        errorMessage={vm.passwordError}
                                     />
                                 </div>
-                                <ErrorMessage message={this.state.serverError}/>
+                                <ErrorMessage message={this.state.serverError} />
                                 <Button
                                     key={"submit"}
                                     variant={"primary"}

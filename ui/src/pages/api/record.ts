@@ -1,8 +1,19 @@
-import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel";
-import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel";
+import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
+import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
 
 export function recordCreationHandler(vm: RecordCreationViewModel, petId: string, token?: string): Promise<Response> {
     return fetch(`/api/pet/${petId}/record`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: vm.stringify,
+    })
+}
+
+export function recordsCreationHandler(vm: RecordCreationViewModel, petId: string, token?: string): Promise<Response> {
+    return fetch(`/api/pet/${petId}/records`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

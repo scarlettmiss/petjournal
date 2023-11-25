@@ -11,10 +11,9 @@ import ErrorMessage from "@/components/ErrorMessage"
 import {WithRouterProps} from "next/dist/client/with-router"
 import BaseComponent from "@/components/BaseComponent"
 import jwtDecode from "jwt-decode"
-import ErrorDto from "@/models/ErrorDto";
+import ErrorDto from "@/models/ErrorDto"
 
-interface LoginProps extends WithRouterProps {
-}
+interface LoginProps extends WithRouterProps {}
 
 interface LoginState {
     vm: LoginViewModel
@@ -43,7 +42,7 @@ class Login extends BaseComponent<LoginProps, LoginState> {
     }
 
     private onLoginSuccess = (token: string) => {
-        const decoded: { exp: number } = jwtDecode(token)
+        const decoded: {exp: number} = jwtDecode(token)
         this.cookies.set("token", token, {expires: decoded?.exp > Date.now() ? new Date(decoded?.exp) : undefined})
         this.props.router.replace("/")
     }
@@ -75,12 +74,9 @@ class Login extends BaseComponent<LoginProps, LoginState> {
     render() {
         return (
             <main className="flex flex-col grow h-screen">
-                <NavBar hideAllPages
-                        buttons={<Button title={"Sign Up"} variant={"primary"} onClick={this.navigateToSignUp}/>}/>
-                <div
-                    className="flex items-center justify-center h-full bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
-                    <div
-                        className="container items-center mx-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-md border rounded-md border-indigo-600  px-4 py-12 sm:px-6 lg:px-8">
+                <NavBar hideAllPages buttons={<Button title={"Sign Up"} variant={"primary"} onClick={this.navigateToSignUp} />} />
+                <div className="flex items-center justify-center h-full bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
+                    <div className="container items-center mx-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-md border rounded-md border-indigo-600  px-4 py-12 sm:px-6 lg:px-8">
                         <div className="w-full max-w-md space-y-8">
                             <div>
                                 <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -97,46 +93,36 @@ class Login extends BaseComponent<LoginProps, LoginState> {
                                 </p>
                             </div>
                             <form className="mt-8 space-y-6" method="POST" onSubmit={this.onSubmit}>
-                                <input type="hidden" name="remember" defaultValue="true"/>
+                                <input type="hidden" name="remember" defaultValue="true" />
                                 <div className="shadow-sm">
-                                    <>
-                                        <label htmlFor="email-address" className="sr-only">
-                                            Email address
-                                        </label>
-                                        <TextInput
-                                            id="email-address"
-                                            name="email"
-                                            type="email"
-                                            autoComplete="email"
-                                            required
-                                            width="full"
-                                            classNames="rounded-t-md"
-                                            placeholder="Email address"
-                                            value={this.state.vm.email}
-                                            onInput={this.onEmailChange}
-                                        />
-                                    </>
-                                    <>
-                                        <label htmlFor="password" className="sr-only">
-                                            Password
-                                        </label>
-                                        <TextInput
-                                            id="password"
-                                            name="password"
-                                            type="password"
-                                            width="full"
-                                            autoComplete="current-password"
-                                            required
-                                            classNames="rounded-b-md"
-                                            placeholder="Password"
-                                            value={this.state.vm.password}
-                                            onInput={this.onPasswordChange}
-                                        />
-                                    </>
+                                    <TextInput
+                                        id="email-address"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        width="full"
+                                        classNames="rounded-t-md"
+                                        placeholder="Email address"
+                                        value={this.state.vm.email}
+                                        onInput={this.onEmailChange}
+                                    />
+
+                                    <TextInput
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        width="full"
+                                        autoComplete="current-password"
+                                        required
+                                        classNames="rounded-b-md"
+                                        placeholder="Password"
+                                        value={this.state.vm.password}
+                                        onInput={this.onPasswordChange}
+                                    />
                                 </div>
-                                <ErrorMessage message={this.state.serverError}/>
-                                <Button variant={"primary"} type={"submit"} title={"LogIn"} width={"full"}
-                                        onClick={this.onSubmit}/>
+                                <ErrorMessage message={this.state.serverError} />
+                                <Button variant={"primary"} type={"submit"} title={"LogIn"} width={"full"} onClick={this.onSubmit} />
                             </form>
                         </div>
                     </div>

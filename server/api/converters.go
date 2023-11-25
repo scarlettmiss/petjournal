@@ -115,6 +115,26 @@ func RecordCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUI
 	opts.Notes = requestBody.Notes
 	opts.AdministeredBy = administeredBy.Id
 	opts.VerifiedBy = verifierId
+
+	return opts
+}
+
+func RecordsCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUID, administeredBy user.User) application.RecordsCreateOptions {
+	opts := application.RecordsCreateOptions{}
+	verifierId := uuid.Nil
+	if administeredBy.UserType == user.Vet {
+		verifierId = administeredBy.Id
+	}
+	opts.PetId = petId
+	opts.RecordType = requestBody.RecordType
+	opts.Name = requestBody.Name
+	opts.Date = time.Unix(requestBody.Date/1000, (requestBody.Date%1000)*1000000)
+	opts.Lot = requestBody.Lot
+	opts.Result = requestBody.Result
+	opts.Description = requestBody.Description
+	opts.Notes = requestBody.Notes
+	opts.AdministeredBy = administeredBy.Id
+	opts.VerifiedBy = verifierId
 	opts.NextDate = time.Unix(requestBody.NextDate/1000, (requestBody.NextDate%1000)*1000000)
 
 	return opts
@@ -128,6 +148,7 @@ func RecordUpdateRequestToRecord(requestBody RecordUpdateRequest, rId uuid.UUID,
 	}
 	opts.Id = rId
 	opts.VerifiedBy = verifierId
+	opts.AdministeredBy = updatedBy.Id
 	opts.RecordType = requestBody.RecordType
 	opts.Name = requestBody.Name
 	opts.Date = time.Unix(requestBody.Date/1000, (requestBody.Date%1000)*1000000)
@@ -153,13 +174,13 @@ func RecordToResponse(r record.Record, pet pet.Pet, administeredBy user.User, ve
 	resp.Result = r.Result
 	resp.Description = r.Description
 	resp.Notes = r.Notes
-	resp.AdministeredBy = UserToResponse(administeredBy)
+	if administeredBy != user.Nil {
+		resp.AdministeredBy = UserToResponse(administeredBy)
+	}
 	if verifiedBy != user.Nil {
 		resp.VerifiedBy = UserToResponse(verifiedBy)
 	}
-	if !r.NextDate.IsZero() {
-		resp.NextDate = r.NextDate.UnixMilli()
-	}
+	resp.GroupId = r.GroupId.String()
 
 	return resp
 }
@@ -195,7 +216,10 @@ func UserUpdateRequestToUserOptions(requestBody UserUpdateRequest, uId uuid.UUID
 	return uOpts
 }
 
-func UserToResponse(u user.User) UserResponse {
+func UserToResponse(u user.User) *UserResponse {
+	if u.Id == uuid.Nil {
+		return nil
+	}
 	resp := UserResponse{}
 	resp.Id = u.Id.String()
 	resp.CreatedAt = u.CreatedAt.UnixMilli()
@@ -211,5 +235,5 @@ func UserToResponse(u user.User) UserResponse {
 	resp.State = u.State
 	resp.Country = u.Country
 	resp.Zip = u.Zip
-	return resp
+	return &resp
 }

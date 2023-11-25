@@ -86,7 +86,7 @@ func (r *Repository) CreatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	id, err := uuid.NewUUID()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return pet.Nil, err
 	}

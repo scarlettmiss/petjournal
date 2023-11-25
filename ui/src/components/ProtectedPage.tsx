@@ -43,9 +43,8 @@ class ProtectedPage extends BaseComponent<ProtectedPageProps, ProtectedPageState
     render() {
         return TextUtils.isNotEmpty(this.state.token) ? (
             <div className={`flex flex-col h-screen bg-slate-700`}>
-                {!this.props.hideNav && <NavBar/>}
-                <span
-                    className={`flex flex-col grow overflow-y-auto ${this.props.className}`}>{this.props.children}</span>
+                {!this.props.hideNav && <NavBar />}
+                <span className={`flex flex-col grow overflow-y-auto ${this.props.className}`}>{this.props.children}</span>
             </div>
         ) : (
             <></>

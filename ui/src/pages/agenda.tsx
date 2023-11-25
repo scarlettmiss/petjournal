@@ -7,17 +7,16 @@ import dynamic from "next/dynamic"
 import ErrorMessage from "@/components/ErrorMessage"
 import {WithRouterProps} from "next/dist/client/with-router"
 import BaseComponent from "@/components/BaseComponent"
-import {recordCreationHandler, recordHandler, recordUpdateHandler} from "@/pages/api/record";
-import {Record} from "@/models/record/Record";
-import CalendarEvent from "@/models/CalendarEvent";
-import CalendarComponent from "@/components/CalendarComponent";
-import RecordDialog, {Mode} from "@/components/RecordDialog";
-import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel";
-import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel";
-import {RecordType} from "@/enums/RecordType";
+import {recordCreationHandler, recordHandler, recordsCreationHandler, recordUpdateHandler} from "@/pages/api/record"
+import {Record} from "@/models/record/Record"
+import CalendarEvent from "@/models/CalendarEvent"
+import CalendarComponent from "@/components/CalendarComponent"
+import RecordDialog, {Mode} from "@/components/RecordDialog"
+import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
+import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
+import {RecordType} from "@/enums/RecordType"
 
-interface AgendaProps extends WithRouterProps {
-}
+interface AgendaProps extends WithRouterProps {}
 
 interface AgendaState {
     token?: string
@@ -33,7 +32,6 @@ const ProtectedPage = dynamic(() => import("@/components/ProtectedPage"), {
 })
 
 class Agenda extends BaseComponent<AgendaProps, AgendaState> {
-
     private recordDialogRef: RecordDialog | null = null
 
     constructor(props: AgendaProps) {
@@ -41,7 +39,7 @@ class Agenda extends BaseComponent<AgendaProps, AgendaState> {
         this.state = {
             records: [],
             events: [],
-            loading: true
+            loading: true,
         }
     }
 
@@ -66,25 +64,22 @@ class Agenda extends BaseComponent<AgendaProps, AgendaState> {
     }
 
     private updateEvents = () => {
-        const events = this.state.records.filter(it => it.recordType !== RecordType.WEIGHT && it.recordType !== RecordType.TEMPERATURE).flatMap((r) => {
-            const events: CalendarEvent[] = []
-            const d = new Date(r.date!)
-            events.push(new CalendarEvent(true, r.name!, d, d, r, true))
-            if (r.nextDate) {
-                const date = new Date(r.nextDate)
-                events.push(new CalendarEvent(true, r.name!, date, date, r))
-            }
-            return events
-        })
+        const events = this.state.records
+            .filter((it) => it.recordType !== RecordType.WEIGHT && it.recordType !== RecordType.TEMPERATURE)
+            .flatMap((r) => {
+                const events: CalendarEvent[] = []
+                const d = new Date(r.date!)
+                events.push(new CalendarEvent(true, r.name!, d, d, r, true))
+                return events
+            })
         this.setState({events, loading: false})
     }
 
-    private onUpdateRecordSelected = (record: Record) => {
-        this.recordDialogRef?.setUpdate()
-        this.recordDialogRef?.setDataForUpdate(record)
+    private onViewRecordSelected = (record: Record) => {
+        this.recordDialogRef?.setViewOnly()
+        this.recordDialogRef?.setDataForUpdate(record, record.pet)
         this.recordDialogRef?.show()
     }
-
 
     private updateRecord = async (vm: UpdateRecordViewModel, r?: Record) => {
         const id = r?.id
@@ -112,62 +107,25 @@ class Agenda extends BaseComponent<AgendaProps, AgendaState> {
     }
 
     private onUpdateRecord = async (vm: UpdateRecordViewModel) => {
-        console.log('onUpdateRecord ', vm)
         this.recordDialogRef?.hide()
         this.updateRecord(vm, this.state.selectedRecord)
     }
 
-    private onCopyRecord = (record: Record) => {
-        this.recordDialogRef?.setDataForCreationWithDate(record, new Date())
-        this.recordDialogRef?.show()
-    }
-
-    private onCreateRecord = async (vm: RecordCreationViewModel) => {
-        console.log('onCreateRecord ', vm)
-        this.recordDialogRef?.hide()
-        this.createRecord(vm, this.state.selectedRecord)
-    }
-
     private onEventSelected = async (e: CalendarEvent) => {
-        console.log("event selected: ", e)
         const record = e.resource
         this.setState({selectedRecord: record})
-        if (!e.isEvent) {
-            this.onCopyRecord(record)
-        } else {
-            this.onUpdateRecordSelected(record)
-        }
+
+        this.onViewRecordSelected(record)
     }
-
-
-    private createRecord = async (vm: RecordCreationViewModel, t?: Record) => {
-        const id = t?.pet?.id
-        if (!id) {
-            throw Error("Pet Id was not defined")
-        }
-
-        const resp = await recordCreationHandler(vm, id, this.state.token)
-        const response: Record = await resp.json()
-        if (resp.ok) {
-            this.state.records.push(response)
-            this.setState({records: this.state.records}, () => this.updateEvents())
-        } else if (resp.status === 401) {
-            this.logout(() => this.props.router.replace("/auth/login"))
-        } else {
-            throw Error((response as ErrorDto).error)
-        }
-    }
-
 
     render() {
         if (TextUtils.isNotEmpty(this.state.serverError)) {
-            return <ErrorMessage message={this.state.serverError}/>
+            return <ErrorMessage message={this.state.serverError} />
         }
 
-
         return (
-            <ProtectedPage init={this.initPage} key={"agenda"} className={'relative'}>
-                <div className={'p-8 h-full'}>
+            <ProtectedPage init={this.initPage} key={"agenda"} className={"relative"}>
+                <div className={"p-8 h-full"}>
                     <CalendarComponent
                         events={this.state.events}
                         views={{month: true, week: true, day: true, agenda: true}}
@@ -178,12 +136,10 @@ class Agenda extends BaseComponent<AgendaProps, AgendaState> {
                     ref={(ref) => (this.recordDialogRef = ref)}
                     onDismiss={() => this.recordDialogRef?.hide()}
                     onUpdate={this.onUpdateRecord}
-                    onCreate={this.onCreateRecord}
                     mode={Mode.UPDATE}
                 />
                 {this.state.loading && (
-                    <div role="status"
-                         className={"absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
+                    <div role="status" className={"absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
                         <svg
                             aria-hidden="true"
                             className="w-20 h-20 animate-spin dark:text-indigo-300 fill-indigo-600"

@@ -2,7 +2,6 @@ package api
 
 import (
 	"embed"
-	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -54,6 +53,7 @@ func New(application *application.Application, ui embed.FS) *API {
 
 	recordApi := api.Group("/").Use(middlewares.Auth())
 	recordApi.POST("/api/pet/:petId/record", api.createRecord)
+	recordApi.POST("/api/pet/:petId/records", api.createRecords)
 	recordApi.GET("/api/pet/:petId/records", api.recordsByPet)
 	recordApi.GET("/api/records", api.records)
 	recordApi.GET("/api/pet/:petId/record/:recordId", api.recordByPet)
@@ -99,7 +99,6 @@ func (api *API) register(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		default:
 			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-
 		}
 		return
 	}
@@ -114,7 +113,7 @@ func (api *API) users(c *gin.Context) {
 		return
 	}
 
-	usersResp := make([]UserResponse, 0, len(users))
+	usersResp := make([]*UserResponse, 0, len(users))
 	for _, u := range users {
 		userResponse := UserToResponse(u)
 		usersResp = append(usersResp, userResponse)
@@ -130,7 +129,7 @@ func (api *API) vets(c *gin.Context) {
 		return
 	}
 
-	usersResp := make([]UserResponse, 0, len(users))
+	usersResp := make([]*UserResponse, 0, len(users))
 	for _, u := range users {
 		userResponse := UserToResponse(u)
 		usersResp = append(usersResp, userResponse)
@@ -285,28 +284,11 @@ func (api *API) createPet(c *gin.Context) {
 		}
 		return
 	}
-	owner, err := api.app.User(uId)
+	owner, vet, err := api.ownerVetResponse(p)
 	if err != nil {
-		switch err {
-		case user.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+
 		return
-	}
-	vet := user.Nil
-	if p.VetId != uuid.Nil {
-		vet, err = api.app.UserByType(p.VetId, user.Vet, false)
-		if err != nil {
-			switch err {
-			case user.ErrNotFound:
-				c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			}
-			return
-		}
 	}
 
 	c.JSON(http.StatusCreated, PetToResponse(p, owner, vet))
@@ -328,16 +310,9 @@ func (api *API) pets(c *gin.Context) {
 	petsResp := make([]PetResponse, 0, len(pets))
 	var hasError bool
 	for _, p := range pets {
-		owner, err := api.app.User(p.OwnerId)
+		owner, vet, err := api.ownerVetResponse(p)
 		if err != nil {
-			fmt.Println(err)
-		}
-		vet := user.Nil
-		if p.VetId != uuid.Nil {
-			vet, err = api.app.UserByType(p.VetId, user.Vet, false)
-			if err != nil {
-				hasError = true
-			}
+			hasError = true
 		}
 
 		petResponse := PetToResponse(p, owner, vet)
@@ -345,10 +320,6 @@ func (api *API) pets(c *gin.Context) {
 	}
 
 	if hasError {
-		if err == user.ErrNotFound {
-			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
-			return
-		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
@@ -387,22 +358,10 @@ func (api *API) pet(c *gin.Context) {
 		return
 	}
 
-	owner, err := api.app.User(p.OwnerId)
+	owner, vet, err := api.ownerVetResponse(p)
 	if err != nil {
-		fmt.Println(err)
-	}
-	vet := user.Nil
-	if p.VetId != uuid.Nil {
-		vet, err = api.app.User(p.VetId)
-		if err != nil {
-			switch err {
-			case user.ErrNotFound:
-				c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			}
-			return
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
 	}
 
 	c.JSON(http.StatusOK, PetToResponse(p, owner, vet))
@@ -455,47 +414,27 @@ func (api *API) updatePet(c *gin.Context) {
 		return
 	}
 
-	owner, err := api.app.User(p.OwnerId)
+	owner, vet, err := api.ownerVetResponse(p)
 	if err != nil {
-		fmt.Println(err)
-	}
-
-	vet := user.Nil
-	if p.VetId != uuid.Nil {
-		vet, err = api.app.UserByType(p.VetId, user.Vet, false)
-		if err != nil {
-			switch err {
-			case user.ErrNotFound:
-				c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			}
-			return
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
 	}
 
 	c.JSON(http.StatusOK, PetToResponse(p, owner, vet))
 }
 
-func (api *API) removeVet(c *gin.Context, uId uuid.UUID, pId uuid.UUID) {
-	_, err := api.app.PetByUser(uId, pId, false)
+func (api *API) ownerVetResponse(p pet.Pet) (user.User, user.User, error) {
+	owner, err := api.app.User(p.OwnerId)
 	if err != nil {
-		switch err {
-		case pet.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		}
-		return
+		return user.Nil, user.Nil, err
 	}
 
-	err = api.app.RemoveVet(pId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
+	vet, err := api.app.UserByType(p.VetId, user.Vet, false)
+	if err != nil && err != user.ErrNotFound {
+		return user.Nil, user.Nil, err
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "pet removed"})
-	return
+
+	return owner, vet, nil
 }
 
 func (api *API) deletePet(c *gin.Context) {
@@ -506,27 +445,16 @@ func (api *API) deletePet(c *gin.Context) {
 	}
 
 	id := c.Param("petId")
-	//parse
 	pId, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
-	_, err = api.app.PetByOwner(uId, pId, false)
 
-	if err != nil {
-		if err == pet.ErrNotFound {
-			api.removeVet(c, uId, pId)
-		} else {
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		}
-		return
-	}
-
-	err = api.app.DeletePet(pId)
+	err = api.app.DeletePet(uId, pId)
 	if err != nil {
 		switch err {
-		case pet.ErrNotFound:
+		case user.ErrNotFound, pet.ErrNotFound:
 			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -562,17 +490,6 @@ func (api *API) createRecord(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId, false)
-	if err != nil {
-		switch err {
-		case pet.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		}
-		return
-	}
-
 	var requestBody RecordCreateRequest
 	err = c.ShouldBindJSON(&requestBody)
 	if err != nil {
@@ -586,30 +503,112 @@ func (api *API) createRecord(c *gin.Context) {
 		switch err {
 		case record.ErrNotFound:
 			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		case record.ErrNotValidType, record.ErrNotValidResult,
+		case pet.ErrNotFound, record.ErrNotValidType, record.ErrNotValidResult,
 			record.ErrNotValidName, record.ErrNotValidDate, record.ErrNotValidVerifier:
 			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		default:
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		}
+	}
+
+	p, err := api.app.Pet(r.PetId)
+	if err != nil {
+		switch err {
+		case pet.ErrNotFound:
+			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		}
+		return
+	}
+
+	administer, err := api.app.User(r.AdministeredBy)
+	if err != nil && err != user.ErrNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	verifier, err := api.app.User(r.VerifiedBy)
+	if err != nil && err != user.ErrNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, RecordToResponse(r, p, administer, verifier))
+}
+
+func (api *API) recordsToRecordsResponse(records map[uuid.UUID]record.Record) ([]RecordResponse, bool) {
+	hasError := false
+	recordsResp := make([]RecordResponse, 0, len(records))
+	for _, r := range records {
+		administer, err := api.app.User(r.AdministeredBy)
+		if err != nil && err != user.ErrNotFound {
+			hasError = true
+		}
+
+		verifier, err := api.app.User(r.VerifiedBy)
+		if err != nil && err != user.ErrNotFound {
+			hasError = true
+		}
+
+		p, err := api.app.Pet(r.PetId)
+		if err != nil {
+			hasError = true
+		}
+
+		recordResponse := RecordToResponse(r, p, administer, verifier)
+		recordsResp = append(recordsResp, recordResponse)
+	}
+
+	return recordsResp, !hasError
+}
+
+func (api *API) createRecords(c *gin.Context) {
+	uId, err := uuid.Parse(c.GetString("UserId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	pId := c.Param("petId")
+	petId, err := uuid.Parse(pId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
+	}
+
+	u, err := api.app.User(uId)
+	if err != nil {
+		switch err {
+		case user.ErrNotFound:
+			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		default:
 			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		}
 		return
 	}
 
-	verifier := user.Nil
-	if r.VerifiedBy != uuid.Nil {
-		var err error
-		verifier, err = api.app.User(r.VerifiedBy)
-		if err != nil {
-			switch err {
-			case user.ErrNotFound:
-				c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			}
-			return
-		}
+	var requestBody RecordCreateRequest
+	err = c.ShouldBindJSON(&requestBody)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		return
 	}
-	c.JSON(http.StatusCreated, RecordToResponse(r, p, u, verifier))
+
+	opts := RecordsCreateRequestToRecord(requestBody, petId, u)
+	records, err := api.app.CreateRecords(opts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	recordsResp, ok := api.recordsToRecordsResponse(records)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, recordsResp)
 }
 
 func (api *API) recordsByPet(c *gin.Context) {
@@ -626,40 +625,20 @@ func (api *API) recordsByPet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId, false)
+	records, err := api.app.RecordsByUserPet(uId, petId, false)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
+		switch err {
+		case pet.ErrNotFound:
+			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		default:
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		}
 		return
 	}
 
-	records, err := api.app.RecordsByPet(petId, false)
-	if err != nil {
+	recordsResp, ok := api.recordsToRecordsResponse(records)
+	if !ok {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		return
-	}
-
-	var hasError bool
-	recordsResp := make([]RecordResponse, 0, len(records))
-	for _, r := range records {
-		administer, err := api.app.User(r.AdministeredBy)
-		if err != nil {
-			hasError = true
-		}
-
-		verifier := user.Nil
-		if r.VerifiedBy != uuid.Nil {
-			verifier, err = api.app.User(r.VerifiedBy)
-			if err != nil {
-				hasError = true
-			}
-		}
-
-		recordResponse := RecordToResponse(r, p, administer, verifier)
-		recordsResp = append(recordsResp, recordResponse)
-	}
-
-	if hasError {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -679,33 +658,9 @@ func (api *API) records(c *gin.Context) {
 		return
 	}
 
-	var hasError bool
-	recordsResp := make([]RecordResponse, 0, len(records))
-	for _, r := range records {
-		administer, err := api.app.User(r.AdministeredBy)
-		if err != nil {
-			hasError = true
-		}
-
-		verifier := user.Nil
-		if r.VerifiedBy != uuid.Nil {
-			verifier, err = api.app.User(r.VerifiedBy)
-			if err != nil {
-				hasError = true
-			}
-		}
-
-		p, err := api.app.Pet(r.PetId)
-		if err != nil {
-			hasError = true
-		}
-
-		recordResponse := RecordToResponse(r, p, administer, verifier)
-		recordsResp = append(recordsResp, recordResponse)
-	}
-
-	if hasError {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+	recordsResp, ok := api.recordsToRecordsResponse(records)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
 
@@ -733,50 +688,38 @@ func (api *API) recordByPet(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, petId, false)
+	r, err := api.app.RecordByUserPet(uId, petId, recordId, false)
+	if err != nil {
+		switch err {
+		case pet.ErrNotFound, record.ErrNotFound:
+			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
+		default:
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+		}
+		return
+	}
+
+	p, err := api.app.Pet(r.PetId)
 	if err != nil {
 		switch err {
 		case pet.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		}
-		return
-	}
-
-	r, err := api.app.RecordByPet(petId, recordId, false)
-	if err != nil {
-		switch err {
-		case record.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		}
-		return
-	}
-
-	administer, err := api.app.User(r.AdministeredBy)
-	if err != nil {
-		switch err {
-		case user.ErrNotFound:
 			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 		return
 	}
-	verifier := user.Nil
-	if r.VerifiedBy != uuid.Nil {
-		verifier, err = api.app.User(r.VerifiedBy)
-		if err != nil {
-			switch err {
-			case user.ErrNotFound:
-				c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			}
-			return
-		}
+
+	administer, err := api.app.User(r.AdministeredBy)
+	if err != nil && err != user.ErrNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	verifier, err := api.app.User(r.VerifiedBy)
+	if err != nil && err != user.ErrNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
 	}
 
 	c.JSON(http.StatusOK, RecordToResponse(r, p, administer, verifier))
@@ -824,41 +767,27 @@ func (api *API) updateRecord(c *gin.Context) {
 		return
 	}
 
-	p, err := api.app.PetByUser(uId, r.PetId, false)
+	p, err := api.app.Pet(r.PetId)
 	if err != nil {
 		switch err {
-		case user.ErrNotFound:
+		case pet.ErrNotFound:
 			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 		return
 	}
 
 	administer, err := api.app.User(r.AdministeredBy)
-	if err != nil {
-		switch err {
-		case user.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		}
+	if err != nil && err != user.ErrNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
-	verifier := user.Nil
-	if r.VerifiedBy != uuid.Nil {
-		var err error
-		verifier, err = api.app.User(r.VerifiedBy)
-		if err != nil {
-			switch err {
-			case user.ErrNotFound:
-				c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-			default:
-				c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-			}
-			return
-		}
+	verifier, err := api.app.User(r.VerifiedBy)
+	if err != nil && err != user.ErrNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
 	}
 
 	c.JSON(http.StatusOK, RecordToResponse(r, p, administer, verifier))
@@ -885,43 +814,10 @@ func (api *API) deleteRecord(c *gin.Context) {
 		return
 	}
 
-	_, err = api.app.User(uId)
+	err = api.app.DeleteRecordUserPet(uId, petId, recordId)
 	if err != nil {
 		switch err {
-		case user.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		}
-		return
-	}
-
-	_, err = api.app.PetByUser(uId, petId, false)
-	if err != nil {
-		switch err {
-		case pet.ErrNotFound:
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		}
-		return
-	}
-
-	_, err = api.app.RecordByPet(petId, recordId, false)
-	if err != nil {
-		switch err {
-		case record.ErrNotFound:
-			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
-		default:
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
-		}
-		return
-	}
-
-	err = api.app.DeleteRecord(recordId)
-	if err != nil {
-		switch err {
-		case record.ErrNotFound:
+		case pet.ErrNotFound, user.ErrNotFound, record.ErrNotFound:
 			c.JSON(http.StatusNotFound, utils.ErrorResponse(err))
 		default:
 			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))

@@ -1,5 +1,6 @@
 import TextUtils from "@/Utils/TextUtils"
-import {Step} from "@/components/RecordDialog";
+import {Step} from "@/components/RecordDialog"
+import {startOfDay} from "date-fns"
 
 export default class RecordCreationViewModel {
     private _recordType: string = ""
@@ -37,24 +38,24 @@ export default class RecordCreationViewModel {
                 this.checkDate()
                 this.checkNumberResult()
                 this.checkType()
-                this._valid = TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.resultError) && TextUtils.isEmpty(this.recordTypeError)
+                this._valid =
+                    TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.resultError) && TextUtils.isEmpty(this.recordTypeError)
                 break
             case Step.BASE:
                 this.checkName()
                 this.checkDate()
                 this.checkType()
-                this._valid = TextUtils.isEmpty(this.nameError) && TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.recordTypeError)
-                break;
+                this._valid =
+                    TextUtils.isEmpty(this.nameError) && TextUtils.isEmpty(this.dateError) && TextUtils.isEmpty(this.recordTypeError)
+                break
             case Step.EXTRA_INFO:
                 this._valid = true
-                break;
+                break
             case Step.NEXT_DATE:
                 this.checkNextDate()
                 this._valid = TextUtils.isEmpty(this.nextDateError)
-                break;
-
+                break
         }
-
     }
 
     get recordType(): string {
@@ -100,7 +101,6 @@ export default class RecordCreationViewModel {
         this.nameError = isEmpty ? "Name is required" : ""
         this.hasNameError = isEmpty
     }
-
 
     public checkNumberResult = () => {
         const isNotFinite = TextUtils.isEmpty(this._result) || !Number.isFinite(Number(this._result))
@@ -168,13 +168,12 @@ export default class RecordCreationViewModel {
         return {
             recordType: this._recordType,
             name: this._name,
-            date: new Date(this._date!).getTime(),
+            date: new Date(this._date! + "T00:00").getTime(),
             lot: this._lot,
             result: this._result,
             description: this._description,
             notes: this._notes,
-            nextDate: this.hasNextDate ? new Date(this._nextDate!).getTime() : 0,
+            nextDate: this.hasNextDate ? new Date(this._nextDate! + "T00:00").getTime() : 0,
         }
     }
-
 }

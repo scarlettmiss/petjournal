@@ -73,20 +73,34 @@ type RecordCreateOptions struct {
 	Notes          string
 	AdministeredBy uuid.UUID
 	VerifiedBy     uuid.UUID
+}
+
+type RecordsCreateOptions struct {
+	PetId          uuid.UUID
+	RecordType     string
+	Name           string
+	Date           time.Time
+	Lot            string
+	Result         string
+	Description    string
+	Notes          string
+	AdministeredBy uuid.UUID
+	VerifiedBy     uuid.UUID
 	NextDate       time.Time
 }
 
 type RecordUpdateOptions struct {
-	Id          uuid.UUID
-	RecordType  string
-	Name        string
-	Date        time.Time
-	Lot         string
-	Result      string
-	Description string
-	Notes       string
-	NextDate    time.Time
-	VerifiedBy  uuid.UUID
+	Id             uuid.UUID
+	RecordType     string
+	Name           string
+	Date           time.Time
+	Lot            string
+	Result         string
+	Description    string
+	Notes          string
+	NextDate       time.Time
+	VerifiedBy     uuid.UUID
+	AdministeredBy uuid.UUID
 }
 
 type LoginOptions struct {
@@ -275,15 +289,34 @@ func (a *Application) PetByUser(uId uuid.UUID, id uuid.UUID, includeDel bool) (p
 	return a.petService.PetByUser(uId, id, includeDel)
 }
 
-func (a *Application) PetByOwner(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
+func (a *Application) petByOwner(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
 	return a.petService.PetByOwner(uId, id, includeDel)
 }
 
-func (a *Application) DeletePet(id uuid.UUID) error {
+func (a *Application) DeletePet(uId uuid.UUID, id uuid.UUID) error {
+	_, err := a.petByOwner(uId, id, false)
+
+	if err != nil {
+		// if it's not the owner then check if it's the pet vet
+		// in this case we don't want to delete the pet but we want to remove the vet
+		if err == pet.ErrNotFound {
+			return a.removeVet(uId, id)
+		}
+		return err
+	}
+
 	return a.petService.DeletePet(id)
 }
 
-func (a *Application) RemoveVet(id uuid.UUID) error {
+func (a *Application) removeVet(uId uuid.UUID, id uuid.UUID) error {
+	_, err := a.UserByType(uId, user.Vet, false)
+	if err != nil {
+		return err
+	}
+	_, err = a.PetByUser(uId, id, false)
+	if err != nil {
+		return err
+	}
 	return a.petService.RemoveVet(id)
 }
 
@@ -349,7 +382,6 @@ func (a *Application) UpdatePet(opts PetUpdateOptions) (pet.Pet, error) {
 
 	if opts.DateOfBirth.IsZero() {
 		return pet.Nil, pet.ErrNoValidBirthDate
-
 	}
 
 	gender, err := pet.ParseGender(opts.Gender)
@@ -375,10 +407,20 @@ func (a *Application) UpdatePet(opts PetUpdateOptions) (pet.Pet, error) {
 func (a *Application) CreateRecord(opts RecordCreateOptions) (record.Record, error) {
 	r := record.Nil
 
+	_, err := a.PetByUser(opts.AdministeredBy, opts.PetId, false)
+	if err != nil {
+		return r, err
+	}
+
 	if opts.VerifiedBy != uuid.Nil {
-		_, err := a.UserByType(opts.VerifiedBy, user.Vet, true)
+		_, err = a.UserByType(opts.VerifiedBy, user.Vet, true)
 		if err != nil {
-			return r, record.ErrNotValidVerifier
+			switch err {
+			case user.ErrNotFound:
+				return record.Nil, record.ErrNotValidVerifier
+			default:
+				return record.Nil, err
+			}
 		}
 	}
 
@@ -390,6 +432,9 @@ func (a *Application) CreateRecord(opts RecordCreateOptions) (record.Record, err
 	if typ == record.Weight || typ == record.Temperature {
 		if utils.TextIsEmpty(opts.Result) {
 			return record.Nil, record.ErrNotValidResult
+		}
+		if opts.Date.After(time.Now()) {
+			return record.Nil, record.ErrNotValidDate
 		}
 	} else {
 		if utils.TextIsEmpty(opts.Name) {
@@ -409,11 +454,85 @@ func (a *Application) CreateRecord(opts RecordCreateOptions) (record.Record, err
 	r.Result = opts.Result
 	r.Description = opts.Description
 	r.Notes = opts.Notes
-	r.AdministeredBy = opts.AdministeredBy
-	r.VerifiedBy = opts.VerifiedBy
-	r.NextDate = opts.NextDate
+
+	if !opts.Date.After(time.Now()) {
+		r.AdministeredBy = opts.AdministeredBy
+		r.VerifiedBy = opts.VerifiedBy
+	}
 
 	return a.recordService.CreateRecord(r)
+}
+
+func (a *Application) CreateRecords(opts RecordsCreateOptions) (map[uuid.UUID]record.Record, error) {
+	r := record.Nil
+
+	_, err := a.PetByUser(opts.AdministeredBy, opts.PetId, false)
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.VerifiedBy != uuid.Nil {
+		_, err := a.UserByType(opts.VerifiedBy, user.Vet, true)
+		if err != nil {
+			switch err {
+			case user.ErrNotFound:
+				return nil, record.ErrNotValidVerifier
+			default:
+				return nil, err
+			}
+		}
+	}
+
+	typ, err := record.ParseType(opts.RecordType)
+	if err != nil {
+		return nil, record.ErrNotValidType
+	}
+
+	if typ == record.Weight || typ == record.Temperature {
+		if utils.TextIsEmpty(opts.Result) {
+			return nil, record.ErrNotValidResult
+		}
+		if opts.Date.After(time.Now()) {
+			return nil, record.ErrNotValidDate
+		}
+	} else {
+		if utils.TextIsEmpty(opts.Name) {
+			return nil, record.ErrNotValidName
+		}
+	}
+
+	if opts.Date.IsZero() {
+		return nil, record.ErrNotValidDate
+	}
+
+	if opts.NextDate.IsZero() {
+		return nil, record.ErrNotValidDate
+	}
+
+	recs := make([]record.Record, 2)
+	r.PetId = opts.PetId
+	r.RecordType = typ
+	r.Name = opts.Name
+	r.Date = opts.Date
+	r.Lot = opts.Lot
+	r.Result = opts.Result
+	r.Description = opts.Description
+	r.Notes = opts.Notes
+
+	if !opts.Date.After(time.Now()) {
+		r.AdministeredBy = opts.AdministeredBy
+		r.VerifiedBy = opts.VerifiedBy
+	}
+	recs[0] = r
+
+	nextRecord := record.Record{}
+	nextRecord.PetId = opts.PetId
+	nextRecord.RecordType = typ
+	nextRecord.Name = opts.Name
+	nextRecord.Date = opts.NextDate
+	recs[1] = nextRecord
+
+	return a.recordService.CreateRecords(recs)
 }
 
 func (a *Application) RecordsByUser(uId uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
@@ -424,11 +543,19 @@ func (a *Application) RecordsByUser(uId uuid.UUID, includeDel bool) (map[uuid.UU
 	return a.recordService.PetsRecords(lo.Keys[uuid.UUID, pet.Pet](pets), includeDel)
 }
 
-func (a *Application) RecordsByPet(pId uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
+func (a *Application) RecordsByUserPet(uId uuid.UUID, pId uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
+	_, err := a.PetByUser(uId, pId, false)
+	if err != nil {
+		return nil, err
+	}
 	return a.recordService.PetRecords(pId, includeDel)
 }
 
-func (a *Application) RecordByPet(pId uuid.UUID, tId uuid.UUID, includeDel bool) (record.Record, error) {
+func (a *Application) RecordByUserPet(uId uuid.UUID, pId uuid.UUID, tId uuid.UUID, includeDel bool) (record.Record, error) {
+	_, err := a.PetByUser(uId, pId, false)
+	if err != nil {
+		return record.Nil, err
+	}
 	return a.recordService.PetRecord(pId, tId, includeDel)
 }
 
@@ -436,9 +563,15 @@ func (a *Application) UpdateRecord(opts RecordUpdateOptions) (record.Record, err
 	if opts.VerifiedBy != uuid.Nil {
 		_, err := a.UserByType(opts.VerifiedBy, user.Vet, true)
 		if err != nil {
-			return record.Nil, record.ErrNotValidVerifier
+			switch err {
+			case user.ErrNotFound:
+				return record.Nil, record.ErrNotValidVerifier
+			default:
+				return record.Nil, err
+			}
 		}
 	}
+
 	typ, err := record.ParseType(opts.RecordType)
 	if err != nil {
 		return record.Nil, record.ErrNotValidType
@@ -447,6 +580,9 @@ func (a *Application) UpdateRecord(opts RecordUpdateOptions) (record.Record, err
 	if typ == record.Weight || typ == record.Temperature {
 		if utils.TextIsEmpty(opts.Result) {
 			return record.Nil, record.ErrNotValidResult
+		}
+		if opts.Date.After(time.Now()) {
+			return record.Nil, record.ErrNotValidDate
 		}
 	} else {
 		if utils.TextIsEmpty(opts.Name) {
@@ -470,12 +606,23 @@ func (a *Application) UpdateRecord(opts RecordUpdateOptions) (record.Record, err
 	r.Result = opts.Result
 	r.Description = opts.Description
 	r.Notes = opts.Notes
-	r.NextDate = opts.NextDate
 	r.VerifiedBy = opts.VerifiedBy
+	if r.AdministeredBy == uuid.Nil {
+		r.AdministeredBy = opts.AdministeredBy
+	}
+	if opts.Date.After(time.Now()) {
+		r.AdministeredBy = uuid.Nil
+		r.VerifiedBy = uuid.Nil
+	}
 
 	return a.recordService.UpdateRecord(r)
 }
 
-func (a *Application) DeleteRecord(id uuid.UUID) error {
+func (a *Application) DeleteRecordUserPet(uId uuid.UUID, pId uuid.UUID, id uuid.UUID) error {
+	_, err := a.RecordByUserPet(uId, pId, id, false)
+	if err != nil {
+		return err
+	}
+
 	return a.recordService.DeleteRecord(id)
 }
