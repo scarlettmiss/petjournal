@@ -71,12 +71,26 @@ func (s Service) PetRecord(pId uuid.UUID, rId uuid.UUID, includeDel bool) (recor
 	return petRecord, nil
 }
 
-func (s Service) CreateRecord(Record record.Record) (record.Record, error) {
-	return s.repo.CreateRecord(Record)
+func (s Service) CreateRecord(record record.Record) (record.Record, error) {
+	return s.repo.CreateRecord(record)
 }
 
-func (s Service) UpdateRecord(Record record.Record) (record.Record, error) {
-	return s.repo.UpdateRecord(Record)
+func (s Service) CreateRecords(records []record.Record) (map[uuid.UUID]record.Record, error) {
+	recordsMap := make(map[uuid.UUID]record.Record)
+
+	records, err := s.repo.CreateRecords(records)
+	if err != nil {
+		return recordsMap, err
+	}
+
+	for _, r := range records {
+		recordsMap[r.Id] = r
+	}
+	return recordsMap, nil
+}
+
+func (s Service) UpdateRecord(record record.Record) (record.Record, error) {
+	return s.repo.UpdateRecord(record)
 }
 
 func (s Service) DeleteRecord(id uuid.UUID) error {

@@ -25,7 +25,7 @@ type RecordDBModel struct {
 	Notes          string      `bson:"notes,omitempty"`
 	AdministeredBy uuid.UUID   `bson:"administered_by,omitempty"`
 	VerifiedBy     uuid.UUID   `bson:"verified_by,omitempty"`
-	NextDate       time.Time   `bson:"next_date,omitempty"`
+	GroupId        uuid.UUID   `bson:"group_id,omitempty"`
 }
 
 func ConvertToRecordDBModel(r record.Record) RecordDBModel {
@@ -44,7 +44,7 @@ func ConvertToRecordDBModel(r record.Record) RecordDBModel {
 		Notes:          r.Notes,
 		AdministeredBy: r.AdministeredBy,
 		VerifiedBy:     r.VerifiedBy,
-		NextDate:       r.NextDate,
+		GroupId:        r.GroupId,
 	}
 }
 
@@ -64,7 +64,7 @@ func ConvertToRecordDomainModel(dbRecord RecordDBModel) record.Record {
 		Notes:          dbRecord.Notes,
 		AdministeredBy: dbRecord.AdministeredBy,
 		VerifiedBy:     dbRecord.VerifiedBy,
-		NextDate:       dbRecord.NextDate,
+		GroupId:        dbRecord.GroupId,
 	}
 }
 
@@ -82,7 +82,7 @@ func New(collection *mongo.Collection) *Repository {
 func (r *Repository) CreateRecord(rec record.Record) (record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
-	id, err := uuid.NewUUID()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return record.Nil, err
 	}
@@ -94,17 +94,63 @@ func (r *Repository) CreateRecord(rec record.Record) (record.Record, error) {
 
 	rec.Deleted = false
 
-	dbUser, err := bson.Marshal(ConvertToRecordDBModel(rec))
+	dbRec, err := bson.Marshal(ConvertToRecordDBModel(rec))
 	if err != nil {
 		return record.Nil, err
 	}
 
-	_, err = r.recordsCol.InsertOne(context.Background(), dbUser)
+	_, err = r.recordsCol.InsertOne(context.Background(), dbRec)
 	if err != nil {
 		return record.Nil, err
 	}
 
 	return rec, nil
+}
+
+func (r *Repository) CreateRecords(recs []record.Record) ([]record.Record, error) {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+
+	groupId, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+
+	dbItems := make([]interface{}, len(recs))
+	now := time.Now()
+	hasError := false
+	for i, rec := range recs {
+		id, err := uuid.NewRandom()
+		if err != nil {
+			hasError = true
+		}
+		rec.Id = id
+		rec.GroupId = groupId
+		rec.CreatedAt = now
+		rec.UpdatedAt = now
+
+		rec.Deleted = false
+
+		var dbRec []byte
+		dbRec, err = bson.Marshal(ConvertToRecordDBModel(rec))
+		if err != nil {
+			hasError = true
+		}
+		recs[i] = rec
+		dbItems[i] = dbRec
+	}
+
+	if hasError {
+		hasError = true
+		return nil, err
+	}
+
+	_, err = r.recordsCol.InsertMany(context.Background(), dbItems)
+	if err != nil {
+		return nil, err
+	}
+
+	return recs, nil
 }
 
 func (r *Repository) Record(id uuid.UUID) (record.Record, error) {

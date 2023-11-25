@@ -83,7 +83,7 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	id, err := uuid.NewUUID()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return user.Nil, err
 	}

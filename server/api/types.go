@@ -75,21 +75,21 @@ type RecordUpdateRequest struct {
 }
 
 type RecordResponse struct {
-	Id             string       `json:"id"`
-	CreatedAt      int64        `json:"createdAt"`
-	UpdatedAt      int64        `json:"updatedAt"`
-	Deleted        bool         `json:"deleted"`
-	Pet            PetResponse  `json:"pet"`
-	RecordType     string       `json:"recordType"`
-	Name           string       `json:"name"`
-	Date           int64        `json:"date"`
-	Lot            string       `json:"lot,omitempty"`
-	Result         string       `json:"result,omitempty"`
-	Description    string       `json:"description,omitempty"`
-	Notes          string       `json:"notes,omitempty"`
-	AdministeredBy UserResponse `json:"administeredBy"`
-	VerifiedBy     UserResponse `json:"verifiedBy,omitempty"`
-	NextDate       int64        `json:"nextDate,omitempty"`
+	Id             string        `json:"id"`
+	CreatedAt      int64         `json:"createdAt"`
+	UpdatedAt      int64         `json:"updatedAt"`
+	Deleted        bool          `json:"deleted"`
+	Pet            PetResponse   `json:"pet"`
+	RecordType     string        `json:"recordType"`
+	Name           string        `json:"name"`
+	Date           int64         `json:"date"`
+	Lot            string        `json:"lot,omitempty"`
+	Result         string        `json:"result,omitempty"`
+	Description    string        `json:"description,omitempty"`
+	Notes          string        `json:"notes,omitempty"`
+	AdministeredBy *UserResponse `json:"administeredBy,omitempty"`
+	VerifiedBy     *UserResponse `json:"verifiedBy,omitempty"`
+	GroupId        string        `json:"groupId,omitempty"`
 }
 
 type PetCreateRequest struct {
@@ -121,20 +121,20 @@ type PetUpdateRequest struct {
 }
 
 type PetResponse struct {
-	Id          string            `json:"id"`
-	CreatedAt   int64             `json:"createdAt"`
-	UpdatedAt   int64             `json:"updatedAt"`
-	Deleted     bool              `json:"deleted"`
-	Name        string            `json:"name"`
-	DateOfBirth int64             `json:"dateOfBirth"`
-	Gender      string            `json:"gender"`
-	BreedName   string            `json:"breedName"`
-	Colors      []string          `json:"colors"`
+	Id          string            `json:"id,omitempty"`
+	CreatedAt   int64             `json:"createdAt,omitempty"`
+	UpdatedAt   int64             `json:"updatedAt,omitempty"`
+	Deleted     bool              `json:"deleted,omitempty"`
+	Name        string            `json:"name,omitempty"`
+	DateOfBirth int64             `json:"dateOfBirth,omitempty"`
+	Gender      string            `json:"gender,omitempty"`
+	BreedName   string            `json:"breedName,omitempty"`
+	Colors      []string          `json:"colors,omitempty"`
 	Description string            `json:"description,omitempty"`
 	Pedigree    string            `json:"pedigree,omitempty"`
 	Microchip   string            `json:"microchip,omitempty"`
-	Owner       UserResponse      `json:"owner"`
-	Vet         UserResponse      `json:"vet,omitempty"`
-	Metas       map[string]string `json:"metas"`
-	Avatar      string            `json:"avatar"`
+	Owner       *UserResponse     `json:"owner,omitempty"`
+	Vet         *UserResponse     `json:"vet,omitempty"`
+	Metas       map[string]string `json:"metas,omitempty"`
+	Avatar      string            `json:"avatar,omitempty"`
 }

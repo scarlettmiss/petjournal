@@ -65,7 +65,7 @@ type Record struct {
 	Notes          string
 	AdministeredBy uuid.UUID
 	VerifiedBy     uuid.UUID
-	NextDate       time.Time
+	GroupId        uuid.UUID
 }
 
 var Nil = Record{}
