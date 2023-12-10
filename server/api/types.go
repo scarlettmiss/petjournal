@@ -53,7 +53,7 @@ type UserResponse struct {
 }
 
 type RecordCreateRequest struct {
-	RecordType  string `json:"RecordType"`
+	RecordType  string `json:"recordType"`
 	Name        string `json:"name,omitempty"`
 	Date        int64  `json:"date"`
 	Lot         string `json:"lot,omitempty"`
@@ -64,9 +64,9 @@ type RecordCreateRequest struct {
 }
 
 type RecordUpdateRequest struct {
-	RecordType  string `json:"RecordType,omitempty"`
+	RecordType  string `json:"recordType"`
 	Name        string `json:"name,omitempty"`
-	Date        int64  `json:"date,omitempty"`
+	Date        int64  `json:"date"`
 	Lot         string `json:"lot,omitempty"`
 	Result      string `json:"result,omitempty"`
 	Description string `json:"description,omitempty"`
@@ -111,7 +111,7 @@ type PetUpdateRequest struct {
 	Name        string            `json:"name"`
 	DateOfBirth int64             `json:"dateOfBirth"`
 	Gender      string            `json:"gender"`
-	BreedName   string            `json:"breedName,omitempty"`
+	BreedName   string            `json:"breedName"`
 	Colors      []string          `json:"colors,omitempty"`
 	Description string            `json:"description,omitempty"`
 	Pedigree    string            `json:"pedigree,omitempty"`

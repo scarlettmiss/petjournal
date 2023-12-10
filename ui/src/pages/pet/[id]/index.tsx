@@ -15,7 +15,11 @@ import {
     PlusIcon,
     XMarkIcon,
 } from "@heroicons/react/20/solid"
-import {ArrowTopRightOnSquareIcon, CheckBadgeIcon as CheckBadgeIconOutline, PlusCircleIcon} from "@heroicons/react/24/outline"
+import {
+    ArrowTopRightOnSquareIcon,
+    CheckBadgeIcon as CheckBadgeIconOutline,
+    PlusCircleIcon
+} from "@heroicons/react/24/outline"
 import ErrorMessage from "@/components/ErrorMessage"
 import TextUtils from "@/Utils/TextUtils"
 import {differenceInCalendarMonths, differenceInCalendarWeeks, differenceInCalendarYears, format} from "date-fns"
@@ -54,6 +58,13 @@ class WeightLineData {
         this.weight = weight
         this.weightLimit = weightLimit
     }
+}
+
+interface RecordColor {
+    main: string;
+    tooltip: string;
+    dot: string;
+    backgroundColor: string;
 }
 
 interface PetState {
@@ -193,7 +204,6 @@ class PetPage extends BaseComponent<PetProps, PetState> {
             const records = this.state.records
             const index = records.findIndex((it) => it.id === id)
             records[index] = response
-            console.log("response after update", response)
             this.setState({records}, () => {
                 this.updateLineDatasets()
                 this.updateEvents()
@@ -404,8 +414,18 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         this.weightEntriesDialogRef?.show()
     }
 
+    private getColors(type: RecordType): RecordColor {
+        switch (type) {
+            case RecordType.TEMPERATURE:
+                return {main: "#22d3ee", tooltip: "#0891b2", dot: "#06b6d4",backgroundColor: "#1E293B"}
+            default:
+                return {main: "#818CF8", tooltip: "#4F46E5", dot: "#6366F1",backgroundColor: "#1E293B"}
+        }
+    }
+
     private get weightLine() {
         const supportsEdit = this.state.lineData.length > 0
+        const colors: RecordColor = this.getColors(this.state.selectedLineModel)
         return (
             <div className={"flex flex-col grow h-full w-full"}>
                 <div
@@ -457,18 +477,18 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                     ) : this.state.lineData.length > 0 ? (
                         <ResponsiveContainer className={`flex grow items-center justify-center`} width={"95%"} height={230}>
                             <ComposedChart data={this.state.lineData}>
-                                <XAxis dataKey="date" stroke="#818CF8" />
-                                <YAxis stroke="#818CF8" />
-                                <CartesianGrid strokeDasharray="3 3" stroke="#818CF84a" />
-                                <Area dataKey="weightLimit" stroke="#818CF8" strokeWidth={0.3} fill="#818CF84a" activeDot={false} />
+                                <XAxis dataKey="date" stroke={colors.main} />
+                                <YAxis stroke={colors.main} />
+                                <CartesianGrid strokeDasharray="3 3" stroke={colors.main + "4a"} />
+                                <Area dataKey="weightLimit" stroke={colors.main} strokeWidth={0.3} fill={colors.main + "4a"} activeDot={false} />
                                 <Line
                                     type="monotone"
                                     dataKey="weight"
-                                    stroke="#6366F1"
+                                    stroke={colors.dot}
                                     strokeWidth={2.5}
-                                    dot={{stroke: "#6366F1", strokeWidth: 3}}
+                                    dot={{stroke: colors.dot, strokeWidth: 3}}
                                 />
-                                <Tooltip filterNull contentStyle={{backgroundColor: "#1E293B", borderColor: "#4F46E5"}} />
+                                <Tooltip filterNull contentStyle={{backgroundColor: colors.backgroundColor, borderColor: colors.tooltip}} />
                                 <Legend />
                             </ComposedChart>
                         </ResponsiveContainer>
@@ -483,11 +503,11 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         )
     }
 
-    private recordEntry = (r: Record) => {
+    private recordEntry = (r: Record, upcoming?: boolean) => {
         return (
             <div
                 key={r.id}
-                className={`flex grow flex-col md:flex-row border-b ${
+                className={`md:items-center flex ${upcoming? "" : "grow"}  ${upcoming? "flex-row" : "flex-col"} md:flex-row border-b ${
                     r.administeredBy !== undefined ? "border-indigo-600" : "border-teal-600"
                 } justify-between last:border-b-0`}
             >
@@ -584,11 +604,11 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                             </div>
                         </div>
                         <div className={`${expandedUpcoming ? "" : "hidden"}`}>
-                            <div key={"header"} className={"flex flex-row grow border-teal-600 border-b mb-2"}>
+                            <div key={"header"} className={"hidden md:flex flex-row grow border-teal-600 border-b mb-2"}>
                                 <div className={"flex grow capitalize"}>Name</div>
                                 <div className={"flex grow capitalize"}>Date</div>
                             </div>
-                            {upcoming.map(this.recordEntry)}
+                            {upcoming.map((record)=>this.recordEntry(record, true))}
                         </div>
                     </div>
                 )}
@@ -611,11 +631,11 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 </div>
                             </div>
                             <div className={`${expanded ? "" : "hidden"}`}>
-                                <div key={"header"} className={"flex flex-row grow pe-24 border-indigo-600 border-b mb-2"}>
+                                <div key={"header"} className={"hidden md:flex flex-row grow pe-24 border-indigo-600 border-b mb-2"}>
                                     <div className={"flex grow capitalize"}>Name</div>
                                     <div className={"flex grow capitalize"}>Date</div>
                                 </div>
-                                {tRecords.map(this.recordEntry)}
+                                {tRecords.map((record) => this.recordEntry(record, false))}
                             </div>
                         </div>
                     ) : (
@@ -632,13 +652,12 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
     }
 
     private onEventSelected = async (e: CalendarEvent) => {
-        console.log("event selected: ", e)
         const record = e.resource
         this.setState({selectedRecordId: record.id})
         if (!e.isEvent) {
             this.onCopyRecord(record)
         } else {
-            this.onUpdateRecordSelected(record)
+            this.onViewRecordSelected(record)
         }
     }
 

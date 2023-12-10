@@ -93,8 +93,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
     private onEntryInput = (value: string) => {
         const vm = this.state.vm
         vm.resultError = ""
-        vm.result = value
-        console.log(vm)
+        vm.result = value.replace(",", ".")
         this.setState({vm})
     }
 

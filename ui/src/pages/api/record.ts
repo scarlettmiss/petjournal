@@ -2,7 +2,7 @@ import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel
 import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
 
 export function recordCreationHandler(vm: RecordCreationViewModel, petId: string, token?: string): Promise<Response> {
-    return fetch(`/api/pet/${petId}/record`, {
+    return fetch(`${process.env.apiUrl}/pet/${petId}/record`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -13,7 +13,7 @@ export function recordCreationHandler(vm: RecordCreationViewModel, petId: string
 }
 
 export function recordsCreationHandler(vm: RecordCreationViewModel, petId: string, token?: string): Promise<Response> {
-    return fetch(`/api/pet/${petId}/records`, {
+    return fetch(`${process.env.apiUrl}/pet/${petId}/records`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -24,7 +24,7 @@ export function recordsCreationHandler(vm: RecordCreationViewModel, petId: strin
 }
 
 export function recordUpdateHandler(vm: UpdateRecordViewModel, id: string, petId: string, token?: string): Promise<Response> {
-    return fetch(`/api/pet/${petId}/record/${id}`, {
+    return fetch(`${process.env.apiUrl}/pet/${petId}/record/${id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export function recordUpdateHandler(vm: UpdateRecordViewModel, id: string, petId
 }
 
 export function recordDeletionHandler(rId: string, petId: string, token?: string): Promise<Response> {
-    return fetch(`/api/pet/${petId}/record/${rId}`, {
+    return fetch(`${process.env.apiUrl}/pet/${petId}/record/${rId}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export function recordDeletionHandler(rId: string, petId: string, token?: string
 }
 
 export function petRecordsHandler(petId: string, token?: string): Promise<Response> {
-    return fetch(`/api/pet/${petId}/records`, {
+    return fetch(`${process.env.apiUrl}/pet/${petId}/records`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -55,7 +55,7 @@ export function petRecordsHandler(petId: string, token?: string): Promise<Respon
 }
 
 export function recordHandler(token?: string): Promise<Response> {
-    return fetch(`/api/records`, {
+    return fetch(`${process.env.apiUrl}/records`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
