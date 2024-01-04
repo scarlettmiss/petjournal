@@ -29,6 +29,7 @@ export default function PhoneInput(props: PhoneInputProps) {
             <Input
                 autoFormat={props.autoFormat}
                 countryCodeEditable={props.countryCodeEditable}
+                disableDropdown={props.disabled}
                 preferredCountries={props.preferredCountries}
                 inputProps={{
                     id: props.id,

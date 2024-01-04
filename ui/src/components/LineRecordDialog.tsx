@@ -188,7 +188,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
             <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
-                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700/60 backdrop-blur-lg">
                         {/*Modal header*/}
                         <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-white capitalize">

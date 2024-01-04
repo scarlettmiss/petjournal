@@ -2,12 +2,8 @@ import Button from "@/components/Button"
 import React from "react"
 import {UserType, UserTypeUtils} from "@/enums/UserType"
 import countries from "i18n-iso-countries"
-import PhoneInput from "@/components/PhoneInput"
 import "react-phone-input-2/lib/material.css"
-import TextUtils from "@/Utils/TextUtils"
 import TextInput from "@/components/TextInput"
-import textInputStyle from "@/components/textInput.module.css"
-import styles from "@/components/textInput.module.css"
 import {withRouter} from "next/router"
 import NavBar from "@/components/NavBar"
 import {Auth} from "@/models/user/User"
@@ -72,42 +68,6 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
         this.setState({vm})
     }
 
-    private onCountryChange = (event: any) => {
-        const vm = this.state.vm
-        vm.country = event.currentTarget.value
-        this.setState({vm})
-    }
-
-    private onCityChange = (value: string) => {
-        const vm = this.state.vm
-        vm.city = value
-        this.setState({vm})
-    }
-
-    private onStateChange = (value: string) => {
-        const vm = this.state.vm
-        vm.state = value
-        this.setState({vm})
-    }
-
-    private onZipChange = (value: string) => {
-        const vm = this.state.vm
-        vm.zip = value
-        this.setState({vm})
-    }
-
-    private onAddressChange = (value: string) => {
-        const vm = this.state.vm
-        vm.address = value
-        this.setState({vm})
-    }
-
-    private onPhoneChanged = (phone: string) => {
-        const vm = this.state.vm
-        vm.phone = phone
-        this.setState({vm})
-    }
-
     private checkName = () => {
         this.state.vm.checkName()
         this.forceUpdate()
@@ -164,11 +124,21 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
         const vm = this.state.vm
         return (
             <main className="flex flex-col h-screen ">
-                <NavBar hideAllPages buttons={<Button title={"Sign In"} variant={"primary"} onClick={this.navigateToSignIn} />} />
+                <NavBar
+                    hideAllPages
+                    buttons={
+                        <Button
+                            title={"Sign In"}
+                            variant={"primary"}
+                            onClick={this.navigateToSignIn}
+                            className={"shadow-sm shadow-indigo-700 hover:shadow-md hover:shadow-indigo-800"}
+                        />
+                    }
+                />
                 <div className="flex grow items-center justify-center bg-slate-900 bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
-                    <div className="my-4 flex items-center mx-auto bg-white dark:bg-slate-800 max-w-sm md:max-w-xl border rounded-md border-indigo-600">
+                    <div className="my-4 flex items-center mx-auto bg-white/40 dark:bg-slate-800/20 max-w-sm md:max-w-xl rounded-md backdrop-blur-md dark:backdrop-blur-sm shadow-md">
                         <div className="shadow-sm z-10 px-4 py-4">
-                            <h2 className="py-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-indigo-100">
+                            <h2 className="py-6 text-center text-3xl font-bold tracking-tight text-indigo-900 dark:text-indigo-100">
                                 Create your account
                             </h2>
                             <form className="space-y-4" method="POST" onSubmit={this.onSubmit}>
@@ -197,7 +167,7 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
                                         required
                                         width={"full"}
                                         classNames="rounded-s-md"
-                                        placeholder="Name"
+                                        placeholder="Name*"
                                         value={vm.name}
                                         onInput={this.onNameChange}
                                         onBlur={this.checkName}
@@ -213,7 +183,7 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
                                         required
                                         width={"full"}
                                         classNames="rounded-e-md"
-                                        placeholder="Surname"
+                                        placeholder="Surname*"
                                         value={vm.surname}
                                         onInput={this.onSurnameChange}
                                         onBlur={this.checkSurname}
@@ -223,39 +193,39 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
                                     />
                                 </div>
 
-                                <div className="shadow-sm">
-                                    <TextInput
-                                        id="email-address"
-                                        name="email"
-                                        type="email"
-                                        required
-                                        width={"full"}
-                                        classNames="rounded-t-md"
-                                        placeholder="Email address"
-                                        value={vm.email}
-                                        onInput={this.onEmailChange}
-                                        onBlur={this.checkMail}
-                                        hasError={vm.hasEmailError}
-                                        errorMessage={vm.emailError}
-                                        autoComplete={"email"}
-                                    />
+                                <TextInput
+                                    id="email-address"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    width={"full"}
+                                    classNames="rounded-md"
+                                    placeholder="Email address*"
+                                    value={vm.email}
+                                    onInput={this.onEmailChange}
+                                    onBlur={this.checkMail}
+                                    hasError={vm.hasEmailError}
+                                    errorMessage={vm.emailError}
+                                    autoComplete={"email"}
+                                    showLabel
+                                />
 
-                                    <TextInput
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        autoComplete="new-password"
-                                        required
-                                        width={"full"}
-                                        classNames="rounded-b-md"
-                                        placeholder="Password"
-                                        value={vm.password}
-                                        onInput={this.onPasswordChange}
-                                        onBlur={this.checkPassword}
-                                        hasError={vm.hasPasswordError}
-                                        errorMessage={vm.passwordError}
-                                    />
-                                </div>
+                                <TextInput
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    required
+                                    width={"full"}
+                                    classNames="rounded-md"
+                                    placeholder="Password*"
+                                    value={vm.password}
+                                    onInput={this.onPasswordChange}
+                                    onBlur={this.checkPassword}
+                                    hasError={vm.hasPasswordError}
+                                    errorMessage={vm.passwordError}
+                                    showLabel
+                                />
                                 <ErrorMessage message={this.state.serverError} />
                                 <Button
                                     key={"submit"}

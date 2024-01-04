@@ -303,9 +303,7 @@ class Edit extends BaseComponent<EditProps, EditState> {
                 init={this.initPage}
                 className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center overflow-y-auto"}
             >
-                {/*<div className={"flex fixed self-end mt-4 me-4 hover:bg-gray-600 hover:text-red-600 p-1 rounded-md"}></div>*/}
-
-                <div className="flex items-center mx-auto my-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
+                <div className="flex items-center mx-auto my-auto bg-white dark:bg-slate-800/50 backdrop-blur-sm max-w-sm lg:max-w-xl rounded-md shadow-lg">
                     <div className="shadow-sm px-4 py-4">
                         <div className={"flex flex-row items-baseline justify-end"}>
                             <div className="flex justify-center pb-4 grow">
@@ -315,7 +313,6 @@ class Edit extends BaseComponent<EditProps, EditState> {
                             </div>
                             <TrashIcon className={" h-6 w-6 text-red-500"} onClick={() => this.deleteDialogRef?.show()} />
                         </div>
-
                         <form className="space-y-1 mb-3" method="POST" onSubmit={this.onSubmit}>
                             <div className={"flex py-2"}>
                                 <div className={"mx-auto"}>
@@ -329,7 +326,6 @@ class Edit extends BaseComponent<EditProps, EditState> {
                                         className={"h-[90px] w-[90px]"}
                                     />
                                 </div>
-
                                 <input
                                     ref={(ref) => (this.imageInputRef = ref)}
                                     className={`sr-only`}
@@ -341,7 +337,6 @@ class Edit extends BaseComponent<EditProps, EditState> {
                                     onChange={this.onImageChange}
                                 />
                             </div>
-
                             <TextInput
                                 autoFocus={false}
                                 id="name"
@@ -359,7 +354,6 @@ class Edit extends BaseComponent<EditProps, EditState> {
                                 errorMessage={vm.nameError}
                                 showLabel={true}
                             />
-
                             <TextInput
                                 id="dateOfBirth"
                                 name="dateOfBirth"

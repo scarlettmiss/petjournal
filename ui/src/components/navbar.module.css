@@ -1,5 +1,5 @@
 .navbar {
-    @apply sticky border-gray-200 bg-slate-800;
+    @apply sticky border-gray-200 bg-slate-900;
 }
 
 .rightSideContainer {
