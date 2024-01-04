@@ -1,21 +1,21 @@
 import React, {Component} from "react"
-import {EnvelopeIcon, MapIcon, PhoneIcon, UserIcon, XMarkIcon} from "@heroicons/react/20/solid"
+import {EnvelopeIcon, MapIcon, PhoneIcon, XMarkIcon} from "@heroicons/react/20/solid"
 import TextUtils from "@/Utils/TextUtils"
 import {User} from "@/models/user/User"
 import Avatar from "@/components/Avatar"
 
-interface VetDialogProps {
+interface UserDialogProps {
     onDismiss: () => void
 }
 
-interface VetDialogState {
+interface UserDialogState {
     title: string
     info: User
     show: boolean
 }
 
-export default class VetDialog extends Component<VetDialogProps, VetDialogState> {
-    constructor(props: VetDialogProps) {
+export default class UserDialog extends Component<UserDialogProps, UserDialogState> {
+    constructor(props: UserDialogProps) {
         super(props)
         this.state = {
             title: "Vet Information",
@@ -45,12 +45,12 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
     }
 
     render() {
-        const vet = this.state.info
+        const user = this.state.info
         return (
             <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
-                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700/60 backdrop-blur-lg">
                         {/*Modal header*/}
                         <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-white text-center">{this.state.title}</h3>
@@ -67,31 +67,34 @@ export default class VetDialog extends Component<VetDialogProps, VetDialogState>
                         {this.state.info !== undefined && (
                             <div className="px-12 py-4 space-y-4 max-h-96 overflow-y-auto justify-center">
                                 <div className={"flex items-center justify-center"}>
-                                    <Avatar icon={<UserIcon className={"flex p-1 h-[70px] w-[70px]"} />} />
+                                    <Avatar
+                                        avatarTitle={`${user.surname?.slice(0, 1) ?? ""}${user.name?.slice(0, 1) ?? ""}`}
+                                        className={"flex p-1 h-[70px] w-[70px]"}
+                                    />
                                 </div>
                                 <h3 className="text-center text-2xl text-indigo-100">
-                                    {vet.surname} {vet.name}
+                                    {user.surname} {user.name}
                                 </h3>
 
                                 <div className={"flex flex-col gap-2 mt-3"}>
-                                    {vet.email && (
+                                    {user.email && (
                                         <a
-                                            href={`mailto: ${vet.email}`}
+                                            href={`mailto: ${user.email}`}
                                             target={"_blank"}
                                             className={"flex gap-2 items-center text-indigo-100 hover:text-indigo-300 underline"}
                                         >
                                             <EnvelopeIcon className={"h-5 w-5"} />
-                                            {vet.email}
+                                            {user.email}
                                         </a>
                                     )}
-                                    {vet.phone && (
+                                    {user.phone && user.phone.length > 3 && (
                                         <a
-                                            href={`tel:${vet.phone}`}
+                                            href={`tel:${user.phone}`}
                                             target={"_parent"}
                                             className={"flex gap-2 items-center text-indigo-100 hover:text-indigo-300 underline"}
                                         >
                                             <PhoneIcon className={"h-5 w-5"} />
-                                            {vet.phone}
+                                            {user.phone}
                                         </a>
                                     )}
                                 </div>

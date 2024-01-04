@@ -245,8 +245,8 @@ class Create extends BaseComponent<CreateProps, CreateState> {
     render() {
         const vm = this.state.vm
         return (
-            <ProtectedPage hideNav={true} init={this.initPage} className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}>
-                <div className="container items-center mx-auto my-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-xl border rounded-md border-indigo-600">
+            <ProtectedPage hideNav={true} init={this.initPage} className={"bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}>
+                <div className="container items-center mx-auto my-auto bg-white/40 dark:bg-slate-800/30 max-w-sm lg:max-w-xl rounded-md backdrop-blur-sm shadow-lg">
                     <div className="shadow-sm px-4 py-4">
                         <h2 className=" pb-4 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-indigo-100">
                             Create a Pet profile
@@ -254,14 +254,14 @@ class Create extends BaseComponent<CreateProps, CreateState> {
                         <form className="space-y-1 mb-3" method="POST" onSubmit={this.onSubmit}>
                             <div className={"flex py-2"}>
                                 {this.state.vm.avatar && <ColorExtractor src={this.state.vm.avatar} getColors={this.getAvatarColors} />}
-                                <div className={"mx-auto"}>
+                                <div className={"mx-auto "}>
                                     <Avatar
                                         avatarTitle={"Add Image"}
                                         avatar={this.state.vm.avatar}
                                         onCLick={() => {
                                             this.imageInputRef?.click()
                                         }}
-                                        textStyle={"text-lg h-[90px] w-[90px]"}
+                                        textStyle={"text-lg h-[90px] w-[90px] hover:shadow-xl"}
                                     />
                                 </div>
 
@@ -326,6 +326,7 @@ class Create extends BaseComponent<CreateProps, CreateState> {
                                     className={`${styles.textInput} ${styles.textInputFull} ${
                                         vm.hasGenderError && styles.errorHighlight
                                     } rounded-md`}
+                                    required
                                 >
                                     <option value="">Choose a Gender</option>
                                     {PetGenderUtils.getAll().map((g) => {

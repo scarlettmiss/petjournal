@@ -70,7 +70,9 @@ class NavBar extends BaseComponent<NavBarProps, NavBarState> {
                                 />
 
                                 <ArrowLeftOnRectangleIcon
-                                    className={"h-10 w-10 text-slate-300 p-2 rounded-full hover:bg-gray-600"}
+                                    className={
+                                        "h-10 w-10 text-cyan-50 dark:text-slate-300 p-2 rounded-full hover:bg-indigo-500/20 hover:dark:bg-gray-600"
+                                    }
                                     onClick={() => this.logout(() => this.props.router.replace("/auth/login"))}
                                 />
                             </div>

@@ -4,6 +4,7 @@ import styles from "./textInput.module.css"
 interface ButtonProps {
     id: string
     name: string
+    icon?: React.ReactElement
     type?: HTMLInputTypeAttribute
     required?: boolean
     autoComplete: string
@@ -35,6 +36,9 @@ export default function TextInput(props: ButtonProps) {
             <label htmlFor={props.id} className={props.showLabel ? styles.label : "sr-only"}>
                 {props.placeholder}
             </label>
+            {props.icon !== undefined && <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                {props.icon}
+            </div>}
             <input
                 required={props.required}
                 id={props.id}

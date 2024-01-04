@@ -74,9 +74,19 @@ class Login extends BaseComponent<LoginProps, LoginState> {
     render() {
         return (
             <main className="flex flex-col grow h-screen">
-                <NavBar hideAllPages buttons={<Button title={"Sign Up"} variant={"primary"} onClick={this.navigateToSignUp} />} />
+                <NavBar
+                    hideAllPages
+                    buttons={
+                        <Button
+                            title={"Sign Up"}
+                            variant={"primary"}
+                            onClick={this.navigateToSignUp}
+                            className={"shadow-sm shadow-indigo-700 hover:shadow-md hover:shadow-indigo-800"}
+                        />
+                    }
+                />
                 <div className="flex items-center justify-center h-full bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
-                    <div className="container items-center mx-auto bg-white dark:bg-slate-800 max-w-sm lg:max-w-md border rounded-md border-indigo-600  px-4 py-12 sm:px-6 lg:px-8">
+                    <div className="isolate container items-center mx-auto bg-white dark:bg-slate-800/30 max-w-sm lg:max-w-md rounded-md px-4 py-12 sm:px-6 lg:px-8 shadow-md backdrop-blur-sm">
                         <div className="w-full max-w-md space-y-8">
                             <div>
                                 <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -122,7 +132,14 @@ class Login extends BaseComponent<LoginProps, LoginState> {
                                     />
                                 </div>
                                 <ErrorMessage message={this.state.serverError} />
-                                <Button variant={"primary"} type={"submit"} title={"LogIn"} width={"full"} onClick={this.onSubmit} />
+                                <Button
+                                    variant={"primary"}
+                                    type={"submit"}
+                                    title={"LogIn"}
+                                    width={"full"}
+                                    onClick={this.onSubmit}
+                                    className={"drop-shadow-sm drop-shadow-indigo-600 hover:shadow-md hover:shadow-indigo-800"}
+                                />
                             </form>
                         </div>
                     </div>

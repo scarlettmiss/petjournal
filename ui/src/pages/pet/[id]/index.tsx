@@ -15,16 +15,12 @@ import {
     PlusIcon,
     XMarkIcon,
 } from "@heroicons/react/20/solid"
-import {
-    ArrowTopRightOnSquareIcon,
-    CheckBadgeIcon as CheckBadgeIconOutline,
-    PlusCircleIcon
-} from "@heroicons/react/24/outline"
+import {ArrowTopRightOnSquareIcon, CheckBadgeIcon as CheckBadgeIconOutline, PlusCircleIcon} from "@heroicons/react/24/outline"
 import ErrorMessage from "@/components/ErrorMessage"
 import TextUtils from "@/Utils/TextUtils"
-import {differenceInCalendarMonths, differenceInCalendarWeeks, differenceInCalendarYears, format} from "date-fns"
+import {differenceInCalendarMonths, differenceInCalendarWeeks, differenceInCalendarYears, format, isBefore} from "date-fns"
 import {Area, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
-import VetDialog from "@/components/VetDialog"
+import UserDialog from "@/components/UserDialog"
 import {Record} from "@/models/record/Record"
 import RecordDialog from "@/components/RecordDialog"
 import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
@@ -61,10 +57,10 @@ class WeightLineData {
 }
 
 interface RecordColor {
-    main: string;
-    tooltip: string;
-    dot: string;
-    backgroundColor: string;
+    main: string
+    tooltip: string
+    dot: string
+    backgroundColor: string
 }
 
 interface PetState {
@@ -87,7 +83,7 @@ const ProtectedPage = dynamic(() => import("@/components/ProtectedPage"), {
 
 class PetPage extends BaseComponent<PetProps, PetState> {
     private weightEntriesDialogRef: LineRecordDialog | null = null
-    private vetDialogRef: VetDialog | null = null
+    private userDialogRef: UserDialog | null = null
     private recordDialogRef: RecordDialog | null = null
     private deleteDialogRef: DeleteModal | null = null
 
@@ -296,42 +292,55 @@ class PetPage extends BaseComponent<PetProps, PetState> {
     private get petCard() {
         const pet = this.state.pet!
         return (
-            <div key={pet.id} className={"flex flex-col grow w-full"}>
-                <div className={"flex flex-col bg-slate-800 py-4 px-6 border border-indigo-600 rounded-md shadow-2xl relative"}>
+            <div key={pet.id} className={"flex flex-col grow h-full xl:h-auto w-full"}>
+                <div className={"flex flex-col bg-indigo-300 dark:bg-slate-800 py-4 px-6 rounded-md shadow-2xl relative"}>
                     <PencilIcon
-                        className={"absolute h-8 w-8 self-end text-indigo-300 z-1 hover:bg-gray-600 p-1 rounded-md"}
+                        className={"absolute h-8 w-8 self-end text-indigo-500 dark:text-indigo-300 z-1 hover:bg-gray-600 p-1 rounded-md"}
                         onClick={this.navigateToEdit}
                     />
-                    <h3 className="text-center text-3xl tracking-wider text-indigo-100">{pet.name}</h3>
-                    <div className={"flex flex-col lg:flex-row gap-2 my-4 justify-evenly align-middle"}>
+                    <div className={"flex flex-col xl:flex-row gap-2 my-4 justify-evenly align-middle"}>
                         <Avatar
                             avatarTitle={pet.name?.slice(0, 1) ?? "-"}
                             avatar={pet.avatar}
-                            className={"self-center h-[100px] w-[100px] "}
+                            className={"self-center h-[100px] w-[100px] xl:h-[150px] xl:w-[150px]"}
                         />
-                        <div className={"gap-2 mt-2"}>
-                            <div className={"flex flex-row items-center"}>
-                                <h3 className="text-indigo-200 md:text-lg pe-2 capitalize">breed :</h3>
-                                <p className="text-indigo-200 md:text-lg">{pet.breedName}</p>
-                            </div>
-                            <div className={"flex flex-row items-center"}>
-                                <h3 className="text-indigo-200 md:text-lg pe-2 capitalize">Age :</h3>
-                                <p className="text-indigo-200 md:text-lg">{this.getAge(pet)}</p>
-                            </div>
-                            <div className={"flex flex-row items-center"}>
-                                <h3 className="text-indigo-200 md:text-lg pe-2 capitalize">gender :</h3>
-                                <p className="text-indigo-200 md:text-lg">{PetGenderUtils.getTitle(pet.gender)}</p>
+                        <div className={"gap-2 mt-2 xl:max-w-[60%]"}>
+                            <h3 className="text-center text-xl xl:text-2xl tracking-wider text-indigo-800 dark:text-indigo-100 truncate ">
+                                {pet.name}
+                            </h3>
+                            <div className="flex flex-col ">
+                                <div className={"flex flex-row items-center"}>
+                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                        breed :
+                                    </h3>
+                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg truncate">{pet.breedName}</p>
+                                </div>
+                                <div className={"flex flex-row items-center"}>
+                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                        Age :
+                                    </h3>
+                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg">{this.getAge(pet)}</p>
+                                </div>
+                                <div className={"flex flex-row items-center"}>
+                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                        gender :
+                                    </h3>
+                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg">
+                                        {PetGenderUtils.getTitle(pet.gender)}
+                                    </p>
+                                </div>
                             </div>
                             {pet.colors && pet.colors.length > 0 && (
                                 <div className={"flex flex-row items-start "}>
-                                    <h3 className="text-indigo-200 md:text-lg capitalize justify-start ">colors:</h3>
+                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg capitalize justify-start whitespace-nowrap">
+                                        Colors :
+                                    </h3>
                                     <div className={"flex flex-row gap-x-1.5 gap-y-1 ms-3 flex-wrap py-1.5"}>
                                         {pet.colors.map((color, index) => (
                                             <div
                                                 key={`color_${index}`}
                                                 style={{backgroundColor: color}}
-                                                className={`rounded-full aspect-square h-[15px]
-w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate-600`}
+                                                className={`rounded-full aspect-square h-[15px] w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate-600`}
                                             ></div>
                                         ))}
                                     </div>
@@ -339,22 +348,29 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                             )}
                             {pet.pedigree && (
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-200 text-md md:text-lg pe-2 capitalize">pedigree :</h3>
-                                    <p className="text-indigo-200 text-md md:text-lg">{pet.pedigree}</p>
+                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                        pedigree :
+                                    </h3>
+                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg truncate">{pet.pedigree}</p>
                                 </div>
                             )}
                             {pet.microchip && (
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-200 text-md md:text-lg pe-2 capitalize">microchip :</h3>
-                                    <p className="text-indigo-200 text-md md:text-lg">{pet.microchip}</p>
+                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                        microchip :
+                                    </h3>
+                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg max-w-xl truncate">
+                                        {pet.microchip}
+                                    </p>
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className={"self-center gap-2"}>
-                        {/*<h3 className="text-center text-3xl tracking-wider text-indigo-100">{pet.name}</h3>*/}
                         {pet.description && (
-                            <p className="text-indigo-100 text-md md:text-lg pe-2 capitalize flex-wrap">{pet.description}</p>
+                            <p className="text-indigo-800 dark:text-indigo-100 text-sm xl:text-lg pe-2 capitalize flex-wrap">
+                                {pet.description}
+                            </p>
                         )}
                     </div>
 
@@ -362,30 +378,30 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                         {pet.vet !== undefined && TextUtils.isNotEmpty(pet.vet?.id) && (
                             <div
                                 className={
-                                    "flex border border-indigo-600 grow justify-center items-center gap-2 p-1 hover:bg-gray-700 rounded-md text-indigo-100"
+                                    "flex grow justify-center items-center gap-2 p-1 bg-indigo-500/60 dark:bg-indigo-600/30 rounded-md text-indigo-100 shadow hover:shadow-lg text-sm xl:text-lg !whitespace-nowrap text-ellipsis"
                                 }
                                 onClick={() => {
-                                    this.vetDialogRef?.setData(this.state.pet!.vet!)
-                                    this.vetDialogRef?.setTitle("Vet Information")
-                                    this.vetDialogRef?.show()
+                                    this.userDialogRef?.setData(this.state.pet!.vet!)
+                                    this.userDialogRef?.setTitle("Vet Information")
+                                    this.userDialogRef?.show()
                                 }}
                             >
-                                Show Vet Info
+                                Vet Info
                                 <ArrowTopRightOnSquareIcon className={"h-4 w-4 z-1"} />
                             </div>
                         )}
                         {pet.owner !== undefined && TextUtils.isNotEmpty(pet.owner?.name) && (
                             <div
                                 className={
-                                    "flex border border-indigo-600 grow justify-center items-center gap-2 p-1 hover:bg-gray-700 rounded-md text-indigo-100"
+                                    "flex grow justify-center items-center gap-2 p-1 bg-indigo-500/60 dark:bg-indigo-600/30 rounded-md text-indigo-100 shadow hover:shadow-lg text-sm xl:text-lg"
                                 }
                                 onClick={() => {
-                                    this.vetDialogRef?.setData(this.state.pet!.owner!)
-                                    this.vetDialogRef?.setTitle("Owner Information")
-                                    this.vetDialogRef?.show()
+                                    this.userDialogRef?.setData(this.state.pet!.owner!)
+                                    this.userDialogRef?.setTitle("Owner Information")
+                                    this.userDialogRef?.show()
                                 }}
                             >
-                                Show Owner Info
+                                Owner Info
                                 <ArrowTopRightOnSquareIcon className={"h-4 w-4 z-1"} />
                             </div>
                         )}
@@ -417,9 +433,9 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
     private getColors(type: RecordType): RecordColor {
         switch (type) {
             case RecordType.TEMPERATURE:
-                return {main: "#22d3ee", tooltip: "#0891b2", dot: "#06b6d4",backgroundColor: "#1E293B"}
+                return {main: "#22d3ee", tooltip: "#0891b2", dot: "#06b6d4", backgroundColor: "#1E293B"}
             default:
-                return {main: "#818CF8", tooltip: "#4F46E5", dot: "#6366F1",backgroundColor: "#1E293B"}
+                return {main: "#818CF8", tooltip: "#4F46E5", dot: "#6366F1", backgroundColor: "#1E293B"}
         }
     }
 
@@ -431,7 +447,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                 <div
                     className={`${
                         this.state.loading ? "animate-pulse" : ""
-                    } flex flex-col bg-slate-800 py-2 px-4 border border-indigo-600 rounded-md shadow-2xl grow`}
+                    } flex flex-col bg-indigo-300 dark:bg-slate-800 py-2 px-4 rounded-md shadow-2xl grow`}
                 >
                     <div className={`flex flex-row items-center justify-between mb-6`}>
                         <div className={"flex flex-row gap-4"}>
@@ -450,8 +466,10 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                     }}
                                 >
                                     <h2
-                                        className={`capitalize justify-self-center text-lg lg:text-3xl font-bold tracking-tight ${
-                                            this.state.selectedLineModel === it ? "text-indigo-300" : "text-indigo-100"
+                                        className={`capitalize justify-self-center text-lg xl:text-3xl font-bold tracking-tight ${
+                                            this.state.selectedLineModel === it
+                                                ? `text-indigo-500 dark:text-indigo-300`
+                                                : `text-indigo-050 dark:text-indigo-100`
                                         }`}
                                     >
                                         {RecordTypeUtils.getTitle(it)}
@@ -461,12 +479,14 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                         </div>
                         <div className={"flex flex-row items-center lg:align-baseline align-middle"}>
                             <PlusIcon
-                                className={"flex h-8 w-8 text-indigo-300 lg:mt-4 lg:ml-4 z-1 hover:bg-gray-600 lg:p-1 rounded-md"}
+                                className={
+                                    "flex h-8 w-8 text-indigo-500 dark:text-indigo-300 lg:mt-4 lg:ml-4 z-1 hover:bg-indigo-500/40 hover:dark:bg-gray-600 lg:p-1 rounded-md"
+                                }
                                 onClick={this.setCreateWeightEntry}
                             />
                             <PencilIcon
-                                className={`flex h-7 lg:h-8 w-8 lg:mt-4 lg:ml-4 z-1 hover:bg-gray-600 lg:p-1 rounded-md ${
-                                    supportsEdit ? "text-indigo-300" : "text-slate-300"
+                                className={`flex h-7 lg:h-8 w-8 lg:mt-4 lg:ml-4 z-1 hover:bg-indigo-500/40 hover:dark:bg-gray-600 lg:p-1 rounded-md ${
+                                    supportsEdit ? `text-indigo-500 dark:text-indigo-300` : `text-gray-400 dark:text-slate-300`
                                 }`}
                                 onClick={supportsEdit ? this.setEditWeightEntry : noop}
                             />
@@ -480,7 +500,13 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 <XAxis dataKey="date" stroke={colors.main} />
                                 <YAxis stroke={colors.main} />
                                 <CartesianGrid strokeDasharray="3 3" stroke={colors.main + "4a"} />
-                                <Area dataKey="weightLimit" stroke={colors.main} strokeWidth={0.3} fill={colors.main + "4a"} activeDot={false} />
+                                <Area
+                                    dataKey="weightLimit"
+                                    stroke={colors.main}
+                                    strokeWidth={0.3}
+                                    fill={colors.main + "4a"}
+                                    activeDot={false}
+                                />
                                 <Line
                                     type="monotone"
                                     dataKey="weight"
@@ -507,7 +533,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
         return (
             <div
                 key={r.id}
-                className={`md:items-center flex ${upcoming? "" : "grow"}  ${upcoming? "flex-row" : "flex-col"} md:flex-row border-b ${
+                className={`md:items-center flex ${upcoming ? "" : "grow"}  ${upcoming ? "flex-row" : "flex-col"} md:flex-row border-b ${
                     r.administeredBy !== undefined ? "border-indigo-600" : "border-teal-600"
                 } justify-between last:border-b-0`}
             >
@@ -521,9 +547,9 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                             <CheckBadgeIcon
                                 className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
                                 onClick={() => {
-                                    this.vetDialogRef?.setData(r.verifiedBy!)
-                                    this.vetDialogRef?.setTitle("Vet Information")
-                                    this.vetDialogRef?.show()
+                                    this.userDialogRef?.setData(r.verifiedBy!)
+                                    this.userDialogRef?.setTitle("Vet Information")
+                                    this.userDialogRef?.show()
                                 }}
                             />
                         ) : (
@@ -581,14 +607,17 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
             return <></>
         }
         const records = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy !== undefined)
+        const expired = this.state.records
+            .sort((a, b) => a.date! - b.date!)
+            .filter((it) => it.administeredBy === undefined && isBefore(new Date(it.date!), new Date()))
         const upcoming = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy === undefined)
         const expandedUpcoming = this.state.expandedTypes.get(this.REMINDER)
         return records.length > 0 ? (
             <div className={"overflow-y-auto"}>
-                {upcoming.length > 0 && (
+                {expired.length > 0 && (
                     <div
-                        key={`header${this.REMINDER}`}
-                        className={"flex flex-col border-teal-600 border rounded-md bg-teal-600 bg-opacity-10 px-2.5 mb-2"}
+                        key={`headerExpired`}
+                        className={"flex flex-col border-teal-600 border rounded-md bg-teal-600/40 dark:bg-teal-600/10 px-2.5 mb-2"}
                     >
                         <div key={`header_title_${this.REMINDER}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
                             <div
@@ -608,7 +637,34 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 <div className={"flex grow capitalize"}>Name</div>
                                 <div className={"flex grow capitalize"}>Date</div>
                             </div>
-                            {upcoming.map((record)=>this.recordEntry(record, true))}
+                            {upcoming.map((record) => this.recordEntry(record, true))}
+                        </div>
+                    </div>
+                )}
+                {upcoming.length > 0 && (
+                    <div
+                        key={`header${this.REMINDER}`}
+                        className={"flex flex-col border-teal-600 border rounded-md bg-teal-600/40 dark:bg-teal-600/10 px-2.5 mb-2"}
+                    >
+                        <div key={`header_title_${this.REMINDER}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
+                            <div
+                                className={"flex flex-row grow w-full capitalize"}
+                                onClick={() => this.updateExpanded(this.REMINDER, !expandedUpcoming)}
+                            >
+                                <span className={"flex grow"}>Upcoming </span>
+                                {expandedUpcoming ? (
+                                    <ChevronUpIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
+                                ) : (
+                                    <ChevronDownIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
+                                )}
+                            </div>
+                        </div>
+                        <div className={`${expandedUpcoming ? "" : "hidden"}`}>
+                            <div key={"header"} className={"hidden md:flex flex-row grow border-teal-600 border-b mb-2"}>
+                                <div className={"flex grow capitalize"}>Name</div>
+                                <div className={"flex grow capitalize"}>Date</div>
+                            </div>
+                            {upcoming.map((record) => this.recordEntry(record, true))}
                         </div>
                     </div>
                 )}
@@ -696,7 +752,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
             <div
                 className={`${
                     this.state.loading ? "animate-pulse" : ""
-                } flex flex-col bg-slate-800 py-4 px-6 border border-indigo-600 rounded-md grow overflow-y-auto`}
+                } flex flex-col  bg-indigo-300 dark:bg-slate-800 py-4 px-6 rounded-md grow overflow-y-auto`}
             >
                 <div className={`sticky flex flex-row items-center justify-between mb-6`}>
                     <div className={"flex flex-row gap-4"}>
@@ -714,8 +770,10 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                                 }}
                             >
                                 <h2
-                                    className={`capitalize justify-self-center text-lg lg:text-3xl font-bold tracking-tight ${
-                                        this.state.recordViewType === it ? "text-indigo-300" : "text-indigo-100"
+                                    className={`capitalize justify-self-center text-lg xl:text-3xl font-bold tracking-tight ${
+                                        this.state.recordViewType === it
+                                            ? `text-indigo-500 dark:text-indigo-300`
+                                            : `text-indigo-050 dark:text-indigo-100`
                                     }`}
                                 >
                                     {RecordViewTypeUtils.getTitle(it)}
@@ -723,7 +781,10 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                             </button>
                         ))}
                     </div>
-                    <PlusIcon className={"flex h-8 lg:h-10 text-indigo-200 hover:text-indigo-400 "} onClick={this.setCreateRecord} />
+                    <PlusIcon
+                        className={"flex h-8 xl:h-10 text-indigo-500 dark:text-indigo-200 hover:text-indigo-400 "}
+                        onClick={this.setCreateRecord}
+                    />
                 </div>
                 {this.state.recordViewType === RecordViewType.RECORDS && this.recordsListView}
                 {this.state.recordViewType === RecordViewType.AGENDA && this.calendarListView}
@@ -793,7 +854,7 @@ w-[15px] lg:h-[20px] lg:w-[20px] text-center text-xl font-bold ring-1 ring-slate
                     onUpdate={this.onUpdateLineRecord}
                     onDelete={this.onDeleteLineRecord}
                 />
-                <VetDialog ref={(ref) => (this.vetDialogRef = ref)} onDismiss={() => this.vetDialogRef?.hide()} />
+                <UserDialog ref={(ref) => (this.userDialogRef = ref)} onDismiss={() => this.userDialogRef?.hide()} />
                 <RecordDialog
                     ref={(ref) => (this.recordDialogRef = ref)}
                     onDismiss={() => this.recordDialogRef?.hide()}

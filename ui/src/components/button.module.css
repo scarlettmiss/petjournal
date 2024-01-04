@@ -16,7 +16,7 @@
 }
 
 .btnSecondary:hover {
-    @apply ring-2 ring-indigo-700 text-white;
+    @apply ring-1 ring-indigo-700 shadow-lg text-indigo-500 dark:text-white;
 }
 
 .btnSecondary:focus-visible {
@@ -24,7 +24,7 @@
 }
 
 .btnGroup {
-    @apply m-0 rounded-none first:rounded-l-lg first:ml-0 last:rounded-r-lg border focus:z-10;
+    @apply m-0 rounded-none first:rounded-l-lg first:ml-0 last:rounded-r-lg border-0 focus:z-10 shadow-sm;
 }
 
 .btnPrimaryDisabled {

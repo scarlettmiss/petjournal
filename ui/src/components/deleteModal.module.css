@@ -7,7 +7,7 @@
 }
 
 .content {
-    @apply relative rounded-lg shadow bg-gray-700
+    @apply relative rounded-lg shadow bg-gray-700/60 backdrop-blur-lg
 }
 
 .btnDelete {
