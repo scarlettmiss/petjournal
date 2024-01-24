@@ -11,12 +11,17 @@ export enum RecordType {
     DIAGNOSTIC = "diagnostic",
     DENTAL = "dental",
     OTHER = "other",
+    REMINDER = "reminder",
+    OVER_DUE = "overdue",
 }
 
 export class RecordTypeUtils {
     public static getAll(): string[] {
-        return Object.values(RecordType).filter(it => it !== RecordType.WEIGHT && it !== RecordType.TEMPERATURE)
+        return Object.values(RecordType).filter((it) => it !== RecordType.WEIGHT && it !== RecordType.TEMPERATURE)
     }
+
+    public readonly REMINDER = "reminder"
+    public readonly OVER_DUE = "overdue"
 
     public static getEnum(userType: string): RecordType {
         return RecordType[userType as keyof typeof RecordType]

@@ -87,15 +87,14 @@ class PetPage extends BaseComponent<PetProps, PetState> {
     private recordDialogRef: RecordDialog | null = null
     private deleteDialogRef: DeleteModal | null = null
 
-    private readonly REMINDER = "reminder"
-
     constructor(props: PetProps) {
         super(props)
         const expanded = new Map()
         RecordTypeUtils.getAll().forEach((t) => {
             expanded.set(t, false)
         })
-        expanded.set(this.REMINDER, true)
+        expanded.set(RecordType.REMINDER, true)
+        expanded.set(RecordType.OVER_DUE, true)
         this.state = {
             records: [],
             lineData: [],
@@ -529,61 +528,61 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         )
     }
 
-    private recordEntry = (r: Record, upcoming?: boolean) => {
+    private getRecordTypeColors = (type: string) => {
+        let typeColor = "indigo"
+        if (type === RecordType.REMINDER) {
+            typeColor = "teal"
+        } else if (type === RecordType.OVER_DUE) {
+            typeColor = "rose"
+        }
+        return typeColor
+    }
+
+    private recordEntry = (r: Record, color: string) => {
+        const upcoming = r.administeredBy === undefined
         return (
             <div
                 key={r.id}
-                className={`md:items-center flex ${upcoming ? "" : "grow"}  ${upcoming ? "flex-row" : "flex-col"} md:flex-row border-b ${
-                    r.administeredBy !== undefined ? "border-indigo-600" : "border-teal-600"
-                } justify-between last:border-b-0`}
+                className={`md:items-center flex ${
+                    upcoming ? "flex-row" : "grow flex-col"
+                }  md:flex-row border-b border-${color}-600 justify-between last:border-b-0`}
             >
                 <div onClick={() => this.onViewRecordSelected(r)} className={"flex flex-col md:flex-row grow"}>
                     <p className={"flex grow w-full"}>{r.name}</p>
                     <div className={"flex grow w-full"}>{format(new Date(r.date!), "dd/MM/yyyy")}</div>
                 </div>
-                {r.administeredBy !== undefined ? (
-                    <div className={"flex flex-row md:gap-x-2 items-center py-0.5"}>
-                        {r.verifiedBy ? (
-                            <CheckBadgeIcon
-                                className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
-                                onClick={() => {
-                                    this.userDialogRef?.setData(r.verifiedBy!)
-                                    this.userDialogRef?.setTitle("Vet Information")
-                                    this.userDialogRef?.show()
-                                }}
-                            />
-                        ) : (
-                            <CheckBadgeIconOutline className={"h-8 w-8 text-indigo-300 z-1 p-0.5 rounded-md"} />
-                        )}
+                <div className={"flex flex-row md:gap-x-2 items-center py-0.5"}>
+                    {upcoming ? (
+                        <></>
+                    ) : r.verifiedBy ? (
+                        <CheckBadgeIcon
+                            className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
+                            onClick={() => {
+                                this.userDialogRef?.setData(r.verifiedBy!)
+                                this.userDialogRef?.setTitle("Vet Information")
+                                this.userDialogRef?.show()
+                            }}
+                        />
+                    ) : (
+                        <CheckBadgeIconOutline className={"h-8 w-8 text-indigo-300 z-1 p-0.5 rounded-md"} />
+                    )}
+                    {!upcoming && (
                         <DocumentDuplicateIcon
                             className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
                             onClick={() => this.onCopyRecord(r)}
                         />
-                        <PencilIcon
-                            className={"h-8 w-8 text-indigo-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
-                            onClick={() => this.onUpdateRecordSelected(r)}
-                        />
-                        <XMarkIcon
-                            className={"h-8 w-8 text-red-400 hover:bg-red-600 hover:bg-opacity-20 p-0.5 rounded-md"}
-                            onClick={() => {
-                                this.setState({selectedRecordId: r.id}, () => this.deleteDialogRef?.show())
-                            }}
-                        />
-                    </div>
-                ) : (
-                    <div className={"flex flex-row md:gap-x-2 items-center py-0.5"}>
-                        <PencilIcon
-                            className={"h-8 w-8 text-teal-300 z-1 hover:bg-gray-600 p-0.5 rounded-md"}
-                            onClick={() => this.onUpdateRecordSelected(r)}
-                        />
-                        <XMarkIcon
-                            className={"h-8 w-8 text-red-400 hover:bg-red-600 hover:bg-opacity-20 p-0.5 rounded-md"}
-                            onClick={() => {
-                                this.setState({selectedRecordId: r.id}, () => this.deleteDialogRef?.show())
-                            }}
-                        />
-                    </div>
-                )}
+                    )}
+                    <PencilIcon
+                        className={`h-8 w-8 text-${color}-300 z-1 hover:bg-gray-600 p-0.5 rounded-md`}
+                        onClick={() => this.onUpdateRecordSelected(r)}
+                    />
+                    <XMarkIcon
+                        className={"h-8 w-8 text-red-400 hover:bg-red-600 hover:bg-opacity-20 p-0.5 rounded-md"}
+                        onClick={() => {
+                            this.setState({selectedRecordId: r.id}, () => this.deleteDialogRef?.show())
+                        }}
+                    />
+                </div>
             </div>
         )
     }
@@ -602,107 +601,70 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         this.setState({expandedTypes})
     }
 
+    private recordsTypeView(records: Record[], type: string) {
+        if (records.length === 0) {
+            return <></>
+        }
+        const expanded = this.state.expandedTypes.get(type)
+        const color = this.getRecordTypeColors(type)
+
+        return (
+            <div
+                key={`header${type}`}
+                className={`flex flex-col border-${color}-600 border rounded-md bg-${color}-600 bg-opacity-10 px-2.5 mb-2`}
+            >
+                <div key={`header_title_${type}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
+                    <div className={"flex flex-row grow w-full capitalize"} onClick={() => this.updateExpanded(type, !expanded)}>
+                        <span className={"flex grow"}>{type}</span>
+                        {expanded ? (
+                            <ChevronUpIcon className={`static h-6 w-6 self-end text-${color}-300 z-1`} />
+                        ) : (
+                            <ChevronDownIcon className={`static h-6 w-6 self-end text-${color}-300 z-1`} />
+                        )}
+                    </div>
+                </div>
+                <div className={`${expanded ? "" : "hidden"}`}>
+                    <div key={"header"} className={`hidden md:flex flex-row grow pe-24 border-${color}-600 border-b mb-2`}>
+                        <div className={"flex grow capitalize"}>Name</div>
+                        <div className={"flex grow capitalize"}>Date</div>
+                    </div>
+                    {records.map((record) => this.recordEntry(record, color))}
+                </div>
+            </div>
+        )
+    }
+
+    private get recordsView() {
+        const records = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy !== undefined)
+
+        return RecordTypeUtils.getAll().map((t) => {
+            const tRecords = records.filter((it) => it.recordType === t)
+            return this.recordsTypeView(tRecords, t)
+        })
+    }
+
     private get recordsListView() {
         if (this.state.loading) {
             return <></>
         }
-        const records = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy !== undefined)
-        const expired = this.state.records
-            .sort((a, b) => a.date! - b.date!)
-            .filter((it) => it.administeredBy === undefined && isBefore(new Date(it.date!), new Date()))
-        const upcoming = this.state.records.sort((a, b) => a.date! - b.date!).filter((it) => it.administeredBy === undefined)
-        const expandedUpcoming = this.state.expandedTypes.get(this.REMINDER)
-        return records.length > 0 ? (
+        const sorted = this.state.records.sort((a, b) => a.date! - b.date!)
+        if (sorted.length === 0) {
+            return (
+                <div className={"flex flex-col grow justify-center items-center h-[250px]"} onClick={this.setCreateRecord}>
+                    <PlusCircleIcon className={"flex h-12 text-indigo-400"} />
+                    <h3 className={"text-cyan-200 text-2xl font-semibold"}>Create the first record</h3>
+                </div>
+            )
+        }
+        const notFinalized = sorted.filter((it) => it.administeredBy === undefined)
+        const overDue = notFinalized.filter((it) => isBefore(new Date(it.date!), new Date()))
+        const upcoming = notFinalized.filter((it) => !isBefore(new Date(it.date!), new Date()))
+
+        return (
             <div className={"overflow-y-auto"}>
-                {expired.length > 0 && (
-                    <div
-                        key={`headerExpired`}
-                        className={"flex flex-col border-teal-600 border rounded-md bg-teal-600/40 dark:bg-teal-600/10 px-2.5 mb-2"}
-                    >
-                        <div key={`header_title_${this.REMINDER}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
-                            <div
-                                className={"flex flex-row grow w-full capitalize"}
-                                onClick={() => this.updateExpanded(this.REMINDER, !expandedUpcoming)}
-                            >
-                                <span className={"flex grow"}>Upcoming </span>
-                                {expandedUpcoming ? (
-                                    <ChevronUpIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
-                                ) : (
-                                    <ChevronDownIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
-                                )}
-                            </div>
-                        </div>
-                        <div className={`${expandedUpcoming ? "" : "hidden"}`}>
-                            <div key={"header"} className={"hidden md:flex flex-row grow border-teal-600 border-b mb-2"}>
-                                <div className={"flex grow capitalize"}>Name</div>
-                                <div className={"flex grow capitalize"}>Date</div>
-                            </div>
-                            {upcoming.map((record) => this.recordEntry(record, true))}
-                        </div>
-                    </div>
-                )}
-                {upcoming.length > 0 && (
-                    <div
-                        key={`header${this.REMINDER}`}
-                        className={"flex flex-col border-teal-600 border rounded-md bg-teal-600/40 dark:bg-teal-600/10 px-2.5 mb-2"}
-                    >
-                        <div key={`header_title_${this.REMINDER}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
-                            <div
-                                className={"flex flex-row grow w-full capitalize"}
-                                onClick={() => this.updateExpanded(this.REMINDER, !expandedUpcoming)}
-                            >
-                                <span className={"flex grow"}>Upcoming </span>
-                                {expandedUpcoming ? (
-                                    <ChevronUpIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
-                                ) : (
-                                    <ChevronDownIcon className={"static h-6 w-6 self-end text-teal-300 z-1"} />
-                                )}
-                            </div>
-                        </div>
-                        <div className={`${expandedUpcoming ? "" : "hidden"}`}>
-                            <div key={"header"} className={"hidden md:flex flex-row grow border-teal-600 border-b mb-2"}>
-                                <div className={"flex grow capitalize"}>Name</div>
-                                <div className={"flex grow capitalize"}>Date</div>
-                            </div>
-                            {upcoming.map((record) => this.recordEntry(record, true))}
-                        </div>
-                    </div>
-                )}
-                {RecordTypeUtils.getAll().map((t) => {
-                    const tRecords = records.filter((it) => it.recordType === t)
-                    const expanded = this.state.expandedTypes.get(t)
-                    return tRecords.length > 0 ? (
-                        <div
-                            key={`header${t}`}
-                            className={"flex flex-col border-indigo-600 border rounded-md bg-indigo-600 bg-opacity-10 px-2.5 mb-2"}
-                        >
-                            <div key={`header_title_${t}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
-                                <div className={"flex flex-row grow w-full capitalize"} onClick={() => this.updateExpanded(t, !expanded)}>
-                                    <span className={"flex grow"}>{t}</span>
-                                    {expanded ? (
-                                        <ChevronUpIcon className={"static h-6 w-6 self-end text-indigo-300 z-1"} />
-                                    ) : (
-                                        <ChevronDownIcon className={"static h-6 w-6 self-end text-indigo-300 z-1"} />
-                                    )}
-                                </div>
-                            </div>
-                            <div className={`${expanded ? "" : "hidden"}`}>
-                                <div key={"header"} className={"hidden md:flex flex-row grow pe-24 border-indigo-600 border-b mb-2"}>
-                                    <div className={"flex grow capitalize"}>Name</div>
-                                    <div className={"flex grow capitalize"}>Date</div>
-                                </div>
-                                {tRecords.map((record) => this.recordEntry(record, false))}
-                            </div>
-                        </div>
-                    ) : (
-                        <></>
-                    )
-                })}
-            </div>
-        ) : (
-            <div className={"flex flex-col grow justify-center items-center h-[250px]"} onClick={this.setCreateRecord}>
-                <PlusCircleIcon className={"flex h-12 text-indigo-400"} />
-                <h3 className={"text-cyan-200 text-2xl font-semibold"}>Create the first record</h3>
+                {this.recordsTypeView(overDue, RecordType.OVER_DUE)}
+                {this.recordsTypeView(upcoming, RecordType.REMINDER)}
+                {this.recordsView}
             </div>
         )
     }
