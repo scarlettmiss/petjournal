@@ -3,14 +3,14 @@ const nextConfig = {
     output: "export",
     // reactStrictMode: true,
     env: {
-        // // apiUrl: "http://localhost:8080/api",
-        apiUrl: "https://mypetjournal-lqkz3.ondigitalocean.app/api",
-        // apiUrl: "/api",
+        // apiUrl: "http://localhost:8080/api",
+        // apiUrl: "https://mypetjournal-lqkz3.ondigitalocean.app/api",
+        apiUrl: "/api",
     },
     images: {
-        unoptimized: true
+        unoptimized: true,
     },
-    distDir: 'build'
+    distDir: "build",
 }
 
 module.exports = nextConfig
