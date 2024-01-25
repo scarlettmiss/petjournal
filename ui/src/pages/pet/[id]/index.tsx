@@ -529,23 +529,23 @@ class PetPage extends BaseComponent<PetProps, PetState> {
     }
 
     private getRecordTypeColors = (type: string) => {
-        let typeColor = "indigo"
+        let typeColor = {border: "border-indigo-600", icon: "text-indigo-300", background: "bg-indigo-600"}
         if (type === RecordType.REMINDER) {
-            typeColor = "teal"
+            typeColor = {border: "border-teal-600", icon: "text-teal-300", background: "bg-teal-600"}
         } else if (type === RecordType.OVER_DUE) {
-            typeColor = "rose"
+            typeColor = {border: "border-rose-600", icon: "text-rose-300", background: "bg-rose-600"}
         }
         return typeColor
     }
 
-    private recordEntry = (r: Record, color: string) => {
+    private recordEntry = (r: Record, color: any) => {
         const upcoming = r.administeredBy === undefined
         return (
             <div
                 key={r.id}
-                className={`md:items-center flex ${
-                    upcoming ? "flex-row" : "grow flex-col"
-                }  md:flex-row border-b border-${color}-600 justify-between last:border-b-0`}
+                className={`md:items-center flex ${upcoming ? "flex-row" : "grow flex-col"}  md:flex-row border-b  ${
+                    color.border
+                } justify-between last:border-b-0`}
             >
                 <div onClick={() => this.onViewRecordSelected(r)} className={"flex flex-col md:flex-row grow"}>
                     <p className={"flex grow w-full"}>{r.name}</p>
@@ -573,7 +573,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                         />
                     )}
                     <PencilIcon
-                        className={`h-8 w-8 text-${color}-300 z-1 hover:bg-gray-600 p-0.5 rounded-md`}
+                        className={`h-8 w-8 ${color.icon} z-1 hover:bg-gray-600 p-0.5 rounded-md`}
                         onClick={() => this.onUpdateRecordSelected(r)}
                     />
                     <XMarkIcon
@@ -611,20 +611,20 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         return (
             <div
                 key={`header${type}`}
-                className={`flex flex-col border-${color}-600 border rounded-md bg-${color}-600 bg-opacity-10 px-2.5 mb-2`}
+                className={`flex flex-col ${color.border} border rounded-md ${color.background} bg-opacity-10 px-2.5 mb-2`}
             >
                 <div key={`header_title_${type}`} className={"py-2 flex flex-row gap-x-4 justify-between"}>
                     <div className={"flex flex-row grow w-full capitalize"} onClick={() => this.updateExpanded(type, !expanded)}>
                         <span className={"flex grow"}>{type}</span>
                         {expanded ? (
-                            <ChevronUpIcon className={`static h-6 w-6 self-end text-${color}-300 z-1`} />
+                            <ChevronUpIcon className={`static h-6 w-6 self-end ${color.icon} z-1`} />
                         ) : (
-                            <ChevronDownIcon className={`static h-6 w-6 self-end text-${color}-300 z-1`} />
+                            <ChevronDownIcon className={`static h-6 w-6 self-end ${color.icon} z-1`} />
                         )}
                     </div>
                 </div>
                 <div className={`${expanded ? "" : "hidden"}`}>
-                    <div key={"header"} className={`hidden md:flex flex-row grow pe-24 border-${color}-600 border-b mb-2`}>
+                    <div key={"header"} className={`hidden md:flex flex-row grow pe-24 ${color.border} border-b mb-2`}>
                         <div className={"flex grow capitalize"}>Name</div>
                         <div className={"flex grow capitalize"}>Date</div>
                     </div>
