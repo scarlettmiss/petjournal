@@ -63,6 +63,12 @@ interface RecordColor {
     backgroundColor: string
 }
 
+interface RecordTheme {
+    border: string
+    icon: string
+    background: string
+}
+
 interface PetState {
     token?: string
     pet?: Pet
@@ -528,7 +534,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         )
     }
 
-    private getRecordTypeColors = (type: string) => {
+    private getRecordTypeColors = (type: string): RecordTheme => {
         let typeColor = {border: "border-indigo-600", icon: "text-indigo-300", background: "bg-indigo-600"}
         if (type === RecordType.REMINDER) {
             typeColor = {border: "border-teal-600", icon: "text-teal-300", background: "bg-teal-600"}
@@ -538,7 +544,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         return typeColor
     }
 
-    private recordEntry = (r: Record, color: any) => {
+    private recordEntry = (r: Record, color: RecordTheme) => {
         const upcoming = r.administeredBy === undefined
         return (
             <div
