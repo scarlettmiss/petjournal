@@ -74,3 +74,9 @@ func IsPasswordValid(password string) error {
 	}
 	return nil
 }
+
+func ErrorResponse(err error) map[string]any {
+	return map[string]any{
+		"error": err.Error(),
+	}
+}

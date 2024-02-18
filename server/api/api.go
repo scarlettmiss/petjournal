@@ -4,11 +4,11 @@ import (
 	"embed"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	middlewares2 "github.com/scarlettmiss/petJournal/api/middlewares"
 	"github.com/scarlettmiss/petJournal/application"
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
-	"github.com/scarlettmiss/petJournal/middlewares"
 	"github.com/scarlettmiss/petJournal/utils"
 	"net/http"
 )
@@ -23,27 +23,27 @@ func New(application *application.Application, ui embed.FS) *API {
 		Engine: gin.Default(),
 		app:    application,
 	}
-	api.NoRoute(middlewares.NoRouteMiddleware("/", ui, "public"))
+	api.NoRoute(middlewares2.NoRouteMiddleware("/", ui, "public"))
 
 	api.POST("/api/auth/register", api.register)
 	api.POST("/api/auth/login", api.login)
 	api.GET("/api/vets", api.vets)
 
-	userApi := api.Group("/").Use(middlewares.Auth())
+	userApi := api.Group("/").Use(middlewares2.Auth())
 	userApi.GET("/api/users", api.users)
 	userApi.GET("/api/user", api.user)
 	userApi.GET("/api/user/:id", api.user)
 	userApi.PATCH("/api/user", api.updateUser)
 	userApi.DELETE("/api/user", api.deleteUser)
 
-	petApi := api.Group("/").Use(middlewares.Auth())
+	petApi := api.Group("/").Use(middlewares2.Auth())
 	petApi.POST("/api/pet", api.createPet)
 	petApi.GET("/api/pets", api.pets)
 	petApi.GET("/api/pet/:petId", api.pet)
 	petApi.PATCH("/api/pet/:petId", api.updatePet)
 	petApi.DELETE("/api/pet/:petId", api.deletePet)
 
-	recordApi := api.Group("/").Use(middlewares.Auth())
+	recordApi := api.Group("/").Use(middlewares2.Auth())
 	recordApi.POST("/api/pet/:petId/record", api.createRecord)
 	recordApi.POST("/api/pet/:petId/records", api.createRecords)
 	recordApi.GET("/api/pet/:petId/records", api.recordsByPet)

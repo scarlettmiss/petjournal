@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
-	authService "github.com/scarlettmiss/petJournal/application/services/authService"
+	authUtils "github.com/scarlettmiss/petJournal/utils/authorization"
 )
 
 type Service struct {
@@ -97,7 +97,7 @@ func (s *Service) Authenticate(email string, password string) (user.User, error)
 		return user.User{}, user.ErrUserDeleted
 	}
 
-	if !authService.CheckPasswordHash(password, u.PasswordHash) {
+	if !authUtils.CheckPasswordHash(password, u.PasswordHash) {
 		return user.User{}, user.ErrAuthentication
 	}
 

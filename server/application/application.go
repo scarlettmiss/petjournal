@@ -6,12 +6,12 @@ import (
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
-	authService "github.com/scarlettmiss/petJournal/application/services/authService"
-	jwtService "github.com/scarlettmiss/petJournal/application/services/jwtService"
 	petService "github.com/scarlettmiss/petJournal/application/services/petService"
 	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
 	userService "github.com/scarlettmiss/petJournal/application/services/userService"
 	"github.com/scarlettmiss/petJournal/utils"
+	authUtils "github.com/scarlettmiss/petJournal/utils/authorization"
+	jwtUtils "github.com/scarlettmiss/petJournal/utils/jwt"
 	"time"
 )
 
@@ -159,7 +159,7 @@ func (a *Application) CreateUser(opts UserCreateOptions) (user.User, error) {
 		return user.Nil, err
 	}
 
-	hashed, err := authService.HashPassword(opts.Password)
+	hashed, err := authUtils.HashPassword(opts.Password)
 	if err != nil {
 		return user.Nil, err
 	}
@@ -191,7 +191,7 @@ func (a *Application) UserToken(u user.User) (string, error) {
 	if u.Deleted {
 		return "", user.ErrUserDeleted
 	}
-	return jwtService.GenerateJWT(u.Id, u.UserType)
+	return jwtUtils.GenerateJWT(u.Id, u.UserType)
 }
 
 func (a *Application) CheckEmail(email string, id uuid.UUID, includeDel bool) error {
