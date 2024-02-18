@@ -2,7 +2,6 @@ package api
 
 import (
 	"embed"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/petJournal/application"
@@ -25,13 +24,6 @@ func New(application *application.Application, ui embed.FS) *API {
 		app:    application,
 	}
 	api.NoRoute(middlewares.NoRouteMiddleware("/", ui, "public"))
-
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
-	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
-
-	api.Use(cors.New(config))
 
 	api.POST("/api/auth/register", api.register)
 	api.POST("/api/auth/login", api.login)
