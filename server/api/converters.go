@@ -6,13 +6,13 @@ import (
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
-	"github.com/scarlettmiss/petJournal/utils"
+	"github.com/scarlettmiss/petJournal/utils/text"
 	"time"
 )
 
 func PetCreateRequestToPetCreateOpts(requestBody PetCreateRequest, ownerId uuid.UUID) (application.PetCreateOptions, error) {
 	vId := uuid.Nil
-	if !utils.TextIsEmpty(requestBody.VetId) {
+	if !text.TextIsEmpty(requestBody.VetId) {
 		var err error
 		vId, err = uuid.Parse(requestBody.VetId)
 		if err != nil {
@@ -39,7 +39,7 @@ func PetCreateRequestToPetCreateOpts(requestBody PetCreateRequest, ownerId uuid.
 
 func PetUpdateRequestToPetUpdateOpts(requestBody PetUpdateRequest, pId uuid.UUID, uId uuid.UUID) (application.PetUpdateOptions, error) {
 	vId := uuid.Nil
-	if !utils.TextIsEmpty(requestBody.VetId) {
+	if !text.TextIsEmpty(requestBody.VetId) {
 		var err error
 		vId, err = uuid.Parse(requestBody.VetId)
 		if err != nil {

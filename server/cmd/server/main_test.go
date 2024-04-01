@@ -12,7 +12,6 @@ import (
 	"github.com/scarlettmiss/petJournal/repositories/petrepo"
 	"github.com/scarlettmiss/petJournal/repositories/recordrepo"
 	"github.com/scarlettmiss/petJournal/repositories/userrepo"
-	"github.com/scarlettmiss/petJournal/utils"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -68,38 +67,39 @@ func TestUser(t *testing.T) {
 	app := application.New(opts)
 
 	createOptions := application.UserCreateOptions{}
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidType.Error())
 
 	createOptions.UserType = "test"
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidType.Error())
 
 	createOptions.UserType = "vet"
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidMail.Error())
 
 	createOptions.Email = "mail@mail"
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidMail.Error())
 
 	createOptions.Email = "mail@mail.com"
-	_, err = app.CreateUser(createOptions)
-	assert.EqualError(t, err, utils.ErrPasswordLength.Error())
+	_, _, err = app.CreateUser(createOptions)
+	assert.EqualError(t, err, user.ErrPasswordLength.Error())
 
 	createOptions.Password = "12345678aA!"
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidName.Error())
 
 	createOptions.Name = "testName"
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidSurname.Error())
 
 	createOptions.Surname = "testSurname"
-	u, err := app.CreateUser(createOptions)
+	u, token, err := app.CreateUser(createOptions)
 	assert.Nil(t, err)
+	assert.NotEqual(t, token, "")
 
-	_, err = app.CreateUser(createOptions)
+	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrMailExists.Error())
 
 	updateOptions := application.UserUpdateOptions{}

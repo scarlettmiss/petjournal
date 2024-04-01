@@ -3,6 +3,7 @@ package record
 import (
 	"errors"
 	"github.com/google/uuid"
+	"github.com/scarlettmiss/petJournal/application"
 )
 
 var (
@@ -16,13 +17,12 @@ var (
 )
 
 type Service interface {
-	Records(includeDel bool) map[uuid.UUID]Record
-	Record(id uuid.UUID) (Record, error)
+	record(id uuid.UUID) (Record, error)
 	PetsRecords(pIds []uuid.UUID, includeDel bool) (map[uuid.UUID]Record, error)
-	PetRecords(petId uuid.UUID, includeDel bool) (map[uuid.UUID]Record, error)
-	PetRecord(petId uuid.UUID, id uuid.UUID, includeDel bool) (Record, error)
-	CreateRecord(record Record) (Record, error)
-	CreateRecords(records []Record) (map[uuid.UUID]Record, error)
+	PetRecords(pId uuid.UUID, includeDel bool) (map[uuid.UUID]Record, error)
+	PetRecord(pId uuid.UUID, rId uuid.UUID, includeDel bool) (Record, error)
+	CreateRecord(opts application.UserCreateOptions) (Record, error)
+	CreateRecords(opts application.UserCreateOptions) (map[uuid.UUID]Record, error)
 	UpdateRecord(record Record) (Record, error)
 	DeleteRecord(id uuid.UUID) error
 }

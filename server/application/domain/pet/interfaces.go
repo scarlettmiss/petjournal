@@ -3,6 +3,7 @@ package pet
 import (
 	"errors"
 	"github.com/google/uuid"
+	"github.com/scarlettmiss/petJournal/application"
 )
 
 var (
@@ -16,14 +17,14 @@ var (
 type Service interface {
 	Pet(id uuid.UUID) (Pet, error)
 	PetByUser(uid uuid.UUID, id uuid.UUID, includeDel bool) (Pet, error)
-	PetByOwner(uid uuid.UUID, id uuid.UUID, includeDel bool) (Pet, error)
 	Pets(includeDel bool) []Pet
 	PetsByUser(userId uuid.UUID, includeDel bool) (map[uuid.UUID]Pet, error)
+	CreatePet(opts application.PetCreateOptions) (Pet, error)
+	UpdatePet(opts application.PetUpdateOptions) (Pet, error)
+	DeletePet(uId uuid.UUID, id uuid.UUID) error
+	removeVet(id uuid.UUID) error
 	PetsByOwner(userId uuid.UUID, includeDel bool) (map[uuid.UUID]Pet, error)
-	CreatePet(opts Pet) error
-	UpdatePet() error
-	DeletePet(id uuid.UUID) error
-	RemoveVet(id uuid.UUID) error
+	petByOwner(uid uuid.UUID, id uuid.UUID, includeDel bool) (Pet, error)
 }
 
 type Repository interface {
