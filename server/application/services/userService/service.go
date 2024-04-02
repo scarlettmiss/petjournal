@@ -2,23 +2,23 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/petJournal/application"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/services"
 	authUtils "github.com/scarlettmiss/petJournal/utils/authorization"
 	jwtUtils "github.com/scarlettmiss/petJournal/utils/jwt"
 	textUtils "github.com/scarlettmiss/petJournal/utils/text"
 	"regexp"
 )
 
-type Service struct {
-	repo user.Repository
+type service struct {
+	repo Repository
 }
 
-func New(repo user.Repository) (Service, error) {
-	return Service{repo: repo}, nil
+func New(repo Repository) (Service, error) {
+	return service{repo: repo}, nil
 }
 
-func (s *Service) User(id uuid.UUID) (user.User, error) {
+func (s service) User(id uuid.UUID) (user.User, error) {
 	u, err := s.repo.User(id)
 	if err != nil {
 		return u, err
@@ -26,11 +26,11 @@ func (s *Service) User(id uuid.UUID) (user.User, error) {
 	return u, nil
 }
 
-func (s *Service) Users(includeDel bool) ([]user.User, error) {
+func (s service) Users(includeDel bool) ([]user.User, error) {
 	return s.repo.Users(includeDel)
 }
 
-func (s *Service) UsersByType(t user.Type, includeDel bool) ([]user.User, error) {
+func (s service) UsersByType(t user.Type, includeDel bool) ([]user.User, error) {
 	var users []user.User
 
 	allUsers, err := s.Users(includeDel)
@@ -47,7 +47,7 @@ func (s *Service) UsersByType(t user.Type, includeDel bool) ([]user.User, error)
 	return users, nil
 }
 
-func (s *Service) UserByType(id uuid.UUID, t user.Type, includeDel bool) (user.User, error) {
+func (s service) UserByType(id uuid.UUID, t user.Type, includeDel bool) (user.User, error) {
 	u := user.Nil
 
 	users, err := s.UsersByType(t, includeDel)
@@ -65,7 +65,7 @@ func (s *Service) UserByType(id uuid.UUID, t user.Type, includeDel bool) (user.U
 	return u, err
 }
 
-func (s *Service) CreateUser(opts application.UserCreateOptions) (user.User, string, error) {
+func (s service) CreateUser(opts services.UserCreateOptions) (user.User, string, error) {
 	u := user.Nil
 
 	typ, err := user.ParseType(opts.UserType)
@@ -121,7 +121,7 @@ func (s *Service) CreateUser(opts application.UserCreateOptions) (user.User, str
 	return u, token, nil
 }
 
-func (s *Service) UpdateUser(opts application.UserUpdateOptions, includeDel bool) (user.User, error) {
+func (s service) UpdateUser(opts services.UserUpdateOptions, includeDel bool) (user.User, error) {
 	u, err := s.User(opts.Id)
 	if err != nil {
 		return u, user.ErrNotFound
@@ -153,7 +153,7 @@ func (s *Service) UpdateUser(opts application.UserUpdateOptions, includeDel bool
 	return s.repo.UpdateUser(u)
 }
 
-func (s *Service) Authenticate(email string, password string) (user.User, string, error) {
+func (s service) Authenticate(email string, password string) (user.User, string, error) {
 	var u, ok = s.userByEmail(email, true)
 	if !ok {
 		return u, "", user.ErrNotFound
@@ -175,11 +175,11 @@ func (s *Service) Authenticate(email string, password string) (user.User, string
 	return u, token, nil
 }
 
-func (s *Service) DeleteUser(id uuid.UUID) error {
+func (s service) DeleteUser(id uuid.UUID) error {
 	return s.repo.DeleteUser(id)
 }
 
-func (s *Service) userByEmail(email string, includeDel bool) (user.User, bool) {
+func (s service) userByEmail(email string, includeDel bool) (user.User, bool) {
 	var u user.User
 	var found bool
 
@@ -197,7 +197,7 @@ func (s *Service) userByEmail(email string, includeDel bool) (user.User, bool) {
 	return u, found
 }
 
-func (s *Service) checkEmail(email string, id uuid.UUID, includeDel bool) error {
+func (s service) checkEmail(email string, id uuid.UUID, includeDel bool) error {
 	if !textUtils.IsEmailValid(email) {
 		return user.ErrNoValidMail
 	}

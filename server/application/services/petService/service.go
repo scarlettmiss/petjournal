@@ -2,24 +2,24 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/petJournal/application"
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
+	"github.com/scarlettmiss/petJournal/application/services"
 	textUtils "github.com/scarlettmiss/petJournal/utils/text"
 )
 
-type Service struct {
-	repo pet.Repository
+type service struct {
+	repo Repository
 }
 
-func New(repo pet.Repository) (Service, error) {
-	return Service{repo: repo}, nil
+func New(repo Repository) (Service, error) {
+	return service{repo: repo}, nil
 }
 
-func (s *Service) Pet(id uuid.UUID) (pet.Pet, error) {
+func (s service) Pet(id uuid.UUID) (pet.Pet, error) {
 	return s.repo.Pet(id)
 }
 
-func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
+func (s service) PetByUser(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
 	pets, err := s.PetsByUser(uId, includeDel)
 	if err != nil {
 		return pet.Nil, err
@@ -33,11 +33,11 @@ func (s *Service) PetByUser(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.P
 	return p, nil
 }
 
-func (s *Service) Pets(includeDel bool) ([]pet.Pet, error) {
+func (s service) Pets(includeDel bool) ([]pet.Pet, error) {
 	return s.repo.Pets(includeDel)
 }
 
-func (s *Service) PetsByUser(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.Pet, error) {
+func (s service) PetsByUser(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.Pet, error) {
 	uPets := make(map[uuid.UUID]pet.Pet)
 
 	pets, err := s.Pets(includeDel)
@@ -54,7 +54,7 @@ func (s *Service) PetsByUser(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.
 	return uPets, nil
 }
 
-func (s *Service) CreatePet(opts application.PetCreateOptions) (pet.Pet, error) {
+func (s service) CreatePet(opts services.PetCreateOptions) (pet.Pet, error) {
 	if textUtils.TextIsEmpty(opts.Name) {
 		return pet.Nil, pet.ErrNoValidName
 	}
@@ -88,7 +88,7 @@ func (s *Service) CreatePet(opts application.PetCreateOptions) (pet.Pet, error) 
 	return s.repo.CreatePet(p)
 }
 
-func (s *Service) UpdatePet(opts application.PetUpdateOptions) (pet.Pet, error) {
+func (s service) UpdatePet(opts services.PetUpdateOptions) (pet.Pet, error) {
 	p, err := s.PetByUser(opts.OwnerId, opts.Id, false)
 	if err != nil {
 		return pet.Nil, err
@@ -126,7 +126,7 @@ func (s *Service) UpdatePet(opts application.PetUpdateOptions) (pet.Pet, error) 
 	return s.repo.UpdatePet(p)
 }
 
-func (s *Service) DeletePet(uId uuid.UUID, id uuid.UUID) error {
+func (s service) DeletePet(uId uuid.UUID, id uuid.UUID) error {
 	_, err := s.petByOwner(uId, id, true)
 
 	if err != nil {
@@ -141,7 +141,7 @@ func (s *Service) DeletePet(uId uuid.UUID, id uuid.UUID) error {
 	return s.repo.DeletePet(id)
 }
 
-func (s *Service) removeVet(id uuid.UUID) error {
+func (s service) removeVet(id uuid.UUID) error {
 	p, err := s.Pet(id)
 
 	if err != nil {
@@ -153,7 +153,7 @@ func (s *Service) removeVet(id uuid.UUID) error {
 	return err
 }
 
-func (s *Service) petsByOwner(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.Pet, error) {
+func (s service) petsByOwner(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet.Pet, error) {
 	uPets := make(map[uuid.UUID]pet.Pet)
 
 	pets, err := s.Pets(includeDel)
@@ -170,7 +170,7 @@ func (s *Service) petsByOwner(uId uuid.UUID, includeDel bool) (map[uuid.UUID]pet
 	return uPets, nil
 }
 
-func (s *Service) petByOwner(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
+func (s service) petByOwner(uId uuid.UUID, id uuid.UUID, includeDel bool) (pet.Pet, error) {
 	pets, err := s.petsByOwner(uId, includeDel)
 	if err != nil {
 		return pet.Nil, err

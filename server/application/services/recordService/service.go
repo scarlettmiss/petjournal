@@ -3,25 +3,25 @@ package service
 import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"github.com/scarlettmiss/petJournal/application"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
+	"github.com/scarlettmiss/petJournal/application/services"
 	textUtils "github.com/scarlettmiss/petJournal/utils/text"
 	"time"
 )
 
-type Service struct {
-	repo record.Repository
+type service struct {
+	repo Repository
 }
 
-func New(repo record.Repository) (Service, error) {
-	return Service{repo: repo}, nil
+func New(repo Repository) (Service, error) {
+	return service{repo: repo}, nil
 }
 
-func (s *Service) record(tId uuid.UUID) (record.Record, error) {
+func (s service) record(tId uuid.UUID) (record.Record, error) {
 	return s.repo.Record(tId)
 }
 
-func (s *Service) PetsRecords(pIds []uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
+func (s service) PetsRecords(pIds []uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
 	petRecords := make(map[uuid.UUID]record.Record)
 
 	records, err := s.repo.Records(includeDel)
@@ -40,7 +40,7 @@ func (s *Service) PetsRecords(pIds []uuid.UUID, includeDel bool) (map[uuid.UUID]
 	return petRecords, nil
 }
 
-func (s *Service) PetRecords(pId uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
+func (s service) PetRecords(pId uuid.UUID, includeDel bool) (map[uuid.UUID]record.Record, error) {
 	petRecords := make(map[uuid.UUID]record.Record)
 
 	records, err := s.repo.Records(includeDel)
@@ -57,7 +57,7 @@ func (s *Service) PetRecords(pId uuid.UUID, includeDel bool) (map[uuid.UUID]reco
 	return petRecords, nil
 }
 
-func (s *Service) PetRecord(pId uuid.UUID, rId uuid.UUID, includeDel bool) (record.Record, error) {
+func (s service) PetRecord(pId uuid.UUID, rId uuid.UUID, includeDel bool) (record.Record, error) {
 	petRecords, err := s.PetRecords(pId, includeDel)
 	if err != nil {
 		return record.Nil, err
@@ -70,7 +70,7 @@ func (s *Service) PetRecord(pId uuid.UUID, rId uuid.UUID, includeDel bool) (reco
 	return petRecord, nil
 }
 
-func (s *Service) CreateRecord(opts application.RecordCreateOptions) (record.Record, error) {
+func (s service) CreateRecord(opts services.RecordCreateOptions) (record.Record, error) {
 	r := record.Nil
 
 	typ, err := record.ParseType(opts.RecordType)
@@ -112,7 +112,7 @@ func (s *Service) CreateRecord(opts application.RecordCreateOptions) (record.Rec
 	return s.repo.CreateRecord(r)
 }
 
-func (s *Service) CreateRecords(opts application.RecordsCreateOptions) (map[uuid.UUID]record.Record, error) {
+func (s service) CreateRecords(opts services.RecordsCreateOptions) (map[uuid.UUID]record.Record, error) {
 	r := record.Nil
 
 	typ, err := record.ParseType(opts.RecordType)
@@ -177,7 +177,7 @@ func (s *Service) CreateRecords(opts application.RecordsCreateOptions) (map[uuid
 	return recordsMap, nil
 }
 
-func (s *Service) UpdateRecord(opts application.RecordUpdateOptions) (record.Record, error) {
+func (s service) UpdateRecord(opts services.RecordUpdateOptions) (record.Record, error) {
 	typ, err := record.ParseType(opts.RecordType)
 	if err != nil {
 		return record.Nil, record.ErrNotValidType
@@ -224,6 +224,6 @@ func (s *Service) UpdateRecord(opts application.RecordUpdateOptions) (record.Rec
 	return s.repo.UpdateRecord(r)
 }
 
-func (s *Service) DeleteRecord(id uuid.UUID) error {
+func (s service) DeleteRecord(id uuid.UUID) error {
 	return s.repo.DeleteRecord(id)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/services"
 	petService "github.com/scarlettmiss/petJournal/application/services/petService"
 	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
 	userService "github.com/scarlettmiss/petJournal/application/services/userService"
@@ -33,11 +34,11 @@ func New(opts Options) *Application {
 	return &app
 }
 
-func (a *Application) CreateUser(opts UserCreateOptions) (user.User, string, error) {
+func (a *Application) CreateUser(opts services.UserCreateOptions) (user.User, string, error) {
 	return a.userService.CreateUser(opts)
 }
 
-func (a *Application) UpdateUser(opts UserUpdateOptions, includeDel bool) (user.User, error) {
+func (a *Application) UpdateUser(opts services.UserUpdateOptions, includeDel bool) (user.User, error) {
 	return a.userService.UpdateUser(opts, includeDel)
 }
 
@@ -61,7 +62,7 @@ func (a *Application) DeleteUser(id uuid.UUID) error {
 	return a.userService.DeleteUser(id)
 }
 
-func (a *Application) Authenticate(opts LoginOptions) (user.User, string, error) {
+func (a *Application) Authenticate(opts services.LoginOptions) (user.User, string, error) {
 	return a.userService.Authenticate(opts.Email, opts.Password)
 }
 
@@ -81,7 +82,7 @@ func (a *Application) DeletePet(uId uuid.UUID, id uuid.UUID) error {
 	return a.petService.DeletePet(uId, id)
 }
 
-func (a *Application) CreatePet(opts PetCreateOptions) (pet.Pet, error) {
+func (a *Application) CreatePet(opts services.PetCreateOptions) (pet.Pet, error) {
 	_, err := a.User(opts.OwnerId)
 	if err != nil {
 		return pet.Nil, err
@@ -97,11 +98,11 @@ func (a *Application) CreatePet(opts PetCreateOptions) (pet.Pet, error) {
 	return a.petService.CreatePet(opts)
 }
 
-func (a *Application) UpdatePet(opts PetUpdateOptions) (pet.Pet, error) {
+func (a *Application) UpdatePet(opts services.PetUpdateOptions) (pet.Pet, error) {
 	return a.petService.UpdatePet(opts)
 }
 
-func (a *Application) CreateRecord(opts RecordCreateOptions) (record.Record, error) {
+func (a *Application) CreateRecord(opts services.RecordCreateOptions) (record.Record, error) {
 	_, err := a.PetByUser(opts.AdministeredBy, opts.PetId, false)
 	if err != nil {
 		return record.Nil, err
@@ -122,7 +123,7 @@ func (a *Application) CreateRecord(opts RecordCreateOptions) (record.Record, err
 	return a.recordService.CreateRecord(opts)
 }
 
-func (a *Application) CreateRecords(opts RecordsCreateOptions) (map[uuid.UUID]record.Record, error) {
+func (a *Application) CreateRecords(opts services.RecordsCreateOptions) (map[uuid.UUID]record.Record, error) {
 	_, err := a.PetByUser(opts.AdministeredBy, opts.PetId, false)
 	if err != nil {
 		return nil, err
@@ -166,7 +167,7 @@ func (a *Application) RecordByUserPet(uId uuid.UUID, pId uuid.UUID, tId uuid.UUI
 	return a.recordService.PetRecord(pId, tId, includeDel)
 }
 
-func (a *Application) UpdateRecord(opts RecordUpdateOptions) (record.Record, error) {
+func (a *Application) UpdateRecord(opts services.RecordUpdateOptions) (record.Record, error) {
 	if opts.VerifiedBy != uuid.Nil {
 		_, err := a.UserByType(opts.VerifiedBy, user.Vet, true)
 		if err != nil {
