@@ -9,6 +9,7 @@ import (
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/services"
 	"net/http"
 )
 
@@ -219,7 +220,7 @@ func (api *API) login(c *gin.Context) {
 		return
 	}
 
-	loginOpts := application.LoginOptions{Email: requestBody.Email, Password: requestBody.Password}
+	loginOpts := services.LoginOptions{Email: requestBody.Email, Password: requestBody.Password}
 
 	u, token, err := api.app.Authenticate(loginOpts)
 	if err != nil {

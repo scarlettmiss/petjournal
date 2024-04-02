@@ -2,25 +2,25 @@ package api
 
 import (
 	"github.com/google/uuid"
-	"github.com/scarlettmiss/petJournal/application"
 	"github.com/scarlettmiss/petJournal/application/domain/pet"
 	"github.com/scarlettmiss/petJournal/application/domain/record"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
+	"github.com/scarlettmiss/petJournal/application/services"
 	"github.com/scarlettmiss/petJournal/utils/text"
 	"time"
 )
 
-func PetCreateRequestToPetCreateOpts(requestBody PetCreateRequest, ownerId uuid.UUID) (application.PetCreateOptions, error) {
+func PetCreateRequestToPetCreateOpts(requestBody PetCreateRequest, ownerId uuid.UUID) (services.PetCreateOptions, error) {
 	vId := uuid.Nil
 	if !text.TextIsEmpty(requestBody.VetId) {
 		var err error
 		vId, err = uuid.Parse(requestBody.VetId)
 		if err != nil {
-			return application.PetCreateOptions{}, err
+			return services.PetCreateOptions{}, err
 		}
 	}
 
-	p := application.PetCreateOptions{}
+	p := services.PetCreateOptions{}
 	p.Name = requestBody.Name
 	p.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
 	p.Gender = requestBody.Gender
@@ -37,17 +37,17 @@ func PetCreateRequestToPetCreateOpts(requestBody PetCreateRequest, ownerId uuid.
 	return p, nil
 }
 
-func PetUpdateRequestToPetUpdateOpts(requestBody PetUpdateRequest, pId uuid.UUID, uId uuid.UUID) (application.PetUpdateOptions, error) {
+func PetUpdateRequestToPetUpdateOpts(requestBody PetUpdateRequest, pId uuid.UUID, uId uuid.UUID) (services.PetUpdateOptions, error) {
 	vId := uuid.Nil
 	if !text.TextIsEmpty(requestBody.VetId) {
 		var err error
 		vId, err = uuid.Parse(requestBody.VetId)
 		if err != nil {
-			return application.PetUpdateOptions{}, err
+			return services.PetUpdateOptions{}, err
 		}
 	}
 
-	opts := application.PetUpdateOptions{}
+	opts := services.PetUpdateOptions{}
 	opts.Id = pId
 	opts.Name = requestBody.Name
 	opts.DateOfBirth = time.Unix(requestBody.DateOfBirth/1000, (requestBody.DateOfBirth%1000)*1000000)
@@ -99,8 +99,8 @@ func PetToVerySimplifiedResponse(pet pet.Pet) PetResponse {
 	return p
 }
 
-func RecordCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUID, administeredBy user.User) application.RecordCreateOptions {
-	opts := application.RecordCreateOptions{}
+func RecordCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUID, administeredBy user.User) services.RecordCreateOptions {
+	opts := services.RecordCreateOptions{}
 	verifierId := uuid.Nil
 	if administeredBy.UserType == user.Vet {
 		verifierId = administeredBy.Id
@@ -119,8 +119,8 @@ func RecordCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUI
 	return opts
 }
 
-func RecordsCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUID, administeredBy user.User) application.RecordsCreateOptions {
-	opts := application.RecordsCreateOptions{}
+func RecordsCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UUID, administeredBy user.User) services.RecordsCreateOptions {
+	opts := services.RecordsCreateOptions{}
 	verifierId := uuid.Nil
 	if administeredBy.UserType == user.Vet {
 		verifierId = administeredBy.Id
@@ -140,8 +140,8 @@ func RecordsCreateRequestToRecord(requestBody RecordCreateRequest, petId uuid.UU
 	return opts
 }
 
-func RecordUpdateRequestToRecord(requestBody RecordUpdateRequest, rId uuid.UUID, updatedBy user.User) application.RecordUpdateOptions {
-	opts := application.RecordUpdateOptions{}
+func RecordUpdateRequestToRecord(requestBody RecordUpdateRequest, rId uuid.UUID, updatedBy user.User) services.RecordUpdateOptions {
+	opts := services.RecordUpdateOptions{}
 	verifierId := uuid.Nil
 	if updatedBy.UserType == user.Vet {
 		verifierId = updatedBy.Id
@@ -185,8 +185,8 @@ func RecordToResponse(r record.Record, pet pet.Pet, administeredBy user.User, ve
 	return resp
 }
 
-func UserCreateRequestToUserCreateOptions(requestBody UserCreateRequest) application.UserCreateOptions {
-	uOpts := application.UserCreateOptions{}
+func UserCreateRequestToUserCreateOptions(requestBody UserCreateRequest) services.UserCreateOptions {
+	uOpts := services.UserCreateOptions{}
 	uOpts.UserType = requestBody.UserType
 	uOpts.Email = requestBody.Email
 	uOpts.Password = requestBody.Password
@@ -201,8 +201,8 @@ func UserCreateRequestToUserCreateOptions(requestBody UserCreateRequest) applica
 	return uOpts
 }
 
-func UserUpdateRequestToUserOptions(requestBody UserUpdateRequest, uId uuid.UUID) application.UserUpdateOptions {
-	uOpts := application.UserUpdateOptions{}
+func UserUpdateRequestToUserOptions(requestBody UserUpdateRequest, uId uuid.UUID) services.UserUpdateOptions {
+	uOpts := services.UserUpdateOptions{}
 	uOpts.Id = uId
 	uOpts.Email = requestBody.Email
 	uOpts.Name = requestBody.Name
