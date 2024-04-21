@@ -19,11 +19,7 @@ func New(repo Repository) (Service, error) {
 }
 
 func (s service) User(id uuid.UUID) (user.User, error) {
-	u, err := s.repo.User(id)
-	if err != nil {
-		return u, err
-	}
-	return u, nil
+	return s.repo.User(id)
 }
 
 func (s service) Users(includeDel bool) ([]user.User, error) {

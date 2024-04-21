@@ -131,7 +131,8 @@ func (s service) DeletePet(uId uuid.UUID, id uuid.UUID) error {
 
 	if err != nil {
 		// if it's not the owner then check if it's the pet vet
-		// in this case we don't want to delete the pet but we want to remove the vet
+		// in this case we don't want to delete the pet but we
+		//want to remove the vet
 		if err == pet.ErrNotFound {
 			return s.removeVet(id)
 		}
