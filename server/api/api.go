@@ -15,14 +15,22 @@ import (
 
 type API struct {
 	*gin.Engine
-	app *application.Application
+	app application.Application
 }
 
-func New(application *application.Application, ui embed.FS) *API {
+func New(application application.Application, ui embed.FS) *API {
 	api := &API{
 		Engine: gin.Default(),
 		app:    application,
 	}
+	//CORS only for dev mode. Should be commented out for production
+	//config := cors.DefaultConfig()
+	//config.AllowAllOrigins = true
+	//config.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE"}
+	//config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	//
+	//api.Use(cors.New(config))
+
 	api.NoRoute(middlewares.NoRouteMiddleware("/", ui, "public"))
 
 	api.POST("/api/auth/register", api.register)
