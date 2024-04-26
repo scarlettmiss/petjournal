@@ -68,18 +68,26 @@ func ConvertToUserDomainModel(dbUser UserDBModel) user.User {
 	}
 }
 
-type Repository struct {
+type Repository interface {
+	CreateUser(user user.User) (user.User, error)
+	User(id uuid.UUID) (user.User, error)
+	Users(includeDel bool) ([]user.User, error)
+	UpdateUser(u user.User) (user.User, error)
+	DeleteUser(id uuid.UUID) error
+}
+
+type repository struct {
 	mux   sync.Mutex
 	users *mongo.Collection
 }
 
-func New(collection *mongo.Collection) *Repository {
-	return &Repository{
+func New(collection *mongo.Collection) Repository {
+	return &repository{
 		users: collection,
 	}
 }
 
-func (r *Repository) CreateUser(u user.User) (user.User, error) {
+func (r *repository) CreateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -108,7 +116,7 @@ func (r *Repository) CreateUser(u user.User) (user.User, error) {
 	return u, nil
 }
 
-func (r *Repository) User(id uuid.UUID) (user.User, error) {
+func (r *repository) User(id uuid.UUID) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -117,7 +125,7 @@ func (r *Repository) User(id uuid.UUID) (user.User, error) {
 	return ConvertToUserDomainModel(retrievedUser), err
 }
 
-func (r *Repository) userInternal(id uuid.UUID) (UserDBModel, error) {
+func (r *repository) userInternal(id uuid.UUID) (UserDBModel, error) {
 	var retrievedUser UserDBModel
 
 	filter := bson.M{"_id": id}
@@ -130,7 +138,7 @@ func (r *Repository) userInternal(id uuid.UUID) (UserDBModel, error) {
 	return retrievedUser, nil
 }
 
-func (r *Repository) Users(includeDel bool) ([]user.User, error) {
+func (r *repository) Users(includeDel bool) ([]user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -174,7 +182,7 @@ func (r *Repository) Users(includeDel bool) ([]user.User, error) {
 	return users, nil
 }
 
-func (r *Repository) UpdateUser(u user.User) (user.User, error) {
+func (r *repository) UpdateUser(u user.User) (user.User, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -186,7 +194,7 @@ func (r *Repository) UpdateUser(u user.User) (user.User, error) {
 	return ConvertToUserDomainModel(updatedUser), nil
 }
 
-func (r *Repository) updateUserInternal(u UserDBModel) (UserDBModel, error) {
+func (r *repository) updateUserInternal(u UserDBModel) (UserDBModel, error) {
 	// Define the filter to identify the document to update
 	filter := bson.M{"_id": u.Id}
 
@@ -206,7 +214,7 @@ func (r *Repository) updateUserInternal(u UserDBModel) (UserDBModel, error) {
 	return u, nil
 }
 
-func (r *Repository) DeleteUser(id uuid.UUID) error {
+func (r *repository) DeleteUser(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

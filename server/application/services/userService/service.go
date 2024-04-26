@@ -4,17 +4,31 @@ import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
 	"github.com/scarlettmiss/petJournal/application/services"
+	"github.com/scarlettmiss/petJournal/repositories/userrepo"
 	authUtils "github.com/scarlettmiss/petJournal/utils/authorization"
 	jwtUtils "github.com/scarlettmiss/petJournal/utils/jwt"
 	textUtils "github.com/scarlettmiss/petJournal/utils/text"
 	"regexp"
 )
 
-type service struct {
-	repo Repository
+type Service interface {
+	User(id uuid.UUID) (user.User, error)
+	Users(includeDel bool) ([]user.User, error)
+	UsersByType(t user.Type, includeDel bool) ([]user.User, error)
+	UserByType(id uuid.UUID, t user.Type, includeDel bool) (user.User, error)
+	CreateUser(user services.UserCreateOptions) (user.User, string, error)
+	UpdateUser(opts services.UserUpdateOptions, includeDel bool) (user.User, error)
+	Authenticate(email string, password string) (user.User, string, error)
+	DeleteUser(id uuid.UUID) error
+	userByEmail(email string, includeDel bool) (user.User, bool)
+	checkEmail(email string, id uuid.UUID, includeDel bool) error
 }
 
-func New(repo Repository) (Service, error) {
+type service struct {
+	repo userrepo.Repository
+}
+
+func New(repo userrepo.Repository) (Service, error) {
 	return service{repo: repo}, nil
 }
 

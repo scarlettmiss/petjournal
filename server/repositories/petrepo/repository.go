@@ -71,18 +71,26 @@ func ConvertToPetDomainModel(dbPet PetDBModel) pet.Pet {
 	}
 }
 
-type Repository struct {
+type Repository interface {
+	CreatePet(pet pet.Pet) (pet.Pet, error)
+	Pet(id uuid.UUID) (pet.Pet, error)
+	Pets(includeDel bool) ([]pet.Pet, error)
+	UpdatePet(pet pet.Pet) (pet.Pet, error)
+	DeletePet(id uuid.UUID) error
+}
+
+type repository struct {
 	mux  sync.Mutex
 	pets *mongo.Collection
 }
 
-func New(collection *mongo.Collection) *Repository {
-	return &Repository{
+func New(collection *mongo.Collection) Repository {
+	return &repository{
 		pets: collection,
 	}
 }
 
-func (r *Repository) CreatePet(p pet.Pet) (pet.Pet, error) {
+func (r *repository) CreatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -111,7 +119,7 @@ func (r *Repository) CreatePet(p pet.Pet) (pet.Pet, error) {
 	return p, nil
 }
 
-func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
+func (r *repository) Pet(id uuid.UUID) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -119,7 +127,7 @@ func (r *Repository) Pet(id uuid.UUID) (pet.Pet, error) {
 	return ConvertToPetDomainModel(retrievedPet), err
 }
 
-func (r *Repository) petInternal(id uuid.UUID) (PetDBModel, error) {
+func (r *repository) petInternal(id uuid.UUID) (PetDBModel, error) {
 	var retrievedPet PetDBModel
 
 	filter := bson.M{"_id": id}
@@ -131,7 +139,7 @@ func (r *Repository) petInternal(id uuid.UUID) (PetDBModel, error) {
 	return retrievedPet, nil
 }
 
-func (r *Repository) Pets(includeDel bool) ([]pet.Pet, error) {
+func (r *repository) Pets(includeDel bool) ([]pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -175,7 +183,7 @@ func (r *Repository) Pets(includeDel bool) ([]pet.Pet, error) {
 	return pets, nil
 }
 
-func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
+func (r *repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -187,7 +195,7 @@ func (r *Repository) UpdatePet(p pet.Pet) (pet.Pet, error) {
 	return ConvertToPetDomainModel(updatedPet), nil
 }
 
-func (r *Repository) updatePetInternal(p PetDBModel) (PetDBModel, error) {
+func (r *repository) updatePetInternal(p PetDBModel) (PetDBModel, error) {
 	// Define the filter to identify the document to update
 	filter := bson.M{"_id": p.Id}
 
@@ -207,7 +215,7 @@ func (r *Repository) updatePetInternal(p PetDBModel) (PetDBModel, error) {
 	return p, nil
 }
 
-func (r *Repository) DeletePet(id uuid.UUID) error {
+func (r *repository) DeletePet(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

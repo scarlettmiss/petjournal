@@ -68,18 +68,27 @@ func ConvertToRecordDomainModel(dbRecord RecordDBModel) record.Record {
 	}
 }
 
-type Repository struct {
+type Repository interface {
+	CreateRecord(record record.Record) (record.Record, error)
+	CreateRecords(records []record.Record) ([]record.Record, error)
+	Record(id uuid.UUID) (record.Record, error)
+	Records(includeDel bool) ([]record.Record, error)
+	UpdateRecord(record record.Record) (record.Record, error)
+	DeleteRecord(id uuid.UUID) error
+}
+
+type repository struct {
 	mux        sync.Mutex
 	recordsCol *mongo.Collection
 }
 
-func New(collection *mongo.Collection) *Repository {
-	return &Repository{
+func New(collection *mongo.Collection) Repository {
+	return &repository{
 		recordsCol: collection,
 	}
 }
 
-func (r *Repository) CreateRecord(rec record.Record) (record.Record, error) {
+func (r *repository) CreateRecord(rec record.Record) (record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 	id, err := uuid.NewRandom()
@@ -107,7 +116,7 @@ func (r *Repository) CreateRecord(rec record.Record) (record.Record, error) {
 	return rec, nil
 }
 
-func (r *Repository) CreateRecords(recs []record.Record) ([]record.Record, error) {
+func (r *repository) CreateRecords(recs []record.Record) ([]record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -153,7 +162,7 @@ func (r *Repository) CreateRecords(recs []record.Record) ([]record.Record, error
 	return recs, nil
 }
 
-func (r *Repository) Record(id uuid.UUID) (record.Record, error) {
+func (r *repository) Record(id uuid.UUID) (record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -163,7 +172,7 @@ func (r *Repository) Record(id uuid.UUID) (record.Record, error) {
 
 }
 
-func (r *Repository) recordInternal(id uuid.UUID) (RecordDBModel, error) {
+func (r *repository) recordInternal(id uuid.UUID) (RecordDBModel, error) {
 	var retrievedRecord RecordDBModel
 
 	filter := bson.M{"_id": id}
@@ -177,7 +186,7 @@ func (r *Repository) recordInternal(id uuid.UUID) (RecordDBModel, error) {
 
 }
 
-func (r *Repository) Records(includeDel bool) ([]record.Record, error) {
+func (r *repository) Records(includeDel bool) ([]record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -221,7 +230,7 @@ func (r *Repository) Records(includeDel bool) ([]record.Record, error) {
 	return records, nil
 }
 
-func (r *Repository) UpdateRecord(rec record.Record) (record.Record, error) {
+func (r *repository) UpdateRecord(rec record.Record) (record.Record, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -233,7 +242,7 @@ func (r *Repository) UpdateRecord(rec record.Record) (record.Record, error) {
 	return ConvertToRecordDomainModel(updatedRec), nil
 }
 
-func (r *Repository) updateRecordInternal(rec RecordDBModel) (RecordDBModel, error) {
+func (r *repository) updateRecordInternal(rec RecordDBModel) (RecordDBModel, error) {
 	// Define the filter to identify the document to update
 	filter := bson.M{"_id": rec.Id}
 
@@ -254,7 +263,7 @@ func (r *Repository) updateRecordInternal(rec RecordDBModel) (RecordDBModel, err
 	return rec, nil
 }
 
-func (r *Repository) DeleteRecord(id uuid.UUID) error {
+func (r *repository) DeleteRecord(id uuid.UUID) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 

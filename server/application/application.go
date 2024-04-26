@@ -10,6 +10,9 @@ import (
 	petService "github.com/scarlettmiss/petJournal/application/services/petService"
 	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
 	userService "github.com/scarlettmiss/petJournal/application/services/userService"
+	"github.com/scarlettmiss/petJournal/repositories/petrepo"
+	"github.com/scarlettmiss/petJournal/repositories/recordrepo"
+	"github.com/scarlettmiss/petJournal/repositories/userrepo"
 )
 
 /*
@@ -23,9 +26,9 @@ type application struct {
 }
 
 type Options struct {
-	PetService    petService.Service
-	UserService   userService.Service
-	RecordService recordService.Service
+	PetRepo    petrepo.Repository
+	UserRepo   userrepo.Repository
+	RecordRepo recordrepo.Repository
 }
 
 type Application interface {
@@ -52,10 +55,24 @@ type Application interface {
 	DeleteRecordUserPet(uId uuid.UUID, pId uuid.UUID, id uuid.UUID) error
 }
 
-func New(opts Options) Application {
-	app := application{petService: opts.PetService, userService: opts.UserService, recordService: opts.RecordService}
+func New(opts Options) (Application, error) {
+	//init services
+	ps, err := petService.New(opts.PetRepo)
+	if err != nil {
+		return nil, err
+	}
+	us, err := userService.New(opts.UserRepo)
+	if err != nil {
+		return nil, err
+	}
+	rs, err := recordService.New(opts.RecordRepo)
+	if err != nil {
+		return nil, err
+	}
 
-	return &app
+	app := application{petService: ps, userService: us, recordService: rs}
+
+	return &app, nil
 }
 
 func (a *application) CreateUser(opts services.UserCreateOptions) (user.User, string, error) {

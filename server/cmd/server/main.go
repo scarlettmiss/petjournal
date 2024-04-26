@@ -6,9 +6,6 @@ import (
 	"github.com/scarlettmiss/petJournal/api"
 	"github.com/scarlettmiss/petJournal/api/config"
 	"github.com/scarlettmiss/petJournal/application"
-	petService "github.com/scarlettmiss/petJournal/application/services/petService"
-	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
-	userService "github.com/scarlettmiss/petJournal/application/services/userService"
 	"github.com/scarlettmiss/petJournal/repositories/petrepo"
 	"github.com/scarlettmiss/petJournal/repositories/recordrepo"
 	"github.com/scarlettmiss/petJournal/repositories/userrepo"
@@ -65,24 +62,10 @@ func main() {
 
 	recordsCollection := db.Collection("records")
 	recordRepo := recordrepo.New(recordsCollection)
-	//init services
-	ps, err := petService.New(petRepo)
-	if err != nil {
-		panic(err)
-	}
-	us, err := userService.New(userRepo)
-	if err != nil {
-		panic(err)
-	}
-	rs, err := recordService.New(recordRepo)
-	if err != nil {
-		panic(err)
-	}
 
 	//pass services to application
-	opts := application.Options{PetService: ps, UserService: us, RecordService: rs}
-	app := application.New(opts)
-
+	opts := application.Options{PetRepo: petRepo, UserRepo: userRepo, RecordRepo: recordRepo}
+	app, err := application.New(opts)
 	if err != nil {
 		panic(err)
 	}
