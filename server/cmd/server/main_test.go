@@ -6,9 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/scarlettmiss/petJournal/application"
 	"github.com/scarlettmiss/petJournal/application/domain/user"
-	petService "github.com/scarlettmiss/petJournal/application/services/petService"
-	recordService "github.com/scarlettmiss/petJournal/application/services/recordService"
-	userService "github.com/scarlettmiss/petJournal/application/services/userService"
+	"github.com/scarlettmiss/petJournal/application/services"
 	"github.com/scarlettmiss/petJournal/repositories/petrepo"
 	"github.com/scarlettmiss/petJournal/repositories/recordrepo"
 	"github.com/scarlettmiss/petJournal/repositories/userrepo"
@@ -54,19 +52,13 @@ func TestUser(t *testing.T) {
 
 	recordsCollection := db.Collection("records")
 	recordRepo := recordrepo.New(recordsCollection)
-	//init services
-	ps, err := petService.New(petRepo)
-	assert.Nil(t, err)
-	us, err := userService.New(userRepo)
-	assert.Nil(t, err)
-	rs, err := recordService.New(recordRepo)
-	assert.Nil(t, err)
 
 	//pass services to application
-	opts := application.Options{PetService: ps, UserService: us, RecordService: rs}
-	app := application.New(opts)
+	opts := application.Options{PetRepo: petRepo, UserRepo: userRepo, RecordRepo: recordRepo}
+	app, err := application.New(opts)
+	assert.Nil(t, err)
 
-	createOptions := application.UserCreateOptions{}
+	createOptions := services.UserCreateOptions{}
 	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrNoValidType.Error())
 
@@ -102,7 +94,7 @@ func TestUser(t *testing.T) {
 	_, _, err = app.CreateUser(createOptions)
 	assert.EqualError(t, err, user.ErrMailExists.Error())
 
-	updateOptions := application.UserUpdateOptions{}
+	updateOptions := services.UserUpdateOptions{}
 	_, err = app.UpdateUser(updateOptions, false)
 	assert.EqualError(t, err, user.ErrNotFound.Error())
 
