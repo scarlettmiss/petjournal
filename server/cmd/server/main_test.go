@@ -38,6 +38,9 @@ func TestUser(t *testing.T) {
 	var result bson.M
 	err = client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result)
 	assert.Nil(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
