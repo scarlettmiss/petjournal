@@ -298,9 +298,9 @@ class PetPage extends BaseComponent<PetProps, PetState> {
         const pet = this.state.pet!
         return (
             <div key={pet.id} className={"flex flex-col grow h-full xl:h-auto w-full"}>
-                <div className={"flex flex-col bg-indigo-300 dark:bg-slate-800 py-4 px-6 rounded-md shadow-2xl relative"}>
+                <div className={"flex flex-col bg-slate-800 py-4 px-6 rounded-md shadow-2xl relative"}>
                     <PencilIcon
-                        className={"absolute h-8 w-8 self-end text-indigo-500 dark:text-indigo-300 z-1 hover:bg-gray-600 p-1 rounded-md"}
+                        className={"absolute h-8 w-8 self-end text-indigo-300 z-1 hover:bg-gray-600 p-1 rounded-md"}
                         onClick={this.navigateToEdit}
                     />
                     <div className={"flex flex-col xl:flex-row gap-2 my-4 justify-evenly align-middle"}>
@@ -310,34 +310,34 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                             className={"self-center h-[100px] w-[100px] xl:h-[150px] xl:w-[150px]"}
                         />
                         <div className={"gap-2 mt-2 xl:max-w-[60%]"}>
-                            <h3 className="text-center text-xl xl:text-2xl tracking-wider text-indigo-800 dark:text-indigo-100 truncate ">
+                            <h3 className="text-center text-xl xl:text-2xl tracking-wider text-indigo-100 truncate ">
                                 {pet.name}
                             </h3>
                             <div className="flex flex-col ">
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                    <h3 className="text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
                                         breed :
                                     </h3>
-                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg truncate">{pet.breedName}</p>
+                                    <p className="text-indigo-200 text-sm xl:text-lg truncate">{pet.breedName}</p>
                                 </div>
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                    <h3 className="text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
                                         Age :
                                     </h3>
-                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg">{this.getAge(pet)}</p>
+                                    <p className="text-indigo-200 text-sm xl:text-lg">{this.getAge(pet)}</p>
                                 </div>
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                    <h3 className="text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
                                         gender :
                                     </h3>
-                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg">
+                                    <p className="text-indigo-200 text-sm xl:text-lg">
                                         {PetGenderUtils.getTitle(pet.gender)}
                                     </p>
                                 </div>
                             </div>
                             {pet.colors && pet.colors.length > 0 && (
                                 <div className={"flex flex-row items-start "}>
-                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg capitalize justify-start whitespace-nowrap">
+                                    <h3 className="text-indigo-200 text-sm xl:text-lg capitalize justify-start whitespace-nowrap">
                                         Colors :
                                     </h3>
                                     <div className={"flex flex-row gap-x-1.5 gap-y-1 ms-3 flex-wrap py-1.5"}>
@@ -353,18 +353,18 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                             )}
                             {pet.pedigree && (
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                    <h3 className="text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
                                         pedigree :
                                     </h3>
-                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg truncate">{pet.pedigree}</p>
+                                    <p className="text-indigo-200 text-sm xl:text-lg truncate">{pet.pedigree}</p>
                                 </div>
                             )}
                             {pet.microchip && (
                                 <div className={"flex flex-row items-center"}>
-                                    <h3 className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
+                                    <h3 className="text-indigo-200 text-sm xl:text-lg pe-2 capitalize whitespace-nowrap">
                                         microchip :
                                     </h3>
-                                    <p className="text-indigo-700 dark:text-indigo-200 text-sm xl:text-lg max-w-xl truncate">
+                                    <p className="text-indigo-200 text-sm xl:text-lg max-w-xl truncate">
                                         {pet.microchip}
                                     </p>
                                 </div>
@@ -373,7 +373,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                     </div>
                     <div className={"self-center gap-2"}>
                         {pet.description && (
-                            <p className="text-indigo-800 dark:text-indigo-100 text-sm xl:text-lg pe-2 capitalize flex-wrap">
+                            <p className="text-indigo-100 text-sm xl:text-lg pe-2 capitalize flex-wrap">
                                 {pet.description}
                             </p>
                         )}
@@ -383,7 +383,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                         {pet.vet !== undefined && TextUtils.isNotEmpty(pet.vet?.id) && (
                             <div
                                 className={
-                                    "flex grow justify-center items-center gap-2 p-1 bg-indigo-500/60 dark:bg-indigo-600/30 rounded-md text-indigo-100 shadow hover:shadow-lg text-sm xl:text-lg !whitespace-nowrap text-ellipsis"
+                                    "flex grow justify-center items-center gap-2 p-1 bg-indigo-600/30 rounded-md text-indigo-100 shadow hover:shadow-lg text-sm xl:text-lg !whitespace-nowrap text-ellipsis"
                                 }
                                 onClick={() => {
                                     this.userDialogRef?.setData(this.state.pet!.vet!)
@@ -398,7 +398,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                         {pet.owner !== undefined && TextUtils.isNotEmpty(pet.owner?.name) && (
                             <div
                                 className={
-                                    "flex grow justify-center items-center gap-2 p-1 bg-indigo-500/60 dark:bg-indigo-600/30 rounded-md text-indigo-100 shadow hover:shadow-lg text-sm xl:text-lg"
+                                    "flex grow justify-center items-center gap-2 p-1 bg-indigo-600/30 rounded-md text-indigo-100 shadow hover:shadow-lg text-sm xl:text-lg"
                                 }
                                 onClick={() => {
                                     this.userDialogRef?.setData(this.state.pet!.owner!)
@@ -452,7 +452,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                 <div
                     className={`${
                         this.state.loading ? "animate-pulse" : ""
-                    } flex flex-col bg-indigo-300 dark:bg-slate-800 py-2 px-4 rounded-md shadow-2xl grow`}
+                    } flex flex-col bg-slate-800 py-2 px-4 rounded-md shadow-2xl grow`}
                 >
                     <div className={`flex flex-row items-center justify-between mb-6`}>
                         <div className={"flex flex-row gap-4"}>
@@ -473,8 +473,8 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                                     <h2
                                         className={`capitalize justify-self-center text-lg xl:text-3xl font-bold tracking-tight ${
                                             this.state.selectedLineModel === it
-                                                ? `text-indigo-500 dark:text-indigo-300`
-                                                : `text-indigo-050 dark:text-indigo-100`
+                                                ? `text-indigo-300`
+                                                : `text-indigo-100`
                                         }`}
                                     >
                                         {RecordTypeUtils.getTitle(it)}
@@ -485,13 +485,13 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                         <div className={"flex flex-row items-center lg:align-baseline align-middle"}>
                             <PlusIcon
                                 className={
-                                    "flex h-8 w-8 text-indigo-500 dark:text-indigo-300 lg:mt-4 lg:ml-4 z-1 hover:bg-indigo-500/40 hover:dark:bg-gray-600 lg:p-1 rounded-md"
+                                    "flex h-8 w-8 text-indigo-300 lg:mt-4 lg:ml-4 z-1 hover:bg-gray-600 lg:p-1 rounded-md"
                                 }
                                 onClick={this.setCreateWeightEntry}
                             />
                             <PencilIcon
-                                className={`flex h-7 lg:h-8 w-8 lg:mt-4 lg:ml-4 z-1 hover:bg-indigo-500/40 hover:dark:bg-gray-600 lg:p-1 rounded-md ${
-                                    supportsEdit ? `text-indigo-500 dark:text-indigo-300` : `text-gray-400 dark:text-slate-300`
+                                className={`flex h-7 lg:h-8 w-8 lg:mt-4 lg:ml-4 z-1 hover:bg-gray-600 lg:p-1 rounded-md ${
+                                    supportsEdit ? `text-indigo-300` : `text-slate-300`
                                 }`}
                                 onClick={supportsEdit ? this.setEditWeightEntry : noop}
                             />
@@ -720,7 +720,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
             <div
                 className={`${
                     this.state.loading ? "animate-pulse" : ""
-                } flex flex-col  bg-indigo-300 dark:bg-slate-800 py-4 px-6 rounded-md grow overflow-y-auto`}
+                } flex flex-col bg-slate-800 py-4 px-6 rounded-md grow overflow-y-auto`}
             >
                 <div className={`sticky flex flex-row items-center justify-between mb-6`}>
                     <div className={"flex flex-row gap-4"}>
@@ -740,8 +740,8 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                                 <h2
                                     className={`capitalize justify-self-center text-lg xl:text-3xl font-bold tracking-tight ${
                                         this.state.recordViewType === it
-                                            ? `text-indigo-500 dark:text-indigo-300`
-                                            : `text-indigo-050 dark:text-indigo-100`
+                                            ? `text-indigo-300`
+                                            : `text-indigo-100`
                                     }`}
                                 >
                                     {RecordViewTypeUtils.getTitle(it)}
@@ -750,7 +750,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                         ))}
                     </div>
                     <PlusIcon
-                        className={"flex h-8 xl:h-10 text-indigo-500 dark:text-indigo-200 hover:text-indigo-400 "}
+                        className={"flex h-8 xl:h-10 text-indigo-200 hover:text-indigo-400 "}
                         onClick={this.setCreateRecord}
                     />
                 </div>
@@ -839,7 +839,7 @@ class PetPage extends BaseComponent<PetProps, PetState> {
                     <div role="status" className={"absolute z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
                         <svg
                             aria-hidden="true"
-                            className="w-20 h-20 animate-spin dark:text-indigo-300 fill-indigo-600"
+                            className="w-20 h-20 animate-spin text-indigo-300 fill-indigo-600"
                             viewBox="0 0 100 101"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"

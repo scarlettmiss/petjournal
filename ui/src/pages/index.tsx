@@ -89,10 +89,10 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
         return (
             <button
                 onClick={this.navigateToPetCreate}
-                className="flex flex-col aspect-square py-12 px-8 rounded-md shadow bg-indigo-200 dark:bg-slate-800 hover:shadow-lg justify-center items-center"
+                className="flex flex-col aspect-square py-12 px-8 rounded-md shadow bg-slate-800 hover:shadow-lg justify-center items-center"
             >
-                <PlusCircleIcon className={"flex h-[100px] text-indigo-700 dark:text-indigo-400"} />
-                <div className={"text-indigo-800 dark:text-indigo-200 text-2xl py-2"}>Create Pet</div>
+                <PlusCircleIcon className={"flex h-[100px] text-indigo-400"} />
+                <div className={"text-indigo-200 text-2xl py-2"}>Create Pet</div>
             </button>
         )
     }
@@ -103,7 +103,7 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
             <ProtectedPage init={this.initPage} key={"pets"} className={"pt-4 px-7 overflow-y-hidden"}>
                 <ErrorMessage message={this.state.serverError} />
                 <div className={`flex flex-row justify-between items-center`}>
-                    <h2 className={"align-middle text-indigo-800 dark:text-indigo-200 text-2xl"}>Pets</h2>
+                    <h2 className={"align-middle text-indigo-200 text-2xl"}>Pets</h2>
                     <Button title={"Create Pet"} variant={"primary"} type={"button"} onClick={this.navigateToPetCreate} />
                 </div>
                 <form className="relative mt-4">
@@ -124,7 +124,7 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
                     <div role="status" className={"flex grow justify-center items-center"}>
                         <svg
                             aria-hidden="true"
-                            className="w-20 h-20 animate-spin dark:text-indigo-300 fill-indigo-600"
+                            className="w-20 h-20 animate-spin text-indigo-300 fill-indigo-600"
                             viewBox="0 0 100 101"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -147,7 +147,7 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
                                 <Link
                                     key={pet.id}
                                     href={`/pet/${pet.id}`}
-                                    className="flex flex-col !aspect-square rounded-md shadow-md bg-indigo-200 dark:bg-slate-800 hover:shadow-lg isolate"
+                                    className="flex flex-col !aspect-square rounded-md shadow-md bg-slate-800 hover:shadow-lg isolate"
                                 >
                                     <div className={"flex w-full flex-col my-auto mx-auto items-center py-2.5 px-4"}>
                                         <Avatar
@@ -157,13 +157,13 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
                                         />
                                         <div
                                             className={
-                                                "text-indigo-800 dark:text-indigo-200 text-2xl py-2 truncate max-w-[90%] text-center"
+                                                "text-indigo-200 text-2xl py-2 truncate max-w-[90%] text-center"
                                             }
                                         >
                                             {pet.name}
                                         </div>
                                         <div
-                                            className={"text-indigo-800 dark:text-indigo-200 text-md h-6 truncate max-w-[90%] text-center"}
+                                            className={"text-indigo-200 text-md h-6 truncate max-w-[90%] text-center"}
                                         >
                                             {TextUtils.valueOrEmpty(pet.breedName, "-")}
                                         </div>
@@ -175,11 +175,11 @@ class Pets extends BaseComponent<PetsProps, PetsState> {
                                             className={"h-[30px] w-[30px]"}
                                         />
                                         <div className={"w-full ps-3 overflow-hidden "}>
-                                            <div className={"text-indigo-800 dark:text-indigo-200 text-md pb-1"}>Pet Owner Info</div>
-                                            <div className={"text-indigo-800 dark:text-indigo-200 text-sm truncate max-w-full"}>
+                                            <div className={"text-indigo-200 text-md pb-1"}>Pet Owner Info</div>
+                                            <div className={"text-indigo-200 text-sm truncate max-w-full"}>
                                                 {pet.owner?.surname} {pet.owner?.name}
                                             </div>
-                                            <div className={"text-indigo-800 dark:text-indigo-200 text-sm truncate max-w-full"}>
+                                            <div className={"text-indigo-200 text-sm truncate max-w-full"}>
                                                 {TextUtils.valueOrEmpty(pet.owner?.email!, "-")}
                                             </div>
                                         </div>

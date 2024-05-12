@@ -135,10 +135,10 @@ class Signup extends BaseComponent<SingUpProps, SingUpState> {
                         />
                     }
                 />
-                <div className="flex grow items-center justify-center bg-slate-900 bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
-                    <div className="my-4 flex items-center mx-auto bg-white/40 dark:bg-slate-800/20 max-w-sm md:max-w-xl rounded-md backdrop-blur-md dark:backdrop-blur-sm shadow-md">
+                <div className="flex grow items-center justify-center bg-slate-900 bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
+                    <div className="my-4 flex items-center mx-auto bg-slate-800/20 max-w-sm md:max-w-xl rounded-md backdrop-blur-sm shadow-md">
                         <div className="shadow-sm z-10 px-4 py-4">
-                            <h2 className="py-6 text-center text-3xl font-bold tracking-tight text-indigo-900 dark:text-indigo-100">
+                            <h2 className="py-6 text-center text-3xl font-bold tracking-tight text-indigo-100">
                                 Create your account
                             </h2>
                             <form className="space-y-4" method="POST" onSubmit={this.onSubmit}>

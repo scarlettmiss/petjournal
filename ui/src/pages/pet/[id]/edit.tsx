@@ -303,11 +303,11 @@ class Edit extends BaseComponent<EditProps, EditState> {
                 init={this.initPage}
                 className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center overflow-y-auto"}
             >
-                <div className="flex items-center mx-auto my-auto bg-white dark:bg-slate-800/50 backdrop-blur-sm max-w-sm lg:max-w-xl rounded-md shadow-lg">
+                <div className="flex items-center mx-auto my-auto bg-slate-800/50 backdrop-blur-sm max-w-sm lg:max-w-xl rounded-md shadow-lg">
                     <div className="shadow-sm px-4 py-4">
                         <div className={"flex flex-row items-baseline justify-end"}>
                             <div className="flex justify-center pb-4 grow">
-                                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-indigo-100  text-center">
+                                <h2 className="text-3xl font-bold tracking-tight text-indigo-100  text-center">
                                     Update Pet Profile
                                 </h2>
                             </div>

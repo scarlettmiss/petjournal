@@ -7,12 +7,11 @@ import dynamic from "next/dynamic"
 import ErrorMessage from "@/components/ErrorMessage"
 import {WithRouterProps} from "next/dist/client/with-router"
 import BaseComponent from "@/components/BaseComponent"
-import {recordCreationHandler, recordHandler, recordsCreationHandler, recordUpdateHandler} from "@/pages/api/record"
+import { recordHandler, recordUpdateHandler} from "@/pages/api/record"
 import {Record} from "@/models/record/Record"
 import CalendarEvent from "@/models/CalendarEvent"
 import CalendarComponent from "@/components/CalendarComponent"
 import RecordDialog, {Mode} from "@/components/RecordDialog"
-import RecordCreationViewModel from "@/viewmodels/record/RecordCreationViewModel"
 import UpdateRecordViewModel from "@/viewmodels/record/UpdateRecordViewModel"
 import {RecordType} from "@/enums/RecordType"
 
@@ -142,7 +141,7 @@ class Agenda extends BaseComponent<AgendaProps, AgendaState> {
                     <div role="status" className={"absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
                         <svg
                             aria-hidden="true"
-                            className="w-20 h-20 animate-spin dark:text-indigo-300 fill-indigo-600"
+                            className="w-20 h-20 animate-spin text-indigo-300 fill-indigo-600"
                             viewBox="0 0 100 101"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"

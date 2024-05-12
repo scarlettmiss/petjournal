@@ -19,7 +19,7 @@
 }
 
 .logoTitle {
-    @apply hidden md:block self-center text-lg md:text-2xl font-semibold whitespace-nowrap hover:text-indigo-300 dark:text-cyan-200;
+    @apply hidden md:block self-center text-lg md:text-2xl font-semibold whitespace-nowrap hover:text-indigo-300 text-cyan-200;
 }
 
 .leftSideContainer {
@@ -35,7 +35,7 @@
 }
 
 .pageLink {
-    @apply self-center text-xl font-semibold whitespace-nowrap hover:text-indigo-300 dark:text-cyan-200;
+    @apply self-center text-xl font-semibold whitespace-nowrap hover:text-indigo-300 text-cyan-200;
 }
 
 .pageSelected {

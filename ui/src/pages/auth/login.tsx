@@ -85,18 +85,18 @@ class Login extends BaseComponent<LoginProps, LoginState> {
                         />
                     }
                 />
-                <div className="flex items-center justify-center h-full bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
-                    <div className="isolate container items-center mx-auto bg-white dark:bg-slate-800/30 max-w-sm lg:max-w-md rounded-md px-4 py-12 sm:px-6 lg:px-8 shadow-md backdrop-blur-sm">
+                <div className="flex items-center justify-center h-full bg-[url('/register-bg-dark.jpg')] bg-contain bg-center">
+                    <div className="isolate container items-center mx-auto bg-slate-800/30 max-w-sm lg:max-w-md rounded-md px-4 py-12 sm:px-6 lg:px-8 shadow-md backdrop-blur-sm">
                         <div className="w-full max-w-md space-y-8">
                             <div>
-                                <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-white">
                                     Sign in to your account
                                 </h2>
-                                <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
+                                <p className="mt-2 text-center text-sm text-gray-300">
                                     Or{" "}
                                     <Link
                                         href="/auth/signup"
-                                        className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 "
+                                        className="font-medium text-indigo-400 hover:text-indigo-300 "
                                     >
                                         Create a new account
                                     </Link>

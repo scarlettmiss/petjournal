@@ -434,7 +434,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                                     onChange={this.onHasNextDateChange}
                                     className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
                                 />
-                                <label htmlFor="link-checkbox" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                <label htmlFor="link-checkbox" className="ml-2 text-sm font-medium text-gray-300">
                                     Is recurring
                                 </label>
                             </div>
@@ -469,9 +469,9 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
             <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
-                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700/70 backdrop-blur-lg">
+                    <div className="relative rounded-lg shadow bg-gray-700/70 backdrop-blur-lg">
                         {/*Modal header*/}
-                        <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                        <div className="flex items-start justify-between p-4 border-b rounded-t border-gray-600">
                             {this.state.pet && (
                                 <div className={"flex flex-row gap-x-2 mx-3"}>
                                     <Avatar
@@ -479,15 +479,15 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                                         avatar={this.state.pet.avatar}
                                         className={"self-center h-[30px] w-[30px] "}
                                     />
-                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
+                                    <h3 className="text-xl font-semibold text-white text-center">
                                         {this.state.pet?.name}
                                     </h3>
                                 </div>
                             )}
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white text-center">{this.title}</h3>
+                            <h3 className="text-xl font-semibold text-white text-center">{this.title}</h3>
                             <button
                                 type="button"
-                                className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                className="text-gray-400 bg-transparent rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center hover:bg-gray-600 hover:text-white"
                                 onClick={this.props.onDismiss}
                             >
                                 <XMarkIcon className={"h-6 w-6"} />
@@ -504,7 +504,7 @@ export default class RecordDialog extends Component<RecordDialogProps, RecordDia
                             </div>
                         </div>
                         {/*footer*/}
-                        <div className="flex items-center p-6 justify-end space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                        <div className="flex items-center p-6 justify-end space-x-2 border-t rounded-b border-gray-600">
                             <Button
                                 className={"right-0"}
                                 title={this.secondaryButtonTitle}

@@ -210,13 +210,13 @@ class Account extends BaseComponent<AccountProps, AccountState> {
             <ProtectedPage
                 init={this.initPage}
                 key={"account"}
-                className={"bg-[url('/register-bg.jpg')] dark:bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}
+                className={"bg-[url('/register-bg-dark.jpg')] bg-contain bg-center"}
             >
-                <div className="flex items-center mx-auto my-auto bg-white/40 dark:bg-slate-800/60 backdrop-blur-lg max-w-sm lg:max-w-xl shadow-lg rounded-md">
+                <div className="flex items-center mx-auto my-auto bg-slate-800/60 backdrop-blur-lg max-w-sm lg:max-w-xl shadow-lg rounded-md">
                     <div className="shadow-sm z-10 px-4 py-6">
                         <div className={"flex flex-row items-baseline justify-end"}>
                             <div className="flex justify-center pb-4 grow">
-                                <h2 className="text-3xl font-bold tracking-tight text-indigo-900 dark:text-indigo-100  text-center">
+                                <h2 className="text-3xl font-bold tracking-tight text-indigo-100  text-center">
                                     {this.state.viewOnly ? "Account Information" : "Update Account Information"}
                                 </h2>
                             </div>

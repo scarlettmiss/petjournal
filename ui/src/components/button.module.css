@@ -6,21 +6,21 @@
 }
 
 .btnPrimary {
-    @apply bg-indigo-500 dark:bg-indigo-600 text-white
-    hover:bg-indigo-600 hover:dark:bg-indigo-700
-    focus-visible:outline-indigo-700 focus-visible:dark:outline-indigo-800;
+    @apply bg-indigo-600 text-white
+    hover:bg-indigo-700
+    focus-visible:outline-indigo-800;
 }
 
 .btnSecondary {
-    @apply font-semibold bg-white py-2.5 dark:bg-slate-700 border-2 border-indigo-500 outline-indigo-500 text-indigo-500 dark:text-indigo-50 dark:border-indigo-600;
+    @apply font-semibold py-2.5 bg-slate-700 border-2 outline-indigo-500 text-indigo-50 border-indigo-600;
 }
 
 .btnSecondary:hover {
-    @apply ring-1 ring-indigo-700 shadow-lg text-indigo-500 dark:text-white;
+    @apply ring-1 ring-indigo-700 shadow-lg text-white;
 }
 
 .btnSecondary:focus-visible {
-    @apply outline-indigo-600  dark:outline-indigo-600 text-white border-transparent;
+    @apply outline-indigo-600 text-white border-transparent;
 }
 
 .btnGroup {

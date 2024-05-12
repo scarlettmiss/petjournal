@@ -188,15 +188,15 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
             <div id="defaultModal" tabIndex={-1} className={`fixed flex grow ${this.state?.show ? "" : "hidden"} z-50 h-screen w-full`}>
                 <div className="relative self-center mx-auto w-full max-w-2xl max-h-full">
                     {/*Modal content*/}
-                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700/60 backdrop-blur-lg">
+                    <div className="relative rounded-lg shadow bg-gray-700/60 backdrop-blur-lg">
                         {/*Modal header*/}
-                        <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white capitalize">
+                        <div className="flex items-start justify-between p-4 border-b rounded-t border-gray-600">
+                            <h3 className="text-xl font-semibold text-white capitalize">
                                 {RecordTypeUtils.getTitle(this.state.recordType)} Entries
                             </h3>
                             <button
                                 type="button"
-                                className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                className="text-gray-400 bg-transparent rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center hover:bg-gray-600 hover:text-white"
                                 onClick={this.props.onDismiss}
                             >
                                 <XMarkIcon className={"h-6 w-6"} />
@@ -277,7 +277,7 @@ export default class LineRecordDialog extends Component<LineRecordDialogProps, L
                         )}
 
                         {/*footer*/}
-                        <div className="flex items-center p-6 justify-end space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                        <div className="flex items-center p-6 justify-end space-x-2 border-t rounded-b border-gray-600">
                             {this.state.mode !== Mode.LIST && (
                                 <Button
                                     className={"right-0"}
